@@ -1,5 +1,9 @@
 # SideQuest
 
+> ### 🔗 Live-App: **https://niklashaenel.github.io/sidequest/**
+> (Im Ordner liegt auch „SideQuest oeffnen.url" — einfach doppelklicken.)
+> Quellcode öffentlich: https://github.com/niklashaenel/sidequest
+
 Eine Quest am Tag. Erst posten, dann den Feed der anderen sehen.
 Web-App (PWA) mit **Supabase** (Login + Datenbank + Foto-Speicher).
 
