@@ -3,7 +3,7 @@
 // =====================================================================
 
 const $ = (id) => document.getElementById(id);
-const screens = ["authScreen", "overviewScreen", "challengeScreen", "uploadScreen", "feedScreen"];
+const screens = ["authScreen", "overviewScreen", "challengeScreen", "uploadScreen", "feedScreen", "profileScreen"];
 
 function showScreen(id) {
   screens.forEach((s) => $(s).classList.toggle("hidden", s !== id));
@@ -102,6 +102,80 @@ async function loadOverview() {
   }
   await refreshGreeting();
   renderOverview();
+  loadStatsAndTop(); // Stats + Top-3 nachladen (blockiert die Challenge-Liste nicht)
+}
+
+// --- Stats-Leiste + Top-3 ---
+function statCard(val, label, cls, icon) {
+  return `<div class="stat-card ${cls || ""}">
+    <div class="stat-val">${icon ? `<i class="ti ${icon}"></i>` : ""}${val}</div>
+    <div class="stat-label">${label}</div></div>`;
+}
+function renderStatsStrip(el, cards) {
+  el.innerHTML = cards.map((c) => statCard(c.val, c.label, c.cls, c.icon)).join("");
+}
+function renderTopToday(list) {
+  const section = $("topTodaySection");
+  const el = $("topToday");
+  if (!list || !list.length) { section.classList.add("hidden"); return; }
+  const medals = ["🥇", "🥈", "🥉"];
+  el.innerHTML = list.map((t, i) => `
+    <div class="top-item">
+      <div class="top-rank">${medals[i] || ""}</div>
+      <img class="top-thumb" src="${Feed.escape(t.image_url)}" alt="" loading="lazy" />
+      <div class="top-info"><div class="top-user">${Feed.escape(t.username)}</div></div>
+      <div class="top-likes"><i class="ti ti-heart"></i> ${t.likeCount}</div>
+    </div>`).join("");
+  section.classList.remove("hidden");
+}
+async function loadStatsAndTop() {
+  try {
+    const s = await Stats.forMe();
+    state.stats = s;
+    if (s) renderStatsStrip($("statsStrip"), [
+      { val: s.level,         label: "Level", cls: "level" },
+      { val: s.streak,        label: "Serie", cls: "streak", icon: "ti-flame" },
+      { val: s.likesReceived, label: "Likes", cls: "likes",  icon: "ti-heart" },
+    ]);
+    const top = await Stats.topToday(state.challenges.map((c) => c.id));
+    renderTopToday(top);
+  } catch (e) { console.warn("[SideQuest] stats:", e.message); }
+}
+
+// --- Profil ---
+async function openProfile() {
+  showScreen("profileScreen");
+  const s = state.stats || await Stats.forMe();
+  renderProfile(s);
+}
+function renderProfile(s) {
+  if (!s) return;
+  $("profileAvatar").textContent = Feed.initial(state.username);
+  $("profileName").textContent = state.username || "Du";
+  $("profileLevelLabel").textContent = "Level " + s.level;
+  $("profileXpFill").style.width = Math.round(s.progress * 100) + "%";
+  $("profileXpHint").textContent = s.nextNeeded > 0
+    ? `Noch ${s.nextNeeded} XP bis Level ${s.level + 1}` : "Höchstes Level!";
+
+  renderStatsStrip($("profileStats"), [
+    { val: s.done,          label: "Erledigt",      cls: "level" },
+    { val: s.streak,        label: "Serie",         cls: "streak", icon: "ti-flame" },
+    { val: s.likesReceived, label: "Likes erhalten",cls: "likes",  icon: "ti-heart" },
+  ]);
+
+  $("profileBadges").innerHTML = s.badges.map((b) => `
+    <div class="badge ${b.unlocked ? "on" : ""}">
+      <i class="ti ${b.unlocked ? b.icon : "ti-lock"}"></i>
+      <div class="badge-label">${b.label}</div>
+    </div>`).join("");
+
+  const grid = $("profilePosts"), none = $("profileNoPosts");
+  if (!s.posts.length) { grid.innerHTML = ""; none.classList.remove("hidden"); }
+  else {
+    none.classList.add("hidden");
+    grid.innerHTML = s.posts.map((p) =>
+      `<img src="${Feed.escape(p.image_url)}" alt="" loading="lazy" />`).join("");
+  }
 }
 
 async function refreshGreeting() {
@@ -222,6 +296,8 @@ async function goToFeed(ch) {
 
 $("challengeBack").addEventListener("click", () => { renderOverview(); showScreen("overviewScreen"); });
 $("feedBack").addEventListener("click", () => { renderOverview(); showScreen("overviewScreen"); });
+$("headerAvatar").addEventListener("click", openProfile);
+$("profileBack").addEventListener("click", () => showScreen("overviewScreen"));
 
 // =====================================================================
 //  Countdown-Ticker (jede Sekunde alle sichtbaren Countdowns aktualisieren)

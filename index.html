@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=6" />
+  <link rel="stylesheet" href="styles.css?v=7" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
@@ -23,7 +23,7 @@
     <span class="logo">Side<span class="dot">Quest</span></span>
     <div class="header-right">
       <button id="notifyBell" class="icon-btn hidden" aria-label="Benachrichtigungen aktivieren" title="Benachrichtigungen aktivieren"><i class="ti ti-bell"></i></button>
-      <span id="headerAvatar" class="avatar">?</span>
+      <button id="headerAvatar" class="avatar" aria-label="Profil" title="Profil">?</button>
       <button id="logoutBtn" class="icon-btn" aria-label="Abmelden" title="Abmelden"><i class="ti ti-logout"></i></button>
     </div>
   </header>
@@ -62,8 +62,38 @@
     <section id="overviewScreen" class="screen hidden">
       <h2 class="greeting" id="greetingName">Los geht's!</h2>
       <p class="greeting-sub">Wähle eine Challenge und zeig, was du drauf hast.</p>
+
+      <!-- Stats-Leiste (Level/XP, Serie, Likes) -->
+      <div id="statsStrip" class="stats-strip"></div>
+
       <p class="section-label">Jetzt aktiv</p>
       <div id="challengeList" class="challenge-list"></div>
+
+      <!-- Top-3 beliebteste Beiträge heute -->
+      <div id="topTodaySection" class="hidden">
+        <p class="section-label" style="margin-top:24px">🏆 Beliebt heute</p>
+        <div id="topToday" class="top-today"></div>
+      </div>
+    </section>
+
+    <!-- ===== Profil ===== -->
+    <section id="profileScreen" class="screen hidden">
+      <button class="back-btn" id="profileBack"><i class="ti ti-arrow-left"></i> Übersicht</button>
+      <div class="profile-head">
+        <div id="profileAvatar" class="profile-avatar">?</div>
+        <h2 id="profileName" class="profile-name">…</h2>
+        <div class="profile-level">
+          <span id="profileLevelLabel">Level 1</span>
+          <div class="xp-bar"><div id="profileXpFill" class="xp-fill"></div></div>
+          <span id="profileXpHint" class="xp-hint"></span>
+        </div>
+      </div>
+      <div id="profileStats" class="stats-strip" style="margin-top:4px"></div>
+      <p class="section-label" style="margin-top:22px">Abzeichen</p>
+      <div id="profileBadges" class="badges"></div>
+      <p class="section-label" style="margin-top:22px">Deine Beiträge</p>
+      <div id="profilePosts" class="post-grid"></div>
+      <p id="profileNoPosts" class="empty-state hidden"><i class="ti ti-camera"></i>Noch keine Beiträge. Mach deine erste Challenge!</p>
     </section>
 
     <!-- ===== Screen 3: Challenge-Detail (Foto machen) ===== -->
@@ -115,14 +145,15 @@
     <button class="link-btn" id="onboardLater">Später</button>
   </div>
 
-  <script src="js/supabaseClient.js?v=6"></script>
-  <script src="js/auth.js?v=6"></script>
-  <script src="js/challenges.js?v=6"></script>
-  <script src="js/social.js?v=6"></script>
-  <script src="js/upload.js?v=6"></script>
-  <script src="js/feed.js?v=6"></script>
-  <script src="js/push.js?v=6"></script>
-  <script src="js/onboarding.js?v=6"></script>
-  <script src="js/app.js?v=6"></script>
+  <script src="js/supabaseClient.js?v=7"></script>
+  <script src="js/auth.js?v=7"></script>
+  <script src="js/challenges.js?v=7"></script>
+  <script src="js/social.js?v=7"></script>
+  <script src="js/upload.js?v=7"></script>
+  <script src="js/feed.js?v=7"></script>
+  <script src="js/push.js?v=7"></script>
+  <script src="js/onboarding.js?v=7"></script>
+  <script src="js/stats.js?v=7"></script>
+  <script src="js/app.js?v=7"></script>
 </body>
 </html>

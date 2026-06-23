@@ -57,6 +57,7 @@ header {
   background: var(--brand-soft); color: var(--brand-text);
   display: flex; align-items: center; justify-content: center;
   font-size: 13px; font-weight: 700; text-transform: uppercase;
+  border: none; cursor: pointer; font-family: inherit; padding: 0;
 }
 .icon-btn {
   background: none; border: none; color: var(--muted); cursor: pointer;
@@ -195,6 +196,58 @@ main { flex: 1; width: 100%; max-width: 520px; margin: 0 auto;
 .comment-form button:disabled { color: var(--muted-2); cursor: default; }
 
 .spinner-text { color: var(--muted); text-align: center; padding: 34px 0; }
+
+/* ---------- Stats-Leiste (Übersicht) ---------- */
+.stats-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 4px 0 20px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border);
+             border-radius: var(--r-md); padding: 12px 10px; text-align: center; }
+.stat-val { font-size: 22px; font-weight: 800; line-height: 1.1; display: flex;
+            align-items: center; justify-content: center; gap: 4px; }
+.stat-val .ti { font-size: 18px; }
+.stat-label { font-size: 11px; color: var(--muted); margin-top: 3px;
+              text-transform: uppercase; letter-spacing: .05em; }
+.stat-card.level .stat-val { color: var(--brand-text); }
+.stat-card.streak .stat-val { color: var(--hourly); }
+.stat-card.likes .stat-val { color: var(--like); }
+
+/* XP-Balken */
+.xp-bar { height: 7px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+.xp-fill { height: 100%; background: var(--brand); border-radius: 999px; transition: width .5s ease; }
+.xp-mini { margin-top: 8px; }
+
+/* ---------- Top-3 ---------- */
+.top-today { display: flex; flex-direction: column; gap: 10px; }
+.top-item { display: flex; align-items: center; gap: 12px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px 12px; }
+.top-rank { font-size: 22px; width: 28px; text-align: center; flex-shrink: 0; }
+.top-thumb { width: 46px; height: 46px; border-radius: 10px; object-fit: cover;
+             background: var(--surface-2); flex-shrink: 0; }
+.top-info { flex: 1; min-width: 0; }
+.top-user { font-weight: 700; font-size: 14px; }
+.top-likes { color: var(--like); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+
+/* ---------- Profil ---------- */
+.profile-head { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 0 4px; }
+.profile-avatar { width: 76px; height: 76px; border-radius: 50%; background: var(--brand-soft);
+                  color: var(--brand-text); display: flex; align-items: center; justify-content: center;
+                  font-size: 32px; font-weight: 800; text-transform: uppercase; }
+.profile-name { font-size: 22px; font-weight: 800; }
+.profile-level { width: 100%; max-width: 280px; text-align: center; }
+.profile-level > span { font-size: 13px; font-weight: 700; color: var(--brand-text); }
+.profile-level .xp-bar { margin: 8px 0 4px; }
+.xp-hint { color: var(--muted); font-size: 12px; font-weight: 400 !important; }
+
+.badges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.badge { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md);
+         padding: 14px 8px; text-align: center; opacity: .4; }
+.badge.on { opacity: 1; border-color: var(--border-str); }
+.badge .ti { font-size: 26px; color: var(--brand-text); }
+.badge.on .ti { color: var(--brand); }
+.badge-label { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.25; }
+.badge.on .badge-label { color: var(--text); }
+
+.post-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.post-grid img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px; background: var(--surface-2); }
 
 /* ---------- Onboarding-Hinweis (Bottom-Sheet) ---------- */
 .onboard {
