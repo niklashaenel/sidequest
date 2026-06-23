@@ -14,6 +14,17 @@ const Challenges = {
     return Challenges.kindMeta[kind] || { label: "Challenge", icon: "ti-flag", cls: "k-daily" };
   },
 
+  // Sorgt (serverseitig) dafür, dass für JETZT eine Tages- + Stunden-Challenge
+  // existiert – automatisch aus dem Challenge-Pool. Fehler nur loggen, nicht blockieren.
+  async ensure() {
+    try {
+      const { error } = await sb.rpc("ensure_active_challenges");
+      if (error) console.warn("[SideQuest] ensure_active_challenges:", error.message);
+    } catch (e) {
+      console.warn("[SideQuest] ensure_active_challenges:", e.message);
+    }
+  },
+
   // Alle Challenges, die GERADE aktiv sind (starts_at <= jetzt <= ends_at).
   async active() {
     const nowIso = new Date().toISOString();

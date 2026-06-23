@@ -79,6 +79,7 @@ async function loadOverview() {
   const listEl = $("challengeList");
   listEl.innerHTML = '<p class="spinner-text">Lade Challenges…</p>';
   try {
+    await Challenges.ensure();              // automatisch heutige/stündliche anlegen
     state.challenges = await Challenges.active();
     state.doneIds = await Challenges.doneIds(state.challenges.map((c) => c.id));
   } catch (err) {
