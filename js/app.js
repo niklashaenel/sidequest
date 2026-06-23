@@ -73,6 +73,7 @@ $("logoutBtn").addEventListener("click", async () => { await Auth.logout(); });
 async function enterApp() {
   showScreen("overviewScreen");
   await loadOverview();
+  Onboarding.maybeShow();
 }
 
 async function loadOverview() {
@@ -241,6 +242,7 @@ function uebersetzeFehler(err) {
 //  Start: Session beobachten
 // =====================================================================
 applyAuthMode();
+Onboarding.init();
 
 sb.auth.onAuthStateChange((event, session) => {
   // Frischer Login (oder Registrierung mit Session) -> in die App.

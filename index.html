@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=4" />
+  <link rel="stylesheet" href="styles.css?v=5" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
@@ -101,12 +101,23 @@
 
   </main>
 
-  <script src="js/supabaseClient.js?v=4"></script>
-  <script src="js/auth.js?v=4"></script>
-  <script src="js/challenges.js?v=4"></script>
-  <script src="js/social.js?v=4"></script>
-  <script src="js/upload.js?v=4"></script>
-  <script src="js/feed.js?v=4"></script>
-  <script src="js/app.js?v=4"></script>
+  <!-- Willkommens-Hinweis: Zum Startbildschirm hinzufügen -->
+  <div id="onboardCard" class="onboard hidden">
+    <button class="onboard-close" id="onboardClose" aria-label="Schließen"><i class="ti ti-x"></i></button>
+    <div class="onboard-icon"><i class="ti ti-device-mobile-share"></i></div>
+    <h3 class="onboard-title">SideQuest als App installieren</h3>
+    <p class="onboard-text" id="onboardText"></p>
+    <button class="btn" id="onboardInstallBtn"><i class="ti ti-download"></i> App installieren</button>
+    <button class="link-btn" id="onboardLater">Später</button>
+  </div>
+
+  <script src="js/supabaseClient.js?v=5"></script>
+  <script src="js/auth.js?v=5"></script>
+  <script src="js/challenges.js?v=5"></script>
+  <script src="js/social.js?v=5"></script>
+  <script src="js/upload.js?v=5"></script>
+  <script src="js/feed.js?v=5"></script>
+  <script src="js/onboarding.js?v=5"></script>
+  <script src="js/app.js?v=5"></script>
 </body>
 </html>
