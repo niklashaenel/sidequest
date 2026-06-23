@@ -27,10 +27,10 @@ const Feed = {
     list.innerHTML = '<p class="spinner-text">Lade Beiträge…</p>';
     empty.classList.add("hidden");
 
-    // Beiträge inkl. Username aus der verknüpften profiles-Tabelle holen.
-    const { data, error } = await sb
+    // 1) Beiträge zur Quest holen (neueste zuerst).
+    const { data: subs, error } = await sb
       .from("submissions")
-      .select("image_url, created_at, profiles(username)")
+      .select("user_id, image_url, created_at")
       .eq("quest_id", quest.id)
       .order("created_at", { ascending: false });
 
@@ -41,13 +41,23 @@ const Feed = {
 
     list.innerHTML = "";
 
-    if (!data || data.length === 0) {
+    if (!subs || subs.length === 0) {
       empty.classList.remove("hidden");
       return;
     }
 
-    for (const item of data) {
-      const username = item.profiles?.username || "Jemand";
+    // 2) Passende Anzeigenamen in einer zweiten Abfrage holen und je User-ID merken.
+    const ids = [...new Set(subs.map((s) => s.user_id))];
+    const { data: profs } = await sb
+      .from("profiles")
+      .select("id, username")
+      .in("id", ids);
+    const nameById = {};
+    (profs || []).forEach((p) => { nameById[p.id] = p.username; });
+
+    // 3) Beiträge anzeigen.
+    for (const item of subs) {
+      const username = nameById[item.user_id] || "Jemand";
       const el = document.createElement("article");
       el.className = "feed-item";
       el.innerHTML = `
