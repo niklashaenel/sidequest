@@ -9,17 +9,20 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=5" />
+  <link rel="stylesheet" href="styles.css?v=6" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- OneSignal Web Push -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
 
   <header id="appHeader" class="hidden">
     <span class="logo">Side<span class="dot">Quest</span></span>
     <div class="header-right">
+      <button id="notifyBell" class="icon-btn hidden" aria-label="Benachrichtigungen aktivieren" title="Benachrichtigungen aktivieren"><i class="ti ti-bell"></i></button>
       <span id="headerAvatar" class="avatar">?</span>
       <button id="logoutBtn" class="icon-btn" aria-label="Abmelden" title="Abmelden"><i class="ti ti-logout"></i></button>
     </div>
@@ -108,16 +111,18 @@
     <h3 class="onboard-title">SideQuest als App installieren</h3>
     <p class="onboard-text" id="onboardText"></p>
     <button class="btn" id="onboardInstallBtn"><i class="ti ti-download"></i> App installieren</button>
+    <button class="btn btn-ghost hidden" id="onboardNotifyBtn"><i class="ti ti-bell"></i> Benachrichtigungen erlauben</button>
     <button class="link-btn" id="onboardLater">Später</button>
   </div>
 
-  <script src="js/supabaseClient.js?v=5"></script>
-  <script src="js/auth.js?v=5"></script>
-  <script src="js/challenges.js?v=5"></script>
-  <script src="js/social.js?v=5"></script>
-  <script src="js/upload.js?v=5"></script>
-  <script src="js/feed.js?v=5"></script>
-  <script src="js/onboarding.js?v=5"></script>
-  <script src="js/app.js?v=5"></script>
+  <script src="js/supabaseClient.js?v=6"></script>
+  <script src="js/auth.js?v=6"></script>
+  <script src="js/challenges.js?v=6"></script>
+  <script src="js/social.js?v=6"></script>
+  <script src="js/upload.js?v=6"></script>
+  <script src="js/feed.js?v=6"></script>
+  <script src="js/push.js?v=6"></script>
+  <script src="js/onboarding.js?v=6"></script>
+  <script src="js/app.js?v=6"></script>
 </body>
 </html>

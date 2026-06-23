@@ -74,7 +74,20 @@ async function enterApp() {
   showScreen("overviewScreen");
   await loadOverview();
   Onboarding.maybeShow();
+  refreshBell();
 }
+
+// Glocke in der Kopfzeile: nur zeigen, wenn Benachrichtigungen erlaubt werden können.
+const notifyBell = $("notifyBell");
+function refreshBell() {
+  notifyBell.classList.toggle("hidden", !(typeof Push !== "undefined" && Push.canPrompt()));
+}
+notifyBell.addEventListener("click", async () => {
+  notifyBell.disabled = true;
+  await Push.enable();
+  notifyBell.disabled = false;
+  refreshBell();
+});
 
 async function loadOverview() {
   const listEl = $("challengeList");
@@ -243,6 +256,7 @@ function uebersetzeFehler(err) {
 // =====================================================================
 applyAuthMode();
 Onboarding.init();
+Push.init();
 
 sb.auth.onAuthStateChange((event, session) => {
   // Frischer Login (oder Registrierung mit Session) -> in die App.
