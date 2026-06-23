@@ -1,30 +1,31 @@
 // =====================================================================
-//  app.js – Steuerzentrale: verbindet Screens, Buttons und die Module
+//  app.js – Steuerzentrale: Screens, Übersicht, Countdown, Foto, Feed
 // =====================================================================
 
-// --- Kurzhelfer ---
 const $ = (id) => document.getElementById(id);
-const screens = ["authScreen", "questScreen", "uploadScreen", "feedScreen"];
+const screens = ["authScreen", "overviewScreen", "challengeScreen", "uploadScreen", "feedScreen"];
 
-// Zeigt genau einen Screen, versteckt die anderen. Header nur außerhalb von Auth.
 function showScreen(id) {
   screens.forEach((s) => $(s).classList.toggle("hidden", s !== id));
   $("appHeader").classList.toggle("hidden", id === "authScreen");
   window.scrollTo(0, 0);
 }
-
 function setMessage(el, text, type) {
   el.textContent = text || "";
   el.className = "message" + (type ? " " + type : "");
 }
 
-// Zustand für den aktuellen Durchlauf.
-let currentQuest = null;     // heutige Quest
-let pickedFile = null;       // gerade aufgenommenes Foto (vor Upload)
-let registerMode = false;    // Login- oder Registrieren-Modus im Auth-Screen
+const state = {
+  challenges: [],     // aktuell aktive Challenges
+  doneIds: new Set(), // welche ich heute schon erledigt habe
+  current: null,      // gerade gewählte Challenge
+  username: "",
+};
+let pickedFile = null;
+let registerMode = false;
 
 // =====================================================================
-//  Auth-Screen: Umschalten Login <-> Registrieren
+//  Auth-Screen
 // =====================================================================
 function applyAuthMode() {
   $("usernameField").classList.toggle("hidden", !registerMode);
@@ -33,11 +34,7 @@ function applyAuthMode() {
   $("toggleModeBtn").textContent  = registerMode ? "Login" : "Registrieren";
   setMessage($("authMessage"), "");
 }
-
-$("toggleModeBtn").addEventListener("click", () => {
-  registerMode = !registerMode;
-  applyAuthMode();
-});
+$("toggleModeBtn").addEventListener("click", () => { registerMode = !registerMode; applyAuthMode(); });
 
 $("primaryAuthBtn").addEventListener("click", async () => {
   const email = $("emailInput").value.trim();
@@ -45,134 +42,188 @@ $("primaryAuthBtn").addEventListener("click", async () => {
   const username = $("usernameInput").value.trim();
   const btn = $("primaryAuthBtn");
 
-  if (!email || !password) {
-    return setMessage($("authMessage"), "Bitte E-Mail und Passwort eingeben.", "error");
-  }
-  if (registerMode && !username) {
-    return setMessage($("authMessage"), "Bitte einen Anzeigenamen wählen.", "error");
-  }
+  if (!email || !password) return setMessage($("authMessage"), "Bitte E-Mail und Passwort eingeben.", "error");
+  if (registerMode && !username) return setMessage($("authMessage"), "Bitte einen Anzeigenamen wählen.", "error");
 
   btn.disabled = true;
   setMessage($("authMessage"), "Moment…");
   try {
     if (registerMode) {
       const res = await Auth.register(username, email, password);
-      // Falls E-Mail-Bestätigung in Supabase AN ist, gibt es noch keine Session.
       if (!res.session) {
-        // Erst Modus umschalten (applyAuthMode räumt Meldungen weg),
-        // DANN die Meldung setzen, damit sie sichtbar bleibt.
-        registerMode = false;
-        applyAuthMode();
-        setMessage($("authMessage"),
-          "Konto angelegt. Bitte E-Mail bestätigen, dann einloggen.", "ok");
+        registerMode = false; applyAuthMode();
+        setMessage($("authMessage"), "Konto angelegt. Bitte E-Mail bestätigen, dann einloggen.", "ok");
         return;
       }
     } else {
       await Auth.login(email, password);
-      // Profil sicherstellen (z. B. falls beim ersten Login noch keins existiert).
       await Auth.ensureProfile(null);
     }
-    await enterApp();
+    // Das Wechseln in die App übernimmt der onAuthStateChange-Listener (SIGNED_IN).
   } catch (err) {
     setMessage($("authMessage"), uebersetzeFehler(err), "error");
-  } finally {
-    btn.disabled = false;
+  } finally { btn.disabled = false; }
+});
+
+$("logoutBtn").addEventListener("click", async () => { await Auth.logout(); });
+
+// =====================================================================
+//  Übersicht (aktive Challenges)
+// =====================================================================
+async function enterApp() {
+  showScreen("overviewScreen");
+  await loadOverview();
+}
+
+async function loadOverview() {
+  const listEl = $("challengeList");
+  listEl.innerHTML = '<p class="spinner-text">Lade Challenges…</p>';
+  try {
+    state.challenges = await Challenges.active();
+    state.doneIds = await Challenges.doneIds(state.challenges.map((c) => c.id));
+  } catch (err) {
+    listEl.innerHTML = `<p class="spinner-text">Fehler: ${Feed.escape(err.message)}</p>`;
+    return;
   }
-});
+  await refreshGreeting();
+  renderOverview();
+}
 
-$("logoutBtn").addEventListener("click", async () => {
-  await Auth.logout();
-  // onAuthStateChange (unten) bringt uns automatisch zurück zum Login.
-});
+async function refreshGreeting() {
+  const user = await Auth.getUser();
+  if (!user) return;
+  const { data } = await sb.from("profiles").select("username").eq("id", user.id).maybeSingle();
+  state.username = (data && data.username) || user.email.split("@")[0];
+  $("greetingName").textContent = `Hi, ${state.username}!`;
+  $("headerAvatar").textContent = Feed.initial(state.username);
+}
+
+function renderOverview() {
+  const listEl = $("challengeList");
+  listEl.innerHTML = "";
+
+  if (!state.challenges.length) {
+    listEl.innerHTML =
+      '<div class="empty-state"><i class="ti ti-mood-empty"></i>Gerade keine aktive Challenge. Schau später wieder vorbei!</div>';
+    return;
+  }
+
+  for (const ch of state.challenges) {
+    const meta = Challenges.meta(ch.kind);
+    const done = state.doneIds.has(ch.id);
+    const urgent = Challenges.isUrgent(ch.ends_at);
+
+    const card = document.createElement("div");
+    card.className = `challenge-card ${meta.cls}${urgent ? " urgent" : ""}`;
+    card.innerHTML = `
+      <div class="cc-top">
+        <div class="cc-icon"><i class="ti ${meta.icon}"></i></div>
+        <div style="flex:1"><span class="cc-badge">${meta.label}</span></div>
+        <div class="cc-count ${urgent ? "warn" : ""}" data-ends="${ch.ends_at}">
+          <i class="ti ti-clock"></i> <span>${Challenges.formatRemaining(ch.ends_at)}</span>
+        </div>
+      </div>
+      <p class="cc-title">${Feed.escape(ch.title)}</p>
+      <div class="cc-action ${done ? "done" : ""}">
+        ${done ? '<i class="ti ti-check"></i> Erledigt – Feed ansehen' : "Challenge starten"}
+      </div>`;
+    card.addEventListener("click", () => openChallenge(ch));
+    listEl.appendChild(card);
+  }
+}
+
+function openChallenge(ch) {
+  state.current = ch;
+  if (state.doneIds.has(ch.id)) { goToFeed(ch); return; }
+  showChallengeDetail(ch);
+}
+
+function showChallengeDetail(ch) {
+  const meta = Challenges.meta(ch.kind);
+  const icon = $("detailIcon");
+  icon.className = "cc-icon";
+  icon.innerHTML = `<i class="ti ${meta.icon}"></i>`;
+  // Typ-Farbe an Icon/Badge über die Kind-Klasse am Detail-Header setzen:
+  const head = $("detailIcon").parentElement;
+  head.className = `detail-head ${meta.cls}`;
+  const badge = $("detailBadge");
+  badge.className = "cc-badge";
+  badge.textContent = meta.label;
+  $("questTitle").textContent = ch.title;
+  const cd = $("detailCountdown");
+  cd.dataset.ends = ch.ends_at;
+  cd.querySelector("span").textContent = Challenges.formatRemaining(ch.ends_at);
+  setMessage($("questMessage"), "");
+  showScreen("challengeScreen");
+}
 
 // =====================================================================
-//  Quest-Screen: Kamera auslösen
+//  Foto machen + hochladen
 // =====================================================================
-$("startQuestBtn").addEventListener("click", () => {
-  $("cameraInput").click(); // öffnet die native Kamera / Dateiauswahl
-});
+$("startQuestBtn").addEventListener("click", () => $("cameraInput").click());
 
 $("cameraInput").addEventListener("change", (e) => {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
   pickedFile = file;
-
-  // Vorschau anzeigen und zum Upload-Screen wechseln.
   $("previewImage").src = URL.createObjectURL(file);
-  $("uploadQuestLabel").textContent = currentQuest ? currentQuest.title : "";
+  $("uploadQuestLabel").textContent = state.current ? state.current.title : "";
   setMessage($("uploadMessage"), "");
   showScreen("uploadScreen");
 });
 
-// =====================================================================
-//  Upload-Screen: hochladen oder neu aufnehmen
-// =====================================================================
 $("retakeBtn").addEventListener("click", () => {
-  pickedFile = null;
-  $("cameraInput").value = ""; // erlaubt erneutes Auswählen derselben Datei
-  showScreen("questScreen");
+  pickedFile = null; $("cameraInput").value = "";
+  showScreen("challengeScreen");
+});
+$("uploadBack").addEventListener("click", () => {
+  pickedFile = null; $("cameraInput").value = "";
+  showScreen("challengeScreen");
 });
 
 $("confirmUploadBtn").addEventListener("click", async () => {
-  if (!pickedFile || !currentQuest) return;
+  if (!pickedFile || !state.current) return;
   const btn = $("confirmUploadBtn");
   btn.disabled = true;
   setMessage($("uploadMessage"), "Lade hoch…");
-
   try {
-    await Upload.submit(pickedFile, currentQuest);
-    pickedFile = null;
-    $("cameraInput").value = "";
-    await goToFeed(); // Beitrag steht -> Feed freigeschaltet
+    await Upload.submit(pickedFile, state.current);
+    state.doneIds.add(state.current.id);
+    pickedFile = null; $("cameraInput").value = "";
+    goToFeed(state.current);
   } catch (err) {
     setMessage($("uploadMessage"), uebersetzeFehler(err), "error");
-  } finally {
-    btn.disabled = false;
-  }
+  } finally { btn.disabled = false; }
 });
 
 // =====================================================================
-//  Ablauf-Steuerung
+//  Feed
 // =====================================================================
-
-// Nach Login: entscheiden, welcher Screen dran ist.
-async function enterApp() {
-  showScreen("questScreen");
-  setMessage($("questMessage"), "");
-  $("questTitle").textContent = "Lade Quest…";
-
-  try {
-    currentQuest = await Quest.today();
-  } catch (err) {
-    return setMessage($("questMessage"), uebersetzeFehler(err), "error");
-  }
-
-  if (!currentQuest) {
-    $("questTitle").textContent = "Heute gibt es noch keine Quest.";
-    setMessage($("questMessage"), "Schau später wieder vorbei! 👀");
-    return;
-  }
-
-  $("questTitle").textContent = currentQuest.title;
-
-  // Schon heute eingereicht? Dann direkt in den Feed.
-  try {
-    if (await Upload.hasSubmittedToday(currentQuest)) {
-      await goToFeed();
-    }
-  } catch (err) {
-    setMessage($("questMessage"), uebersetzeFehler(err), "error");
-  }
-}
-
-async function goToFeed() {
-  $("feedQuestTitle").textContent = currentQuest ? currentQuest.title : "";
+async function goToFeed(ch) {
+  $("feedQuestTitle").textContent = ch ? ch.title : "";
   showScreen("feedScreen");
-  await Feed.render(currentQuest);
+  await Feed.render(ch);
 }
 
+$("challengeBack").addEventListener("click", () => { renderOverview(); showScreen("overviewScreen"); });
+$("feedBack").addEventListener("click", () => { renderOverview(); showScreen("overviewScreen"); });
+
 // =====================================================================
-//  Fehler verständlich auf Deutsch machen
+//  Countdown-Ticker (jede Sekunde alle sichtbaren Countdowns aktualisieren)
+// =====================================================================
+setInterval(() => {
+  document.querySelectorAll("[data-ends]").forEach((el) => {
+    const span = el.querySelector("span");
+    if (span) span.textContent = Challenges.formatRemaining(el.dataset.ends);
+    const urgent = Challenges.isUrgent(el.dataset.ends);
+    el.classList.toggle("warn", urgent && el.classList.contains("cc-count"));
+    const card = el.closest(".challenge-card");
+    if (card) card.classList.toggle("urgent", urgent);
+  });
+}, 1000);
+
+// =====================================================================
+//  Fehlertexte auf Deutsch
 // =====================================================================
 function uebersetzeFehler(err) {
   const msg = (err && err.message) ? err.message : String(err);
@@ -181,55 +232,33 @@ function uebersetzeFehler(err) {
   if (/Password should be at least/i.test(msg)) return "Passwort muss mindestens 6 Zeichen haben.";
   if (/Email not confirmed/i.test(msg))        return "E-Mail noch nicht bestätigt.";
   if (/Failed to fetch|NetworkError/i.test(msg)) return "Keine Verbindung zu Supabase. URL/Key prüfen.";
+  if (/row-level security/i.test(msg))         return "Keine Berechtigung (RLS). Policies prüfen.";
   return msg;
 }
 
 // =====================================================================
-//  Start: Auth-Status beobachten (hält Session über Reloads hinweg)
+//  Start: Session beobachten
 // =====================================================================
 applyAuthMode();
 
-// Sicherheitsnetz: Wenn die Supabase-Keys noch nicht eingetragen sind,
-// zeigen wir eine klare Anleitung statt eines stillen Fehlers.
-if (!sb) {
-  showScreen("authScreen");
-  $("primaryAuthBtn").disabled = true;
-  $("toggleModeBtn").disabled = true;
-  setMessage(
-    $("authMessage"),
-    "Setup nötig: Trage deine Supabase-URL und den anon-Key in js/supabaseClient.js ein.",
-    "error"
-  );
-  throw new Error("[SideQuest] Supabase nicht konfiguriert – Start abgebrochen.");
-}
-
 sb.auth.onAuthStateChange((event, session) => {
-  if (session && session.user) {
-    // Eingeloggt (auch nach Reload) -> in die App.
-    if ($("authScreen").classList.contains("hidden") === false || event === "SIGNED_IN") {
-      enterApp();
-    }
-  } else {
-    // Ausgeloggt -> zurück zum Login.
-    currentQuest = null;
-    pickedFile = null;
+  // Frischer Login (oder Registrierung mit Session) -> in die App.
+  if (event === "SIGNED_IN" && session && session.user) {
+    enterApp();
+  } else if (event === "SIGNED_OUT") {
+    state.current = null; pickedFile = null;
     showScreen("authScreen");
   }
 });
 
-// Direkt beim Laden prüfen, ob schon eine Session existiert.
+// Beim Laden: bestehende Session? -> direkt in die App, sonst Login.
+// (INITIAL_SESSION wird oben bewusst ignoriert, damit es hier nicht doppelt lädt.)
 (async () => {
   const user = await Auth.getUser();
-  if (user) {
-    await enterApp();
-  } else {
-    showScreen("authScreen");
-  }
+  if (user) await enterApp();
+  else showScreen("authScreen");
 })();
 
-// Service Worker registrieren (PWA / "Zum Startbildschirm").
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("sw.js").catch(() => {/* offline egal im MVP */});
-  });
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 }

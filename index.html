@@ -2,105 +2,111 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <!-- viewport-fit=cover + user-scalable=no: damit es sich am Handy wie eine App anfühlt -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
-  <meta name="theme-color" content="#0d0d0f" />
+  <meta name="theme-color" content="#0a0a0c" />
   <title>SideQuest</title>
 
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=2" />
+  <link rel="stylesheet" href="styles.css?v=3" />
+  <!-- Tabler-Icons (für die schicken Symbole) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
-  <!-- Supabase-Client direkt vom CDN (kein npm/Build nötig) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-  <!-- =================== Kopfzeile (nur sichtbar, wenn eingeloggt) =================== -->
   <header id="appHeader" class="hidden">
-    <span class="logo">SideQuest</span>
-    <button id="logoutBtn" class="link-btn">Abmelden</button>
+    <span class="logo">Side<span class="dot">Quest</span></span>
+    <div class="header-right">
+      <span id="headerAvatar" class="avatar">?</span>
+      <button id="logoutBtn" class="icon-btn" aria-label="Abmelden" title="Abmelden"><i class="ti ti-logout"></i></button>
+    </div>
   </header>
 
   <main>
 
-    <!-- =================== Screen 1: Login / Registrieren =================== -->
+    <!-- ===== Screen 1: Login / Registrieren ===== -->
     <section id="authScreen" class="screen">
       <div class="card">
-        <h1 class="brand">SideQuest</h1>
-        <p class="subtitle">Eine Quest am Tag. Erst posten, dann sehen.</p>
+        <h1 class="brand-big">Side<span class="dot">Quest</span></h1>
+        <p class="subtitle">Eine Challenge. Erst posten, dann sehen.</p>
 
-        <!-- Anzeigename: nur beim Registrieren nötig -->
         <label id="usernameField" class="field hidden">
           <span>Anzeigename</span>
           <input id="usernameInput" type="text" autocomplete="username" placeholder="z. B. Niklas" />
         </label>
-
         <label class="field">
           <span>E-Mail</span>
           <input id="emailInput" type="email" autocomplete="email" placeholder="du@beispiel.de" />
         </label>
-
         <label class="field">
           <span>Passwort</span>
           <input id="passwordInput" type="password" autocomplete="current-password" placeholder="mind. 6 Zeichen" />
         </label>
 
         <button id="primaryAuthBtn" class="btn">Login</button>
-
         <p class="toggle-line">
           <span id="toggleText">Noch kein Konto?</span>
           <button id="toggleModeBtn" class="link-btn">Registrieren</button>
         </p>
-
         <p id="authMessage" class="message"></p>
       </div>
     </section>
 
-    <!-- =================== Screen 2: Heutige Quest =================== -->
-    <section id="questScreen" class="screen hidden">
+    <!-- ===== Screen 2: Challenge-Übersicht ===== -->
+    <section id="overviewScreen" class="screen hidden">
+      <h2 class="greeting" id="greetingName">Los geht's!</h2>
+      <p class="greeting-sub">Wähle eine Challenge und zeig, was du drauf hast.</p>
+      <p class="section-label">Jetzt aktiv</p>
+      <div id="challengeList" class="challenge-list"></div>
+    </section>
+
+    <!-- ===== Screen 3: Challenge-Detail (Foto machen) ===== -->
+    <section id="challengeScreen" class="screen hidden">
+      <button class="back-btn" id="challengeBack"><i class="ti ti-arrow-left"></i> Übersicht</button>
       <div class="card">
-        <p class="label">Deine Quest heute</p>
-        <h2 id="questTitle" class="quest-title">Lade Quest…</h2>
-
-        <!-- Verstecktes Kamera-Input: der Button unten löst es aus -->
+        <div class="detail-head">
+          <div id="detailIcon" class="cc-icon"></div>
+          <span id="detailBadge" class="cc-badge"></span>
+        </div>
+        <h2 id="questTitle" class="quest-title">Lade Challenge…</h2>
+        <span id="detailCountdown" class="countdown-pill"><i class="ti ti-clock"></i> <span></span></span>
         <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden" />
-        <button id="startQuestBtn" class="btn">📸 Quest starten</button>
-
+        <button id="startQuestBtn" class="btn"><i class="ti ti-camera"></i> Challenge starten</button>
         <p id="questMessage" class="message"></p>
       </div>
     </section>
 
-    <!-- =================== Screen 3: Upload (Vorschau + Hochladen) =================== -->
+    <!-- ===== Screen 4: Upload (Vorschau) ===== -->
     <section id="uploadScreen" class="screen hidden">
+      <button class="back-btn" id="uploadBack"><i class="ti ti-arrow-left"></i> Zurück</button>
       <div class="card">
-        <p class="label" id="uploadQuestLabel"></p>
+        <p id="uploadQuestLabel" class="section-label" style="margin:0"></p>
         <img id="previewImage" class="preview" alt="Vorschau deines Fotos" />
-        <button id="confirmUploadBtn" class="btn">Hochladen &amp; freischalten</button>
+        <button id="confirmUploadBtn" class="btn"><i class="ti ti-upload"></i> Hochladen &amp; freischalten</button>
         <button id="retakeBtn" class="link-btn">Neues Foto machen</button>
         <p id="uploadMessage" class="message"></p>
       </div>
     </section>
 
-    <!-- =================== Screen 4: Feed =================== -->
+    <!-- ===== Screen 5: Feed ===== -->
     <section id="feedScreen" class="screen hidden">
-      <div class="feed-head">
-        <p class="label">Heutige Beiträge</p>
-        <h2 id="feedQuestTitle" class="feed-quest"></h2>
-      </div>
+      <button class="back-btn" id="feedBack"><i class="ti ti-arrow-left"></i> Übersicht</button>
+      <h2 id="feedQuestTitle" class="feed-quest"></h2>
       <div id="feedList" class="feed-list"></div>
-      <p id="feedEmpty" class="message hidden">Noch keine weiteren Beiträge. Du bist früh dran! 🎉</p>
+      <p id="feedEmpty" class="empty-state hidden"><i class="ti ti-photo"></i>Noch keine weiteren Beiträge. Du bist früh dran!</p>
     </section>
 
   </main>
 
-  <!-- Reihenfolge wichtig: erst Client, dann die Module, app.js zuletzt -->
-  <script src="js/supabaseClient.js?v=2"></script>
-  <script src="js/auth.js?v=2"></script>
-  <script src="js/quest.js?v=2"></script>
-  <script src="js/upload.js?v=2"></script>
-  <script src="js/feed.js?v=2"></script>
-  <script src="js/app.js?v=2"></script>
+  <script src="js/supabaseClient.js?v=3"></script>
+  <script src="js/auth.js?v=3"></script>
+  <script src="js/challenges.js?v=3"></script>
+  <script src="js/social.js?v=3"></script>
+  <script src="js/upload.js?v=3"></script>
+  <script src="js/feed.js?v=3"></script>
+  <script src="js/app.js?v=3"></script>
 </body>
 </html>
