@@ -173,6 +173,75 @@ const Social = {
     return true;
   },
 
+  // ---- Echte Freunde (mit Zustimmung) über friend_requests ----
+  // Liefert: { friends:Set(uid), incoming:[{id,uid}], outgoing:Set(uid) }. Fail-soft.
+  async friendData() {
+    const out = { friends: new Set(), incoming: [], outgoing: new Set() };
+    try {
+      const user = await Auth.getUser();
+      if (!user) return out;
+      const { data, error } = await sb.from("friend_requests")
+        .select("id, requester, addressee, status")
+        .or(`requester.eq.${user.id},addressee.eq.${user.id}`);
+      if (error) throw error;
+      (data || []).forEach((r) => {
+        if (r.status === "accepted") {
+          out.friends.add(r.requester === user.id ? r.addressee : r.requester);
+        } else if (r.status === "pending") {
+          if (r.addressee === user.id) out.incoming.push({ id: r.id, uid: r.requester });
+          else out.outgoing.add(r.addressee);
+        }
+      });
+    } catch (e) { console.warn("[SideQuest] friendData:", e.message); }
+    return out;
+  },
+
+  // Freundschaftsanfrage schicken. Hat die Person mich schon angefragt -> direkt befreunden.
+  // Rückgabe: "requested" | "accepted" | "pending" | "friends".
+  async sendFriendRequest(addresseeId) {
+    const user = await Auth.getUser();
+    if (!user) throw new Error("Nicht eingeloggt.");
+    if (user.id === addresseeId) throw new Error("Dich selbst kannst du nicht anfragen.");
+    const { data: existing } = await sb.from("friend_requests")
+      .select("id, requester, addressee, status")
+      .or(`and(requester.eq.${user.id},addressee.eq.${addresseeId}),and(requester.eq.${addresseeId},addressee.eq.${user.id})`);
+    const rows = existing || [];
+    const accepted = rows.find((r) => r.status === "accepted");
+    if (accepted) return "friends";
+    const theirs = rows.find((r) => r.status === "pending" && r.requester === addresseeId);
+    if (theirs) { // sie haben mich schon angefragt -> annehmen
+      const { error } = await sb.from("friend_requests").update({ status: "accepted" }).eq("id", theirs.id);
+      if (error) throw error;
+      return "accepted";
+    }
+    const mine = rows.find((r) => r.status === "pending" && r.requester === user.id);
+    if (mine) return "pending";
+    const { error } = await sb.from("friend_requests")
+      .insert({ requester: user.id, addressee: addresseeId, status: "pending" });
+    if (error) throw error;
+    return "requested";
+  },
+
+  // Eingehende Anfrage beantworten (annehmen = accepted, ablehnen = löschen).
+  async respondFriend(requestId, accept) {
+    if (accept) {
+      const { error } = await sb.from("friend_requests").update({ status: "accepted" }).eq("id", requestId);
+      if (error) throw error;
+    } else {
+      const { error } = await sb.from("friend_requests").delete().eq("id", requestId);
+      if (error) throw error;
+    }
+  },
+
+  // Freundschaft beenden (akzeptierte Zeile in beliebiger Richtung löschen).
+  async unfriend(otherId) {
+    const user = await Auth.getUser();
+    if (!user) throw new Error("Nicht eingeloggt.");
+    const { error } = await sb.from("friend_requests").delete().eq("status", "accepted")
+      .or(`and(requester.eq.${user.id},addressee.eq.${otherId}),and(requester.eq.${otherId},addressee.eq.${user.id})`);
+    if (error) throw error;
+  },
+
   // Eigene Profil-Kosmetik speichern (Avatar/Titel/Rahmen).
   async saveProfile(patch) {
     const user = await Auth.getUser();

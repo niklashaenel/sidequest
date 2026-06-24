@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=17" />
+  <link rel="stylesheet" href="styles.css?v=18" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
@@ -111,6 +111,17 @@
         </div>
       </div>
       <div id="profileStats" class="stats-strip" style="margin-top:4px"></div>
+
+      <!-- Freundschaftsanfragen / Freunde / Folge ich -->
+      <div id="friendRequestsSection" class="hidden">
+        <p class="section-label" style="margin-top:22px">🤝 Freundschaftsanfragen</p>
+        <div id="friendRequests" class="soc-list"></div>
+      </div>
+      <p class="section-label" style="margin-top:22px">Freunde (<span id="friendsCount">0</span>)</p>
+      <div id="friendsList" class="soc-list"></div>
+      <p class="section-label" style="margin-top:18px">Folge ich (<span id="followsCount">0</span>)</p>
+      <div id="followsList" class="soc-list"></div>
+
       <p class="section-label" style="margin-top:22px">Titel</p>
       <div id="titleChips" class="cos-chips"></div>
       <p class="section-label" style="margin-top:18px">Rahmen</p>
@@ -156,7 +167,7 @@
       <h2 id="feedQuestTitle" class="feed-quest"></h2>
       <div id="feedToggle" class="seg-toggle">
         <button data-mode="all" class="active"><i class="ti ti-world"></i> Alle</button>
-        <button data-mode="friends"><i class="ti ti-users"></i> Freunde</button>
+        <button data-mode="friends"><i class="ti ti-users"></i> Folge ich</button>
       </div>
       <div id="feedList" class="feed-list"></div>
       <p id="feedEmpty" class="empty-state hidden"><i class="ti ti-photo"></i>Noch keine weiteren Beiträge. Du bist früh dran!</p>
@@ -189,15 +200,15 @@
     <button class="link-btn" id="onboardLater">Später</button>
   </div>
 
-  <script src="js/supabaseClient.js?v=17"></script>
-  <script src="js/auth.js?v=17"></script>
-  <script src="js/challenges.js?v=17"></script>
-  <script src="js/social.js?v=17"></script>
-  <script src="js/upload.js?v=17"></script>
-  <script src="js/feed.js?v=17"></script>
-  <script src="js/push.js?v=17"></script>
-  <script src="js/onboarding.js?v=17"></script>
-  <script src="js/stats.js?v=17"></script>
-  <script src="js/app.js?v=17"></script>
+  <script src="js/supabaseClient.js?v=18"></script>
+  <script src="js/auth.js?v=18"></script>
+  <script src="js/challenges.js?v=18"></script>
+  <script src="js/social.js?v=18"></script>
+  <script src="js/upload.js?v=18"></script>
+  <script src="js/feed.js?v=18"></script>
+  <script src="js/push.js?v=18"></script>
+  <script src="js/onboarding.js?v=18"></script>
+  <script src="js/stats.js?v=18"></script>
+  <script src="js/app.js?v=18"></script>
 </body>
 </html>

@@ -244,6 +244,71 @@ async function openProfile() {
   const s = await Stats.forMe();
   state.stats = s;
   renderProfile(s);
+  renderSocial().catch((e) => console.warn("[SideQuest] social:", e.message));
+}
+
+// Profil: Anfragen / Freunde / Folge-ich-Listen rendern.
+async function renderSocial() {
+  const [fd, follows] = await Promise.all([Social.friendData(), Social.myFollows()]);
+  state.follows = follows;
+  const ids = [...new Set([...fd.friends, ...follows, ...fd.incoming.map((i) => i.uid)])];
+  const profs = await Feed.fetchProfiles(ids);
+  const nameOf = (uid) => (profs[uid] && profs[uid].username) || "Jemand";
+  const avatarOf = (uid) => Feed.avatarHTML(nameOf(uid), profs[uid] && profs[uid].avatar_url, profs[uid] && profs[uid].frame, "soc-avatar");
+  const row = (uid, extra) => `<div class="soc-row" data-uid="${Feed.escape(uid)}">${avatarOf(uid)}<span class="soc-name">${Feed.escape(nameOf(uid))}</span>${extra}</div>`;
+
+  // Eingehende Anfragen
+  const reqWrap = $("friendRequests"), reqSec = $("friendRequestsSection");
+  if (fd.incoming.length) {
+    reqWrap.innerHTML = fd.incoming.map((r) =>
+      `<div class="soc-row" data-id="${r.id}" data-uid="${Feed.escape(r.uid)}">${avatarOf(r.uid)}<span class="soc-name">${Feed.escape(nameOf(r.uid))}</span>
+        <button class="soc-btn accept" data-act="accept"><i class="ti ti-check"></i> Annehmen</button>
+        <button class="soc-btn ghost" data-act="decline" aria-label="Ablehnen"><i class="ti ti-x"></i></button></div>`).join("");
+    reqSec.classList.remove("hidden");
+    reqWrap.querySelectorAll(".soc-btn").forEach((b) => b.addEventListener("click", async () => {
+      const rowEl = b.closest(".soc-row");
+      rowEl.querySelectorAll(".soc-btn").forEach((x) => (x.disabled = true));
+      try { await Social.respondFriend(Number(rowEl.dataset.id), b.dataset.act === "accept"); await renderSocial(); }
+      catch (e) { rowEl.querySelectorAll(".soc-btn").forEach((x) => (x.disabled = false)); alert("Fehler: " + e.message); }
+    }));
+  } else { reqSec.classList.add("hidden"); }
+
+  // Freunde
+  const friends = [...fd.friends];
+  $("friendsCount").textContent = friends.length;
+  const frWrap = $("friendsList");
+  frWrap.innerHTML = friends.length
+    ? friends.map((uid) => row(uid, '<button class="soc-btn ghost" data-act="unfriend">Entfernen</button>')).join("")
+    : '<p class="soc-empty">Noch keine Freunde – schick im Feed eine Anfrage! 🤝</p>';
+  frWrap.querySelectorAll('[data-act="unfriend"]').forEach((b) => b.addEventListener("click", async () => {
+    if (!confirm("Freundschaft beenden?")) return;
+    b.disabled = true;
+    try { await Social.unfriend(b.closest(".soc-row").dataset.uid); await renderSocial(); }
+    catch (e) { b.disabled = false; alert("Fehler: " + e.message); }
+  }));
+
+  // Folge ich
+  $("followsCount").textContent = follows.size;
+  const foWrap = $("followsList");
+  const fl = [...follows];
+  foWrap.innerHTML = fl.length
+    ? fl.map((uid) => {
+        const tag = fd.friends.has(uid) ? '<span class="soc-tag">✓ Freund</span>'
+          : fd.outgoing.has(uid) ? '<span class="soc-tag">angefragt</span>'
+          : '<button class="soc-btn" data-act="friend">+ Freund</button>';
+        return row(uid, tag + '<button class="soc-btn ghost" data-act="unfollow">Entfolgen</button>');
+      }).join("")
+    : '<p class="soc-empty">Du folgst noch niemandem. Im Feed auf „+ Folgen" tippen.</p>';
+  foWrap.querySelectorAll('[data-act="unfollow"]').forEach((b) => b.addEventListener("click", async () => {
+    b.disabled = true;
+    try { await Social.toggleFollow(b.closest(".soc-row").dataset.uid, true); await renderSocial(); }
+    catch (e) { b.disabled = false; alert("Fehler: " + e.message); }
+  }));
+  foWrap.querySelectorAll('[data-act="friend"]').forEach((b) => b.addEventListener("click", async () => {
+    b.disabled = true;
+    try { await Social.sendFriendRequest(b.closest(".soc-row").dataset.uid); await renderSocial(); }
+    catch (e) { b.disabled = false; alert("Fehler: " + e.message); }
+  }));
 }
 function renderProfile(s) {
   if (!s) return;

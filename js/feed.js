@@ -80,13 +80,14 @@ const Feed = {
     list.innerHTML = '<p class="spinner-text">Lade Beiträge…</p>';
     empty.classList.add("hidden");
 
-    // 1) Alle Beiträge zur Challenge (neueste zuerst) + wem ich folge – parallel.
-    const [subsRes, follows] = await Promise.all([
+    // 1) Alle Beiträge zur Challenge (neueste zuerst) + Folgen + Freunde – parallel.
+    const [subsRes, follows, friends] = await Promise.all([
       sb.from("submissions")
         .select("id, user_id, image_url, created_at")
         .eq("quest_id", quest.id)
         .order("created_at", { ascending: false }),
       Social.myFollows(),
+      Social.friendData(),
     ]);
     if (subsRes.error) {
       list.innerHTML = `<p class="spinner-text">Fehler beim Laden: ${Feed.escape(subsRes.error.message)}</p>`;
@@ -126,6 +127,9 @@ const Feed = {
       const commentCount = commentCounts[item.id] || 0;
       const isMine = item.user_id === myId;
       const following = follows.has(item.user_id);
+      const isFriend = friends.friends.has(item.user_id);
+      const reqPending = friends.outgoing.has(item.user_id);
+      const uid = Feed.escape(item.user_id);
 
       const el = document.createElement("article");
       el.className = "feed-item";
@@ -138,7 +142,12 @@ const Feed = {
           </div>
           ${isMine
             ? '<button class="fi-del" aria-label="Beitrag löschen"><i class="ti ti-trash"></i></button>'
-            : `<button class="fi-follow${following ? " following" : ""}" data-uid="${Feed.escape(item.user_id)}">${following ? "Folge ich" : "+ Folgen"}</button>`}
+            : `<div class="fi-head-actions">
+                 <button class="fi-follow${following ? " following" : ""}" data-uid="${uid}">${following ? "Folge ich" : "+ Folgen"}</button>
+                 ${isFriend
+                   ? '<span class="fi-friend done" title="Befreundet"><i class="ti ti-user-check"></i></span>'
+                   : `<button class="fi-friend${reqPending ? " pending" : ""}" data-uid="${uid}" ${reqPending ? "disabled" : ""} aria-label="Als Freund anfragen" title="Als Freund anfragen"><i class="ti ti-user-plus"></i></button>`}
+               </div>`}
         </div>
         <img class="fi-img" src="${Feed.escape(item.image_url)}" alt="Beitrag von ${Feed.escape(username)}" loading="lazy" />
         <div class="fi-actions">
@@ -200,6 +209,28 @@ const Feed = {
           followBtn.textContent = following ? "Folge ich" : "+ Folgen";
           alert("Hat nicht geklappt: " + e.message);
         } finally { fBusy = false; }
+      });
+    }
+
+    // Als Freund anfragen (nur bei fremden, noch-nicht-Freunden vorhanden)
+    const friendBtn = el.querySelector("button.fi-friend");
+    if (friendBtn && !friendBtn.disabled) {
+      let fbBusy = false;
+      friendBtn.addEventListener("click", async () => {
+        if (fbBusy) return; fbBusy = true;
+        friendBtn.disabled = true;
+        try {
+          const res = await Social.sendFriendRequest(friendBtn.dataset.uid);
+          if (res === "accepted" || res === "friends") {
+            friendBtn.classList.add("done");
+            friendBtn.innerHTML = '<i class="ti ti-user-check"></i>';
+            friendBtn.title = "Befreundet";
+          } else {
+            friendBtn.classList.add("pending");
+            friendBtn.title = "Anfrage gesendet";
+          }
+        } catch (e) { friendBtn.disabled = false; alert("Hat nicht geklappt: " + e.message); }
+        finally { fbBusy = false; }
       });
     }
 
