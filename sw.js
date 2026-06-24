@@ -1,13 +1,11 @@
 // =====================================================================
-//  sw.js – Service Worker (PWA + OneSignal-Push in EINEM Worker)
+//  sw.js – PWA-Service-Worker (Installierbarkeit/Offline)
 // =====================================================================
 //
-// OneSignal wird offiziell empfohlen so integriert: importScripts ganz oben.
-// Dadurch braucht es KEINEN zweiten Worker und keinen Sonder-Scope – dieser
-// eine Worker (Scope /sidequest/) übernimmt Installierbarkeit UND Push.
-importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDKWorker.js");
+// OneSignal-Push läuft BEWUSST in einem eigenen Worker (push/OneSignalSDKWorker.js),
+// damit ein Push-Problem niemals diesen PWA-Worker lahmlegt.
 
-const CACHE_VERSION = "sidequest-v2";
+const CACHE_VERSION = "sidequest-v3";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting(); // neue Version sofort übernehmen
