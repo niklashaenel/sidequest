@@ -80,13 +80,14 @@ async function enterApp() {
 // Glocke in der Kopfzeile: nur zeigen, wenn Benachrichtigungen erlaubt werden können.
 const notifyBell = $("notifyBell");
 function refreshBell() {
-  notifyBell.classList.toggle("hidden", !(typeof Push !== "undefined" && Push.canPrompt()));
+  notifyBell.classList.remove("hidden"); // vorerst immer sichtbar (für Diagnose)
 }
 notifyBell.addEventListener("click", async () => {
   notifyBell.disabled = true;
   await Push.enable();
+  const info = await Push.status();
   notifyBell.disabled = false;
-  refreshBell();
+  alert("📲 Benachrichtigungs-Status\n\n" + info);
 });
 
 async function loadOverview() {

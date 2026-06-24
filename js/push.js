@@ -7,6 +7,8 @@
 
 const Push = {
   APP_ID: "feaa262d-1008-4c6f-b385-fd707f0ef763",
+  lastError: null,
+  initDone: false,
 
   init() {
     window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -19,9 +21,39 @@ const Push = {
           serviceWorkerParam: { scope: "/sidequest/" },
           allowLocalhostAsSecureOrigin: true, // erlaubt lokale Tests
         });
+        Push.initDone = true;
       } catch (e) {
-        console.warn("[SideQuest] OneSignal init:", e && e.message);
+        Push.lastError = (e && e.message) ? e.message : String(e);
+        console.warn("[SideQuest] OneSignal init:", Push.lastError);
       }
+    });
+  },
+
+  // Diagnose: liefert den aktuellen Push-Zustand als lesbaren Text.
+  async status() {
+    const swReg = ("serviceWorker" in navigator)
+      ? (await navigator.serviceWorker.getRegistrations()).map((r) => r.scope).join(" | ") : "kein SW-Support";
+    return new Promise((resolve) => {
+      let done = false;
+      const out = (extra) => {
+        if (done) return; done = true;
+        resolve(
+          "Erlaubnis: " + (("Notification" in window) ? Notification.permission : "n/a") +
+          "\nInit fertig: " + Push.initDone +
+          "\nInit-Fehler: " + (Push.lastError || "keiner") +
+          "\nStandalone(App): " + (window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true) +
+          "\nSW-Scopes: " + swReg +
+          "\n" + extra
+        );
+      };
+      setTimeout(() => out("OneSignal: SDK antwortete nicht (Timeout)"), 7000);
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.OneSignalDeferred.push(async (OneSignal) => {
+        try {
+          const sub = OneSignal.User && OneSignal.User.PushSubscription;
+          out("Abo-ID: " + ((sub && sub.id) || "KEINE") + "\nAbo aktiv: " + (sub ? sub.optedIn : "?"));
+        } catch (e) { out("OneSignal-Fehler: " + (e && e.message)); }
+      });
     });
   },
 
