@@ -14,8 +14,9 @@ const Push = {
       try {
         await OneSignal.init({
           appId: Push.APP_ID,
-          serviceWorkerPath: "sidequest/push/OneSignalSDKWorker.js",
-          serviceWorkerParam: { scope: "/sidequest/push/" },
+          // Unser eigener Service Worker (sw.js) enthält OneSignal via importScripts.
+          serviceWorkerPath: "sidequest/sw.js",
+          serviceWorkerParam: { scope: "/sidequest/" },
           allowLocalhostAsSecureOrigin: true, // erlaubt lokale Tests
         });
       } catch (e) {
