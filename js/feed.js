@@ -22,6 +22,32 @@ const Feed = {
     return (name || "?").trim().charAt(0).toUpperCase() || "?";
   },
 
+  // Reaktions-Leiste (5 Emoji-Chips, eigene Reaktion hervorgehoben).
+  reactionBar(counts, mine) {
+    const chips = Social.REACTIONS.map((e) => {
+      const n = counts[e] || 0;
+      const active = mine === e ? " active" : "";
+      return `<button class="re-chip${active}" type="button" data-emoji="${e}">${e}${n ? `<span>${n}</span>` : ""}</button>`;
+    }).join("");
+    return `<div class="fi-reactions" data-mine="${mine || ""}">${chips}</div>`;
+  },
+
+  // Reaktions-Chips optimistisch umrechnen (from -1, to +1, Aktiv-Markierung setzen).
+  applyReaction(reBar, from, to) {
+    const adj = (emoji, delta) => {
+      if (!emoji) return;
+      const chip = reBar.querySelector(`.re-chip[data-emoji="${emoji}"]`);
+      if (!chip) return;
+      let span = chip.querySelector("span");
+      let n = (span ? parseInt(span.textContent, 10) : 0) + delta;
+      n = Math.max(0, n);
+      if (n > 0) { if (!span) { span = document.createElement("span"); chip.appendChild(span); } span.textContent = n; }
+      else if (span) { span.remove(); }
+    };
+    adj(from, -1); adj(to, 1);
+    reBar.querySelectorAll(".re-chip").forEach((c) => c.classList.toggle("active", c.dataset.emoji === to));
+  },
+
   async render(quest, onDeleted) {
     const me = await Auth.getUser();
     const myId = me ? me.id : null;
@@ -47,10 +73,11 @@ const Feed = {
     // 2) Namen, Likes und Kommentar-Zähler parallel holen.
     const subIds  = subs.map((s) => s.id);
     const userIds = [...new Set(subs.map((s) => s.user_id))];
-    const [profRes, likes, commentCounts] = await Promise.all([
+    const [profRes, likes, commentCounts, reactions] = await Promise.all([
       sb.from("profiles").select("id, username").in("id", userIds),
       Social.likesFor(subIds),
       Social.commentCountsFor(subIds),
+      Social.reactionsFor(subIds),
     ]);
     const nameById = {};
     (profRes.data || []).forEach((p) => { nameById[p.id] = p.username; });
@@ -82,6 +109,7 @@ const Feed = {
             <i class="ti ti-message-circle"></i><span class="comment-count">${commentCount}</span>
           </button>
         </div>
+        ${Feed.reactionBar(reactions.countById[item.id] || {}, reactions.mineById[item.id])}
         <div class="fi-comments hidden"></div>`;
 
       Feed.wireItem(el, item, liked, onDeleted);
@@ -112,6 +140,29 @@ const Feed = {
         likeCountEl.textContent = Math.max(0, parseInt(likeCountEl.textContent, 10) + (isLiked ? 1 : -1));
       } finally { busy = false; }
     });
+
+    // Reaktionen (eine pro User; Tippen setzt/wechselt/entfernt)
+    const reBar = el.querySelector(".fi-reactions");
+    if (reBar) {
+      let mine = reBar.dataset.mine || null;
+      let reBusy = false;
+      reBar.querySelectorAll(".re-chip").forEach((chip) => {
+        chip.addEventListener("click", async () => {
+          if (reBusy) return; reBusy = true;
+          const emoji = chip.dataset.emoji;
+          const prevMine = mine;
+          const newMine = (prevMine === emoji) ? null : emoji;
+          Feed.applyReaction(reBar, prevMine, newMine);
+          mine = newMine;
+          try {
+            await Social.setReaction(item.id, emoji, prevMine);
+          } catch (e) {
+            Feed.applyReaction(reBar, newMine, prevMine); // zurückdrehen
+            mine = prevMine;
+          } finally { reBusy = false; }
+        });
+      });
+    }
 
     const box = el.querySelector(".fi-comments");
     const toggle = el.querySelector(".fi-comment-toggle");

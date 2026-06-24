@@ -43,6 +43,47 @@ const Social = {
     }
   },
 
+  // ---- Reaktionen (eine Emoji-Reaktion pro User & Beitrag) ----
+  REACTIONS: ["😂", "🔥", "😍", "😮", "👏"],
+
+  // Reaktionen für mehrere Beiträge holen.
+  // Liefert: countById[subId] = {emoji: anzahl}, mineById[subId] = mein-emoji|undefined.
+  // Fail-soft: fehlt die Tabelle noch, kommt einfach Leeres zurück (Feed bleibt heil).
+  async reactionsFor(submissionIds) {
+    const countById = {}; const mineById = {};
+    if (!submissionIds.length) return { countById, mineById };
+    try {
+      const user = await Auth.getUser();
+      const { data, error } = await sb
+        .from("reactions")
+        .select("submission_id, user_id, emoji")
+        .in("submission_id", submissionIds);
+      if (error) throw error;
+      (data || []).forEach((r) => {
+        const m = (countById[r.submission_id] = countById[r.submission_id] || {});
+        m[r.emoji] = (m[r.emoji] || 0) + 1;
+        if (user && r.user_id === user.id) mineById[r.submission_id] = r.emoji;
+      });
+    } catch (e) { console.warn("[SideQuest] reactionsFor:", e.message); }
+    return { countById, mineById };
+  },
+
+  // Reaktion setzen/wechseln/entfernen. Gibt das neue eigene Emoji zurück (oder null).
+  async setReaction(submissionId, emoji, current) {
+    const user = await Auth.getUser();
+    if (!user) throw new Error("Nicht eingeloggt.");
+    if (current === emoji) {
+      const { error } = await sb.from("reactions")
+        .delete().eq("submission_id", submissionId).eq("user_id", user.id);
+      if (error) throw error;
+      return null;
+    }
+    const { error } = await sb.from("reactions")
+      .upsert({ submission_id: submissionId, user_id: user.id, emoji }, { onConflict: "submission_id,user_id" });
+    if (error) throw error;
+    return emoji;
+  },
+
   // Anzahl Kommentare je Beitrag (für die Zähler im Feed).
   async commentCountsFor(submissionIds) {
     const countById = {};

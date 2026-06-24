@@ -398,3 +398,15 @@ body { overscroll-behavior-y: contain; }
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .toast b { color: var(--brand-text); font-weight: 800; }
+
+/* ===================================================================
+   v16: Reaktionen (Emoji) im Feed
+   =================================================================== */
+.fi-reactions { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 12px; }
+.re-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 999px; padding: 4px 9px; font-size: 15px;
+  cursor: pointer; line-height: 1; transition: transform .08s ease, background .15s ease, border-color .15s ease; }
+.re-chip span { font-size: 12px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.re-chip:active { transform: scale(.88); }
+.re-chip.active { background: var(--brand-soft); border-color: var(--brand); }
+.re-chip.active span { color: var(--brand-text); }
