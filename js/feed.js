@@ -4,6 +4,19 @@
 
 const Feed = {
 
+  mode: "all",      // "all" | "friends"
+  current: null,    // { quest, onDeleted } – für Neu-Rendern beim Umschalten
+
+  // Profile robust laden: erst mit Kosmetik-Spalten, sonst Fallback (Spalten noch nicht angelegt).
+  async fetchProfiles(ids) {
+    const by = {};
+    if (!ids.length) return by;
+    let res = await sb.from("profiles").select("id, username, avatar_url, title, frame").in("id", ids);
+    if (res.error) res = await sb.from("profiles").select("id, username").in("id", ids);
+    (res.data || []).forEach((p) => { by[p.id] = p; });
+    return by;
+  },
+
   formatTime(iso) {
     const d = new Date(iso);
     const pad = (n) => String(n).padStart(2, "0");
@@ -20,6 +33,15 @@ const Feed = {
 
   initial(name) {
     return (name || "?").trim().charAt(0).toUpperCase() || "?";
+  },
+
+  // Avatar als HTML: eigenes Foto (avatar_url) oder Anfangsbuchstabe, mit optionalem Rahmen.
+  avatarHTML(name, avatarUrl, frame, baseCls) {
+    const f = frame && frame !== "none" ? " frame-" + frame : "";
+    if (avatarUrl) {
+      return `<div class="${baseCls} has-img${f}" style="background-image:url('${Feed.escape(avatarUrl)}')"></div>`;
+    }
+    return `<div class="${baseCls}${f}">${Feed.escape(Feed.initial(name))}</div>`;
   },
 
   // Reaktions-Leiste (5 Emoji-Chips, eigene Reaktion hervorgehoben).
@@ -49,6 +71,8 @@ const Feed = {
   },
 
   async render(quest, onDeleted) {
+    Feed.current = { quest, onDeleted };
+    const mode = Feed.mode || "all";
     const me = await Auth.getUser();
     const myId = me ? me.id : null;
     const list  = document.getElementById("feedList");
@@ -56,49 +80,65 @@ const Feed = {
     list.innerHTML = '<p class="spinner-text">Lade Beiträge…</p>';
     empty.classList.add("hidden");
 
-    // 1) Beiträge zur Challenge (neueste zuerst).
-    const { data: subs, error } = await sb
-      .from("submissions")
-      .select("id, user_id, image_url, created_at")
-      .eq("quest_id", quest.id)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      list.innerHTML = `<p class="spinner-text">Fehler beim Laden: ${Feed.escape(error.message)}</p>`;
+    // 1) Alle Beiträge zur Challenge (neueste zuerst) + wem ich folge – parallel.
+    const [subsRes, follows] = await Promise.all([
+      sb.from("submissions")
+        .select("id, user_id, image_url, created_at")
+        .eq("quest_id", quest.id)
+        .order("created_at", { ascending: false }),
+      Social.myFollows(),
+    ]);
+    if (subsRes.error) {
+      list.innerHTML = `<p class="spinner-text">Fehler beim Laden: ${Feed.escape(subsRes.error.message)}</p>`;
       return;
     }
-    list.innerHTML = "";
-    if (!subs || !subs.length) { empty.classList.remove("hidden"); return; }
 
-    // 2) Namen, Likes und Kommentar-Zähler parallel holen.
+    // 2) Im Freunde-Modus nur Beiträge von Gefolgten (und mir selbst).
+    const subs = (mode === "friends")
+      ? (subsRes.data || []).filter((s) => follows.has(s.user_id) || s.user_id === myId)
+      : (subsRes.data || []);
+
+    list.innerHTML = "";
+    if (!subs.length) {
+      empty.innerHTML = (mode === "friends")
+        ? '<i class="ti ti-users"></i>Noch keine Beiträge von Freunden. Folge Leuten im „Alle"-Tab!'
+        : '<i class="ti ti-photo"></i>Noch keine weiteren Beiträge. Du bist früh dran!';
+      empty.classList.remove("hidden");
+      return;
+    }
+
+    // 3) Profile (Name/Avatar/Titel/Rahmen), Likes, Kommentare, Reaktionen parallel holen.
     const subIds  = subs.map((s) => s.id);
     const userIds = [...new Set(subs.map((s) => s.user_id))];
-    const [profRes, likes, commentCounts, reactions] = await Promise.all([
-      sb.from("profiles").select("id, username").in("id", userIds),
+    const [profById, likes, commentCounts, reactions] = await Promise.all([
+      Feed.fetchProfiles(userIds),
       Social.likesFor(subIds),
       Social.commentCountsFor(subIds),
       Social.reactionsFor(subIds),
     ]);
-    const nameById = {};
-    (profRes.data || []).forEach((p) => { nameById[p.id] = p.username; });
 
-    // 3) Jeden Beitrag rendern + interaktiv machen.
+    // 4) Jeden Beitrag rendern + interaktiv machen.
     for (const item of subs) {
-      const username = nameById[item.user_id] || "Jemand";
+      const prof = profById[item.user_id] || {};
+      const username = prof.username || "Jemand";
       const liked = likes.likedByMe.has(item.id);
       const likeCount = likes.countById[item.id] || 0;
       const commentCount = commentCounts[item.id] || 0;
+      const isMine = item.user_id === myId;
+      const following = follows.has(item.user_id);
 
       const el = document.createElement("article");
       el.className = "feed-item";
       el.innerHTML = `
         <div class="fi-head">
-          <div class="fi-avatar">${Feed.escape(Feed.initial(username))}</div>
-          <div>
-            <div class="fi-user">${Feed.escape(username)}</div>
+          ${Feed.avatarHTML(username, prof.avatar_url, prof.frame, "fi-avatar")}
+          <div class="fi-id">
+            <div class="fi-user">${Feed.escape(username)}${prof.title ? ` <span class="fi-title">${Feed.escape(prof.title)}</span>` : ""}</div>
             <div class="fi-time">${Feed.formatTime(item.created_at)}</div>
           </div>
-          ${item.user_id === myId ? '<button class="fi-del" aria-label="Beitrag löschen"><i class="ti ti-trash"></i></button>' : ""}
+          ${isMine
+            ? '<button class="fi-del" aria-label="Beitrag löschen"><i class="ti ti-trash"></i></button>'
+            : `<button class="fi-follow${following ? " following" : ""}" data-uid="${Feed.escape(item.user_id)}">${following ? "Folge ich" : "+ Folgen"}</button>`}
         </div>
         <img class="fi-img" src="${Feed.escape(item.image_url)}" alt="Beitrag von ${Feed.escape(username)}" loading="lazy" />
         <div class="fi-actions">
@@ -140,6 +180,28 @@ const Feed = {
         likeCountEl.textContent = Math.max(0, parseInt(likeCountEl.textContent, 10) + (isLiked ? 1 : -1));
       } finally { busy = false; }
     });
+
+    // Folgen / Entfolgen (nur bei fremden Beiträgen vorhanden)
+    const followBtn = el.querySelector(".fi-follow");
+    if (followBtn) {
+      let following = followBtn.classList.contains("following");
+      let fBusy = false;
+      followBtn.addEventListener("click", async () => {
+        if (fBusy) return; fBusy = true;
+        const prev = following;
+        following = !following;
+        followBtn.classList.toggle("following", following);
+        followBtn.textContent = following ? "Folge ich" : "+ Folgen";
+        try {
+          await Social.toggleFollow(followBtn.dataset.uid, prev);
+        } catch (e) {
+          following = prev;
+          followBtn.classList.toggle("following", following);
+          followBtn.textContent = following ? "Folge ich" : "+ Folgen";
+          alert("Hat nicht geklappt: " + e.message);
+        } finally { fBusy = false; }
+      });
+    }
 
     // Reaktionen (eine pro User; Tippen setzt/wechselt/entfernt)
     const reBar = el.querySelector(".fi-reactions");

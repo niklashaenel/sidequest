@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=16" />
+  <link rel="stylesheet" href="styles.css?v=17" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
@@ -100,8 +100,10 @@
     <section id="profileScreen" class="screen hidden">
       <button class="back-btn" id="profileBack"><i class="ti ti-arrow-left"></i> Übersicht</button>
       <div class="profile-head">
-        <div id="profileAvatar" class="profile-avatar">?</div>
+        <button id="profileAvatar" class="profile-avatar" aria-label="Profilbild ändern" title="Profilbild ändern">?</button>
+        <span class="avatar-edit-hint"><i class="ti ti-pencil"></i> Profilbild ändern</span>
         <h2 id="profileName" class="profile-name">…</h2>
+        <span id="profileTitle" class="profile-title hidden"></span>
         <div class="profile-level">
           <span id="profileLevelLabel">Level 1</span>
           <div class="xp-bar"><div id="profileXpFill" class="xp-fill"></div></div>
@@ -109,6 +111,10 @@
         </div>
       </div>
       <div id="profileStats" class="stats-strip" style="margin-top:4px"></div>
+      <p class="section-label" style="margin-top:22px">Titel</p>
+      <div id="titleChips" class="cos-chips"></div>
+      <p class="section-label" style="margin-top:18px">Rahmen</p>
+      <div id="frameChips" class="cos-chips"></div>
       <p class="section-label" style="margin-top:22px">Abzeichen</p>
       <div id="profileBadges" class="badges"></div>
       <p class="section-label" style="margin-top:22px">Deine Beiträge</p>
@@ -148,6 +154,10 @@
     <section id="feedScreen" class="screen hidden">
       <button class="back-btn" id="feedBack"><i class="ti ti-arrow-left"></i> Übersicht</button>
       <h2 id="feedQuestTitle" class="feed-quest"></h2>
+      <div id="feedToggle" class="seg-toggle">
+        <button data-mode="all" class="active"><i class="ti ti-world"></i> Alle</button>
+        <button data-mode="friends"><i class="ti ti-users"></i> Freunde</button>
+      </div>
       <div id="feedList" class="feed-list"></div>
       <p id="feedEmpty" class="empty-state hidden"><i class="ti ti-photo"></i>Noch keine weiteren Beiträge. Du bist früh dran!</p>
     </section>
@@ -156,6 +166,17 @@
 
   <!-- Toast (z. B. Serien-Belohnung) -->
   <div id="toast" class="toast hidden"></div>
+
+  <!-- Avatar-Picker: Profilbild aus eigenen Fotos wählen -->
+  <div id="avatarPicker" class="modal hidden">
+    <div class="modal-card">
+      <button class="onboard-close" id="avatarPickerClose" aria-label="Schließen"><i class="ti ti-x"></i></button>
+      <h3 class="onboard-title">Profilbild wählen</h3>
+      <p class="onboard-text">Nimm eins deiner Fotos – oder zurück zum Buchstaben.</p>
+      <p id="avatarPickerHint" class="onboard-text hidden">Noch keine Fotos – mach erst eine Challenge! 📸</p>
+      <div id="avatarPickerGrid" class="ap-grid"></div>
+    </div>
+  </div>
 
   <!-- Willkommens-Hinweis: Zum Startbildschirm hinzufügen -->
   <div id="onboardCard" class="onboard hidden">
@@ -168,15 +189,15 @@
     <button class="link-btn" id="onboardLater">Später</button>
   </div>
 
-  <script src="js/supabaseClient.js?v=16"></script>
-  <script src="js/auth.js?v=16"></script>
-  <script src="js/challenges.js?v=16"></script>
-  <script src="js/social.js?v=16"></script>
-  <script src="js/upload.js?v=16"></script>
-  <script src="js/feed.js?v=16"></script>
-  <script src="js/push.js?v=16"></script>
-  <script src="js/onboarding.js?v=16"></script>
-  <script src="js/stats.js?v=16"></script>
-  <script src="js/app.js?v=16"></script>
+  <script src="js/supabaseClient.js?v=17"></script>
+  <script src="js/auth.js?v=17"></script>
+  <script src="js/challenges.js?v=17"></script>
+  <script src="js/social.js?v=17"></script>
+  <script src="js/upload.js?v=17"></script>
+  <script src="js/feed.js?v=17"></script>
+  <script src="js/push.js?v=17"></script>
+  <script src="js/onboarding.js?v=17"></script>
+  <script src="js/stats.js?v=17"></script>
+  <script src="js/app.js?v=17"></script>
 </body>
 </html>

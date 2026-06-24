@@ -20,7 +20,34 @@ const state = {
   doneIds: new Set(), // welche ich heute schon erledigt habe
   current: null,      // gerade gewählte Challenge
   username: "",
+  stats: null,        // letzte berechnete Statistik (für Avatar-Picker etc.)
+  profile: { avatar_url: null, title: null, frame: null }, // eigene Kosmetik
 };
+
+// Freischaltbare Titel (gespeichert wird das Label) und Rahmen (gespeichert wird die id).
+const TITLES = [
+  { label: "Frischling",     req: () => true },
+  { label: "Stammgast",      req: (s) => s.done >= 5 },
+  { label: "Serientäter 🔥",  req: (s) => s.streak >= 7 },
+  { label: "Liebling ❤️",     req: (s) => s.likesReceived >= 25 },
+  { label: "Veteran 🎖️",      req: (s) => s.done >= 20 },
+  { label: "Legende 👑",      req: (s) => s.level >= 10 },
+];
+const FRAMES = [
+  { id: "none",   label: "Kein Rahmen", req: () => true },
+  { id: "bronze", label: "Bronze",      req: (s) => s.level >= 3 },
+  { id: "silber", label: "Silber",      req: (s) => s.level >= 5 },
+  { id: "gold",   label: "Gold",        req: (s) => s.level >= 10 },
+  { id: "glow",   label: "Neon-Glow ✨", req: (s) => s.streak >= 14 },
+];
+
+// Avatar-Element (Header/Profil) setzen: eigenes Foto oder Buchstabe, plus Rahmen-Klasse.
+function applyAvatarEl(el, name, avatarUrl, frame, baseCls) {
+  if (!el) return;
+  el.className = baseCls + (frame && frame !== "none" ? " frame-" + frame : "") + (avatarUrl ? " has-img" : "");
+  if (avatarUrl) { el.style.backgroundImage = `url('${avatarUrl}')`; el.textContent = ""; }
+  else { el.style.backgroundImage = ""; el.textContent = Feed.initial(name); }
+}
 let pickedFile = null;
 let registerMode = false;
 
@@ -220,8 +247,12 @@ async function openProfile() {
 }
 function renderProfile(s) {
   if (!s) return;
-  $("profileAvatar").textContent = Feed.initial(state.username);
+  applyAvatarEl($("profileAvatar"), state.username, state.profile.avatar_url, state.profile.frame, "profile-avatar");
   $("profileName").textContent = state.username || "Du";
+  const pt = $("profileTitle");
+  pt.textContent = state.profile.title || "";
+  pt.classList.toggle("hidden", !state.profile.title);
+  renderCosmetics(s);
   $("profileLevelLabel").textContent = "Level " + s.level;
   $("profileXpFill").style.width = Math.round(s.progress * 100) + "%";
   $("profileXpHint").textContent = s.nextNeeded > 0
@@ -266,13 +297,95 @@ function renderProfile(s) {
   }
 }
 
+// Titel- und Rahmen-Auswahl rendern (gesperrt = noch nicht freigeschaltet).
+function renderCosmetics(s) {
+  const equippedTitle = state.profile.title || "Frischling";
+  $("titleChips").innerHTML = TITLES.map((t) => {
+    const unlocked = t.req(s);
+    const equipped = equippedTitle === t.label;
+    return `<button class="cos-chip${unlocked ? "" : " locked"}${equipped ? " equipped" : ""}"
+      data-kind="title" data-val="${Feed.escape(t.label)}" ${unlocked ? "" : "disabled"}>
+      ${unlocked ? "" : '<i class="ti ti-lock"></i> '}${Feed.escape(t.label)}</button>`;
+  }).join("");
+
+  const equippedFrame = state.profile.frame || "none";
+  $("frameChips").innerHTML = FRAMES.map((f) => {
+    const unlocked = f.req(s);
+    const equipped = equippedFrame === f.id;
+    return `<button class="cos-chip frame-chip${unlocked ? "" : " locked"}${equipped ? " equipped" : ""}"
+      data-kind="frame" data-val="${f.id}" ${unlocked ? "" : "disabled"}>
+      <span class="fchip-prev frame-${f.id}"></span>${unlocked ? "" : '<i class="ti ti-lock"></i> '}${Feed.escape(f.label)}</button>`;
+  }).join("");
+
+  document.querySelectorAll("#titleChips .cos-chip:not(.locked), #frameChips .cos-chip:not(.locked)").forEach((chip) => {
+    chip.addEventListener("click", async () => {
+      const kind = chip.dataset.kind, val = chip.dataset.val;
+      const patch = kind === "title"
+        ? { title: val === "Frischling" ? null : val }
+        : { frame: val === "none" ? null : val };
+      chip.disabled = true;
+      try {
+        await Social.saveProfile(patch);
+        if (kind === "title") state.profile.title = patch.title;
+        else state.profile.frame = patch.frame;
+        // Avatare + Titel überall aktualisieren
+        applyAvatarEl($("headerAvatar"), state.username, state.profile.avatar_url, state.profile.frame, "avatar");
+        applyAvatarEl($("profileAvatar"), state.username, state.profile.avatar_url, state.profile.frame, "profile-avatar");
+        const pt = $("profileTitle");
+        pt.textContent = state.profile.title || "";
+        pt.classList.toggle("hidden", !state.profile.title);
+        renderCosmetics(s);
+      } catch (e) { chip.disabled = false; alert("Speichern fehlgeschlagen: " + e.message); }
+    });
+  });
+}
+
+// Avatar-Picker: aus den eigenen Beiträgen wählen (oder zurück auf Buchstabe).
+function openAvatarPicker(s) {
+  const grid = $("avatarPickerGrid");
+  const posts = (s && s.posts) || [];
+  const cells = [`<button class="ap-cell ap-letter" data-url="">${Feed.escape(Feed.initial(state.username))}</button>`]
+    .concat(posts.map((p) =>
+      `<button class="ap-cell" data-url="${Feed.escape(p.image_url)}"><img src="${Feed.escape(p.image_url)}" alt="" loading="lazy" /></button>`));
+  grid.innerHTML = cells.join("");
+  $("avatarPickerHint").classList.toggle("hidden", posts.length > 0);
+  grid.querySelectorAll(".ap-cell").forEach((c) => {
+    c.addEventListener("click", async () => {
+      const url = c.dataset.url || null;
+      grid.querySelectorAll(".ap-cell").forEach((x) => (x.disabled = true));
+      try {
+        await Social.saveProfile({ avatar_url: url });
+        state.profile.avatar_url = url;
+        applyAvatarEl($("headerAvatar"), state.username, url, state.profile.frame, "avatar");
+        applyAvatarEl($("profileAvatar"), state.username, url, state.profile.frame, "profile-avatar");
+        closeAvatarPicker();
+      } catch (e) {
+        grid.querySelectorAll(".ap-cell").forEach((x) => (x.disabled = false));
+        alert("Speichern fehlgeschlagen: " + e.message);
+      }
+    });
+  });
+  $("avatarPicker").classList.remove("hidden");
+}
+function closeAvatarPicker() { $("avatarPicker").classList.add("hidden"); }
+
+// Feed-Umschalter (Alle | Freunde) – aktive Markierung setzen.
+function syncFeedToggle() {
+  document.querySelectorAll("#feedToggle button").forEach((b) =>
+    b.classList.toggle("active", b.dataset.mode === (Feed.mode || "all")));
+}
+
 async function refreshGreeting() {
   const user = await Auth.getUser();
   if (!user) return;
-  const { data } = await sb.from("profiles").select("username").eq("id", user.id).maybeSingle();
-  state.username = (data && data.username) || user.email.split("@")[0];
+  // Mit Kosmetik-Spalten laden; falls noch nicht angelegt -> Fallback auf username.
+  let res = await sb.from("profiles").select("username, avatar_url, title, frame").eq("id", user.id).maybeSingle();
+  if (res.error) res = await sb.from("profiles").select("username").eq("id", user.id).maybeSingle();
+  const data = res.data || {};
+  state.username = data.username || user.email.split("@")[0];
+  state.profile = { avatar_url: data.avatar_url || null, title: data.title || null, frame: data.frame || null };
   $("greetingName").textContent = `Hi, ${state.username}!`;
-  $("headerAvatar").textContent = Feed.initial(state.username);
+  applyAvatarEl($("headerAvatar"), state.username, state.profile.avatar_url, state.profile.frame, "avatar");
 }
 
 function renderOverview() {
@@ -379,6 +492,7 @@ $("confirmUploadBtn").addEventListener("click", async () => {
 async function goToFeed(ch) {
   $("feedQuestTitle").textContent = ch ? ch.title : "";
   showScreen("feedScreen");
+  syncFeedToggle();
   await Feed.render(ch, () => {
     // Eigener Beitrag gelöscht -> Challenge wieder als offen markieren, Stats neu.
     state.doneIds.delete(ch.id);
@@ -390,6 +504,20 @@ $("challengeBack").addEventListener("click", () => { renderOverview(); showScree
 $("feedBack").addEventListener("click", () => { renderOverview(); showScreen("overviewScreen"); });
 $("headerAvatar").addEventListener("click", openProfile);
 $("profileBack").addEventListener("click", () => showScreen("overviewScreen"));
+
+// Feed: Alle | Freunde umschalten
+document.querySelectorAll("#feedToggle button").forEach((b) => {
+  b.addEventListener("click", () => {
+    Feed.mode = b.dataset.mode;
+    syncFeedToggle();
+    if (Feed.current) Feed.render(Feed.current.quest, Feed.current.onDeleted);
+  });
+});
+
+// Profil: Avatar antippen -> Bild aus eigenen Fotos wählen
+$("profileAvatar").addEventListener("click", () => openAvatarPicker(state.stats));
+$("avatarPickerClose").addEventListener("click", closeAvatarPicker);
+$("avatarPicker").addEventListener("click", (e) => { if (e.target.id === "avatarPicker") closeAvatarPicker(); });
 
 // Challenge-Idee vorschlagen
 $("suggestForm").addEventListener("submit", async (e) => {

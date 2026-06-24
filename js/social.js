@@ -141,6 +141,46 @@ const Social = {
     if (!data || data.length === 0) throw new Error("Keine Berechtigung zum Löschen.");
   },
 
+  // ---- Freunde (Follow-Modell) ----
+  // Wem folge ich? Set von friend_ids. Fail-soft (fehlt die Tabelle -> leeres Set).
+  async myFollows() {
+    const set = new Set();
+    try {
+      const user = await Auth.getUser();
+      if (!user) return set;
+      const { data, error } = await sb.from("friendships")
+        .select("friend_id").eq("user_id", user.id);
+      if (error) throw error;
+      (data || []).forEach((r) => set.add(r.friend_id));
+    } catch (e) { console.warn("[SideQuest] myFollows:", e.message); }
+    return set;
+  },
+
+  // Folgen / Entfolgen. Gibt den neuen Zustand zurück (true = folge jetzt).
+  async toggleFollow(friendId, currentlyFollowing) {
+    const user = await Auth.getUser();
+    if (!user) throw new Error("Nicht eingeloggt.");
+    if (user.id === friendId) throw new Error("Dir selbst kannst du nicht folgen.");
+    if (currentlyFollowing) {
+      const { error } = await sb.from("friendships")
+        .delete().eq("user_id", user.id).eq("friend_id", friendId);
+      if (error) throw error;
+      return false;
+    }
+    const { error } = await sb.from("friendships")
+      .insert({ user_id: user.id, friend_id: friendId });
+    if (error) throw error;
+    return true;
+  },
+
+  // Eigene Profil-Kosmetik speichern (Avatar/Titel/Rahmen).
+  async saveProfile(patch) {
+    const user = await Auth.getUser();
+    if (!user) throw new Error("Nicht eingeloggt.");
+    const { error } = await sb.from("profiles").update(patch).eq("id", user.id);
+    if (error) throw error;
+  },
+
   // Challenge-Idee vorschlagen. Landet in challenge_ideas (nur der Admin liest sie
   // im Supabase-Dashboard und übernimmt gute Ideen in den challenge_pool).
   async suggestChallenge(text) {
