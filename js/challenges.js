@@ -38,6 +38,20 @@ const Challenges = {
     return data || [];
   },
 
+  // Vergangene Challenges der letzten 7 Tage (abgelaufen, nur noch ansehbar – kein Upload).
+  async recent() {
+    const now = new Date().toISOString();
+    const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+    const { data, error } = await sb
+      .from("quests")
+      .select("id, title, kind, starts_at, ends_at")
+      .lt("ends_at", now)
+      .gte("ends_at", since)
+      .order("ends_at", { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
   // Für welche dieser Challenges hat der eingeloggte User schon eingereicht?
   // Liefert ein Set mit den quest_ids.
   async doneIds(challengeIds) {

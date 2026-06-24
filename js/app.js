@@ -197,6 +197,35 @@ function celebrateStreak(s) {
   }
 }
 
+function renderBest(list) {
+  const sec = $("bestSection"), el = $("bestPhotos");
+  if (!list || !list.length) { sec.classList.add("hidden"); return; }
+  el.innerHTML = list.map((p) => `
+    <button class="best-cell" data-q="${p.quest_id}" data-title="${Feed.escape(p.quest_title)}" title="${Feed.escape(p.quest_title)}">
+      <img src="${Feed.escape(p.image_url)}" loading="lazy" alt="" />
+      <span class="best-likes"><i class="ti ti-heart"></i> ${p.likeCount}</span>
+    </button>`).join("");
+  el.querySelectorAll(".best-cell").forEach((c) =>
+    c.addEventListener("click", () => goToFeed({ id: Number(c.dataset.q), title: c.dataset.title })));
+  sec.classList.remove("hidden");
+}
+
+function renderArchive(list) {
+  const sec = $("archiveSection"), el = $("archiveList");
+  if (!list || !list.length) { sec.classList.add("hidden"); return; }
+  el.innerHTML = list.map((ch) => {
+    const meta = Challenges.meta(ch.kind);
+    return `<button class="archive-item" data-q="${ch.id}" data-title="${Feed.escape(ch.title)}">
+      <i class="ti ${meta.icon}"></i>
+      <span class="archive-title">${Feed.escape(ch.title)}</span>
+      <i class="ti ti-chevron-right"></i>
+    </button>`;
+  }).join("");
+  el.querySelectorAll(".archive-item").forEach((c) =>
+    c.addEventListener("click", () => goToFeed({ id: Number(c.dataset.q), title: c.dataset.title })));
+  sec.classList.remove("hidden");
+}
+
 function renderWeekly(list) {
   const section = $("weeklySection");
   const el = $("weeklyBoard");
@@ -223,6 +252,8 @@ async function loadStatsAndTop() {
     ]);
     if (s) celebrateStreak(s);
     Stats.weeklyBoard().then(renderWeekly).catch((e) => console.warn("[SideQuest] weekly:", e.message));
+    Stats.bestPhotos().then(renderBest).catch((e) => console.warn("[SideQuest] best:", e.message));
+    Challenges.recent().then(renderArchive).catch((e) => console.warn("[SideQuest] archive:", e.message));
     const top = await Stats.topToday(state.challenges.map((c) => c.id));
     renderTopToday(top);
 

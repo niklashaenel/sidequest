@@ -144,6 +144,39 @@ const Stats = {
     return { posts: rows.length, people: new Set(rows.map((r) => r.user_id)).size };
   },
 
+  // Beste Bilder der Woche: Top-Beiträge der letzten 7 Tage nach Likes (Top 6).
+  async bestPhotos() {
+    const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+    const { data: subs } = await sb
+      .from("submissions")
+      .select("id, user_id, image_url, quest_id, created_at")
+      .gte("created_at", since);
+    if (!subs || !subs.length) return [];
+
+    const likes = await Social.likesFor(subs.map((s) => s.id));
+    const ranked = subs
+      .map((s) => ({ ...s, likeCount: likes.countById[s.id] || 0 }))
+      .sort((a, b) => b.likeCount - a.likeCount || new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 6);
+
+    const uids = [...new Set(ranked.map((s) => s.user_id))];
+    const qids = [...new Set(ranked.map((s) => s.quest_id))];
+    const [profs, quests] = await Promise.all([
+      sb.from("profiles").select("id, username").in("id", uids),
+      sb.from("quests").select("id, title").in("id", qids),
+    ]);
+    const nameById = {}; (profs.data || []).forEach((p) => { nameById[p.id] = p.username; });
+    const titleById = {}; (quests.data || []).forEach((q) => { titleById[q.id] = q.title; });
+
+    return ranked.map((s) => ({
+      image_url: s.image_url,
+      likeCount: s.likeCount,
+      username: nameById[s.user_id] || "Jemand",
+      quest_id: s.quest_id,
+      quest_title: titleById[s.quest_id] || "",
+    }));
+  },
+
   // Die beliebtesten Beiträge (nach Likes) zu den gerade aktiven Challenges.
   async topToday(challengeIds) {
     if (!challengeIds || !challengeIds.length) return [];
