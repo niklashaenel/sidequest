@@ -331,3 +331,25 @@ main { flex: 1; width: 100%; max-width: 520px; margin: 0 auto;
 
 /* Leer-Zustände etwas freundlicher */
 .empty-state { animation: cardIn .4s ease; }
+
+/* Lösch-Overlay auf eigenen Profil-Beiträgen */
+.post-cell { position: relative; }
+.post-cell img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px;
+                 background: var(--surface-2); display: block; }
+.post-del { position: absolute; top: 6px; right: 6px; width: 30px; height: 30px;
+            border: none; border-radius: 8px; background: rgba(0,0,0,0.55); color: #fff;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+.post-del:hover { background: var(--danger); }
+
+/* Pull-to-Refresh */
+body { overscroll-behavior-y: contain; }
+.ptr {
+  position: fixed; top: 0; left: 0; right: 0; height: 0; overflow: hidden; opacity: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted); z-index: 40; pointer-events: none;
+  transition: opacity .15s ease;
+}
+.ptr .ti { font-size: 22px; transition: transform .2s ease; }
+.ptr.ready .ti { transform: rotate(180deg); color: var(--brand-text); }
+.ptr.refreshing .ti { animation: spin .8s linear infinite; color: var(--brand-text); }
+@keyframes spin { to { transform: rotate(360deg); } }

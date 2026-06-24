@@ -170,7 +170,9 @@ async function loadStatsAndTop() {
 // --- Profil ---
 async function openProfile() {
   showScreen("profileScreen");
-  const s = state.stats || await Stats.forMe();
+  // IMMER frisch laden, damit neue Beiträge + Stats sofort erscheinen.
+  const s = await Stats.forMe();
+  state.stats = s;
   renderProfile(s);
 }
 function renderProfile(s) {
@@ -199,7 +201,25 @@ function renderProfile(s) {
   else {
     none.classList.add("hidden");
     grid.innerHTML = s.posts.map((p) =>
-      `<img src="${Feed.escape(p.image_url)}" alt="" loading="lazy" />`).join("");
+      `<div class="post-cell">
+         <img src="${Feed.escape(p.image_url)}" alt="" loading="lazy" />
+         <button class="post-del" data-id="${p.id}" data-quest="${p.quest_id}" aria-label="Beitrag löschen"><i class="ti ti-trash"></i></button>
+       </div>`).join("");
+
+    grid.querySelectorAll(".post-del").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const p = s.posts.find((x) => String(x.id) === btn.dataset.id);
+        if (!p || !confirm("Diesen Beitrag wirklich löschen?")) return;
+        btn.disabled = true;
+        try {
+          await Social.deleteSubmission(p.id, p.image_url);
+          state.doneIds.delete(Number(btn.dataset.quest)); // Challenge wieder offen
+          const fresh = await Stats.forMe();
+          state.stats = fresh;
+          renderProfile(fresh);
+        } catch (e) { btn.disabled = false; alert("Löschen fehlgeschlagen: " + e.message); }
+      });
+    });
   }
 }
 
@@ -327,6 +347,52 @@ $("challengeBack").addEventListener("click", () => { renderOverview(); showScree
 $("feedBack").addEventListener("click", () => { renderOverview(); showScreen("overviewScreen"); });
 $("headerAvatar").addEventListener("click", openProfile);
 $("profileBack").addEventListener("click", () => showScreen("overviewScreen"));
+
+// Den gerade sichtbaren Screen neu laden.
+async function refreshCurrentScreen() {
+  if (!$("overviewScreen").classList.contains("hidden")) await loadOverview();
+  else if (!$("profileScreen").classList.contains("hidden")) await openProfile();
+  else if (!$("feedScreen").classList.contains("hidden") && state.current) await goToFeed(state.current);
+}
+
+// Pull-to-Refresh (runterwischen am oberen Rand, wie bei Instagram/X).
+(function setupPullToRefresh() {
+  const ptr = $("ptr");
+  if (!ptr) return;
+  let startY = null, active = false;
+  const onAuth = () => !$("authScreen").classList.contains("hidden");
+
+  window.addEventListener("touchstart", (e) => {
+    startY = (window.scrollY <= 0 && !onAuth()) ? e.touches[0].clientY : null;
+    active = false;
+  }, { passive: true });
+
+  window.addEventListener("touchmove", (e) => {
+    if (startY === null) return;
+    const dy = e.touches[0].clientY - startY;
+    if (dy > 6 && window.scrollY <= 0) {
+      active = true;
+      const pull = Math.min(dy * 0.5, 80);
+      ptr.style.height = pull + "px";
+      ptr.style.opacity = Math.min(1, pull / 60);
+      ptr.classList.toggle("ready", pull >= 60);
+    }
+  }, { passive: true });
+
+  window.addEventListener("touchend", async () => {
+    if (!active) { startY = null; return; }
+    const ready = ptr.classList.contains("ready");
+    startY = null; active = false;
+    if (ready) {
+      ptr.classList.remove("ready");
+      ptr.classList.add("refreshing");
+      ptr.style.height = "46px"; ptr.style.opacity = "1";
+      try { await refreshCurrentScreen(); } catch (e) {}
+      ptr.classList.remove("refreshing");
+    }
+    ptr.style.height = "0"; ptr.style.opacity = "0";
+  }, { passive: true });
+})();
 
 // =====================================================================
 //  Countdown-Ticker (jede Sekunde alle sichtbaren Countdowns aktualisieren)
