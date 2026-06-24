@@ -76,6 +76,14 @@ const Stats = {
     };
   },
 
+  // Community-Stat: wie viele Beiträge + wie viele Leute heute (zu den aktiven Challenges).
+  async community(challengeIds) {
+    if (!challengeIds || !challengeIds.length) return { posts: 0, people: 0 };
+    const { data } = await sb.from("submissions").select("user_id").in("quest_id", challengeIds);
+    const rows = data || [];
+    return { posts: rows.length, people: new Set(rows.map((r) => r.user_id)).size };
+  },
+
   // Die beliebtesten Beiträge (nach Likes) zu den gerade aktiven Challenges.
   async topToday(challengeIds) {
     if (!challengeIds || !challengeIds.length) return [];

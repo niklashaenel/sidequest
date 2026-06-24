@@ -31,14 +31,24 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body {
+html {
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: 100dvh;
 }
-body { display: flex; flex-direction: column; }
+body {
+  display: flex; flex-direction: column; min-height: 100dvh;
+  color: var(--text);
+  /* sanfte Lichtflecken in den Markenfarben über tiefem Schwarz */
+  background:
+    radial-gradient(1200px 620px at 12% -8%,  rgba(110,98,230,0.22), transparent 60%),
+    radial-gradient(1000px 700px at 114% 4%,  rgba(236,72,153,0.12), transparent 55%),
+    radial-gradient(900px 640px at 50% 120%,  rgba(52,211,153,0.08), transparent 55%);
+  background-color: var(--bg);
+  background-attachment: fixed;
+}
 .hidden { display: none !important; }
 
 /* ---------- Kopfzeile ---------- */
@@ -269,3 +279,51 @@ main { flex: 1; width: 100%; max-width: 520px; margin: 0 auto;
 .onboard-text { color: var(--muted); font-size: 14px; line-height: 1.5; }
 .onboard-text b { color: var(--text); font-weight: 700; }
 .onboard .btn { margin-top: 4px; }
+
+/* ===================================================================
+   Politur: Desktop-Rahmen, Animationen, Skeletons, Community
+   =================================================================== */
+
+/* Desktop: App als zentrierte Spalte mit dezenten Rändern (X-Stil) */
+@media (min-width: 640px) {
+  header { width: 540px; margin: 0 auto; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+  main {
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    background: rgba(13, 13, 15, 0.45);
+    backdrop-filter: blur(3px);
+  }
+}
+
+/* Community-Zeile auf der Übersicht */
+.community { display: flex; align-items: center; gap: 8px; margin: -6px 4px 18px;
+            color: var(--muted); font-size: 13px; font-weight: 600; }
+.community b { color: var(--text); font-weight: 800; }
+
+/* Karten erscheinen sanft gestaffelt */
+@keyframes cardIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.challenge-card, .feed-item { animation: cardIn .42s ease backwards; }
+.challenge-card:nth-child(1){animation-delay:.04s}
+.challenge-card:nth-child(2){animation-delay:.10s}
+.challenge-card:nth-child(3){animation-delay:.16s}
+.challenge-card:nth-child(4){animation-delay:.22s}
+.challenge-card:nth-child(5){animation-delay:.28s}
+
+/* Dringender Countdown pulsiert */
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+.cc-count.warn { animation: pulse 1.4s ease-in-out infinite; }
+.challenge-card.urgent { box-shadow: 0 0 0 1px rgba(245,165,36,0.25), 0 8px 30px rgba(245,165,36,0.08); }
+
+/* Lade-Skelette (Schimmer) statt "Lade…" */
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.skeleton {
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%);
+  background-size: 200% 100%; animation: shimmer 1.3s infinite; border-radius: var(--r-lg);
+}
+.skel-card { height: 92px; margin-bottom: 12px; border: 1px solid var(--border); }
+
+/* Zahlen in der Stats-Leiste: Tabellenziffern, damit beim Hochzählen nichts springt */
+.stat-val .num { font-variant-numeric: tabular-nums; }
+
+/* Leer-Zustände etwas freundlicher */
+.empty-state { animation: cardIn .4s ease; }

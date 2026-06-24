@@ -93,7 +93,8 @@ notifyBell.addEventListener("click", async () => {
 
 async function loadOverview() {
   const listEl = $("challengeList");
-  listEl.innerHTML = '<p class="spinner-text">Lade Challenges…</p>';
+  listEl.innerHTML =
+    '<div class="skeleton skel-card"></div><div class="skeleton skel-card"></div><div class="skeleton skel-card"></div>';
   try {
     await Challenges.ensure();              // automatisch heutige/stündliche anlegen
     state.challenges = await Challenges.active();
@@ -108,13 +109,26 @@ async function loadOverview() {
 }
 
 // --- Stats-Leiste + Top-3 ---
+// Zahl von 0 auf Zielwert hochzählen (kleine Animation, mit Sicherheits-Fallback).
+function countUp(el, target, dur) {
+  target = Number(target) || 0; dur = dur || 650;
+  const start = performance.now();
+  (function tick(now) {
+    const p = Math.min(1, (now - start) / dur);
+    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(tick);
+  })(start);
+  // Falls requestAnimationFrame gedrosselt ist (Hintergrund-Tab): Zielwert sicher setzen.
+  setTimeout(() => { el.textContent = target; }, dur + 200);
+}
 function statCard(val, label, cls, icon) {
   return `<div class="stat-card ${cls || ""}">
-    <div class="stat-val">${icon ? `<i class="ti ${icon}"></i>` : ""}${val}</div>
+    <div class="stat-val">${icon ? `<i class="ti ${icon}"></i>` : ""}<span class="num" data-target="${val}">0</span></div>
     <div class="stat-label">${label}</div></div>`;
 }
 function renderStatsStrip(el, cards) {
   el.innerHTML = cards.map((c) => statCard(c.val, c.label, c.cls, c.icon)).join("");
+  el.querySelectorAll(".num[data-target]").forEach((n) => countUp(n, n.dataset.target));
 }
 function renderTopToday(list) {
   const section = $("topTodaySection");
@@ -141,6 +155,15 @@ async function loadStatsAndTop() {
     ]);
     const top = await Stats.topToday(state.challenges.map((c) => c.id));
     renderTopToday(top);
+
+    const com = await Stats.community(state.challenges.map((c) => c.id));
+    const comEl = $("community");
+    if (com.posts > 0) {
+      comEl.innerHTML = `🔥 <b>${com.posts}</b> ${com.posts === 1 ? "Beitrag" : "Beiträge"} heute · <b>${com.people}</b> dabei`;
+      comEl.classList.remove("hidden");
+    } else {
+      comEl.classList.add("hidden");
+    }
   } catch (e) { console.warn("[SideQuest] stats:", e.message); }
 }
 
