@@ -80,14 +80,15 @@ async function enterApp() {
 // Glocke in der Kopfzeile: nur zeigen, wenn Benachrichtigungen erlaubt werden können.
 const notifyBell = $("notifyBell");
 function refreshBell() {
-  notifyBell.classList.remove("hidden"); // vorerst immer sichtbar (für Diagnose)
+  // Glocke nur zeigen, wenn Benachrichtigungen noch aktiviert werden können.
+  notifyBell.classList.toggle("hidden", !(typeof Push !== "undefined" && Push.canPrompt()));
 }
 notifyBell.addEventListener("click", async () => {
   notifyBell.disabled = true;
-  await Push.enable();
-  const info = await Push.status();
+  const ok = await Push.enable();
   notifyBell.disabled = false;
-  alert("📲 Benachrichtigungs-Status\n\n" + info);
+  refreshBell();
+  if (ok) alert("🔔 Benachrichtigungen aktiviert! Du verpasst keine Challenge mehr.");
 });
 
 async function loadOverview() {
