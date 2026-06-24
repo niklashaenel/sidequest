@@ -22,7 +22,9 @@ const Feed = {
     return (name || "?").trim().charAt(0).toUpperCase() || "?";
   },
 
-  async render(quest) {
+  async render(quest, onDeleted) {
+    const me = await Auth.getUser();
+    const myId = me ? me.id : null;
     const list  = document.getElementById("feedList");
     const empty = document.getElementById("feedEmpty");
     list.innerHTML = '<p class="spinner-text">Lade Beiträge…</p>';
@@ -69,6 +71,7 @@ const Feed = {
             <div class="fi-user">${Feed.escape(username)}</div>
             <div class="fi-time">${Feed.formatTime(item.created_at)}</div>
           </div>
+          ${item.user_id === myId ? '<button class="fi-del" aria-label="Beitrag löschen"><i class="ti ti-trash"></i></button>' : ""}
         </div>
         <img class="fi-img" src="${Feed.escape(item.image_url)}" alt="Beitrag von ${Feed.escape(username)}" loading="lazy" />
         <div class="fi-actions">
@@ -81,13 +84,13 @@ const Feed = {
         </div>
         <div class="fi-comments hidden"></div>`;
 
-      Feed.wireItem(el, item, liked);
+      Feed.wireItem(el, item, liked, onDeleted);
       list.appendChild(el);
     }
   },
 
-  // Like-Button und Kommentar-Aufklapp für einen Beitrag verkabeln.
-  wireItem(el, item, liked) {
+  // Like-Button, Kommentar-Aufklapp und (bei eigenen) Löschen verkabeln.
+  wireItem(el, item, liked, onDeleted) {
     let isLiked = liked;
     let busy = false;
 
@@ -119,6 +122,25 @@ const Feed = {
       box.classList.toggle("hidden", !willShow);
       if (willShow && !loaded) { loaded = true; await Feed.renderComments(box, item.id, countEl); }
     });
+
+    // Löschen (nur bei eigenem Beitrag vorhanden)
+    const del = el.querySelector(".fi-del");
+    if (del) {
+      del.addEventListener("click", async () => {
+        if (!confirm("Diesen Beitrag wirklich löschen?")) return;
+        del.disabled = true;
+        try {
+          await Social.deleteSubmission(item.id, item.image_url);
+          el.style.transition = "opacity .2s ease";
+          el.style.opacity = "0";
+          setTimeout(() => el.remove(), 200);
+          if (typeof onDeleted === "function") onDeleted(item);
+        } catch (e) {
+          del.disabled = false;
+          alert("Löschen fehlgeschlagen: " + e.message);
+        }
+      });
+    }
   },
 
   // Kommentarbereich eines Beitrags füllen (Liste + Eingabefeld).

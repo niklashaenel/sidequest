@@ -316,7 +316,11 @@ $("confirmUploadBtn").addEventListener("click", async () => {
 async function goToFeed(ch) {
   $("feedQuestTitle").textContent = ch ? ch.title : "";
   showScreen("feedScreen");
-  await Feed.render(ch);
+  await Feed.render(ch, () => {
+    // Eigener Beitrag gelöscht -> Challenge wieder als offen markieren, Stats neu.
+    state.doneIds.delete(ch.id);
+    loadStatsAndTop();
+  });
 }
 
 $("challengeBack").addEventListener("click", () => { renderOverview(); showScreen("overviewScreen"); });

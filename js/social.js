@@ -81,6 +81,25 @@ const Social = {
     }));
   },
 
+  // Eigenen Beitrag löschen: Foto aus dem Storage + DB-Zeile (Likes/Kommentare per cascade weg).
+  async deleteSubmission(id, imageUrl) {
+    // Storage-Pfad aus der öffentlichen URL ziehen und Datei entfernen (Fehler hier egal).
+    try {
+      const marker = "/submissions/";
+      const i = (imageUrl || "").indexOf(marker);
+      if (i >= 0) {
+        const path = decodeURIComponent(imageUrl.slice(i + marker.length).split("?")[0]);
+        await sb.storage.from("submissions").remove([path]);
+      }
+    } catch (e) { /* DB-Zeile ist das Wichtige */ }
+
+    // .select() zurückgeben lassen: bei 0 gelöschten Zeilen (fehlende Berechtigung/Policy)
+    // werfen wir bewusst einen Fehler, statt fälschlich "gelöscht" zu melden.
+    const { data, error } = await sb.from("submissions").delete().eq("id", id).select("id");
+    if (error) throw error;
+    if (!data || data.length === 0) throw new Error("Keine Berechtigung zum Löschen.");
+  },
+
   // Neuen Kommentar speichern.
   async addComment(submissionId, body) {
     const user = await Auth.getUser();
