@@ -100,6 +100,18 @@ const Social = {
     if (!data || data.length === 0) throw new Error("Keine Berechtigung zum Löschen.");
   },
 
+  // Challenge-Idee vorschlagen. Landet in challenge_ideas (nur der Admin liest sie
+  // im Supabase-Dashboard und übernimmt gute Ideen in den challenge_pool).
+  async suggestChallenge(text) {
+    const user = await Auth.getUser();
+    if (!user) throw new Error("Nicht eingeloggt.");
+    const body = (text || "").trim();
+    if (body.length < 4) throw new Error("Bitte etwas mehr beschreiben.");
+    const { error } = await sb.from("challenge_ideas")
+      .insert({ user_id: user.id, text: body.slice(0, 280) });
+    if (error) throw error;
+  },
+
   // Neuen Kommentar speichern.
   async addComment(submissionId, body) {
     const user = await Auth.getUser();

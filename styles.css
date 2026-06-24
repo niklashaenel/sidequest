@@ -353,3 +353,48 @@ body { overscroll-behavior-y: contain; }
 .ptr.ready .ti { transform: rotate(180deg); color: var(--brand-text); }
 .ptr.refreshing .ti { animation: spin .8s linear infinite; color: var(--brand-text); }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===================================================================
+   v15: Wochen-Bestenliste, Challenge-Vorschlag, Toast
+   =================================================================== */
+
+/* Wochen-Bestenliste */
+.weekly-board { display: flex; flex-direction: column; gap: 8px; }
+.wb-item { display: flex; align-items: center; gap: 12px; background: var(--surface);
+           border: 1px solid var(--border); border-radius: var(--r-md); padding: 9px 12px; }
+.wb-item.me { border-color: var(--brand); background: var(--brand-soft); }
+.wb-rank { font-size: 18px; font-weight: 800; width: 26px; text-align: center; flex-shrink: 0; color: var(--muted); }
+.wb-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--brand-soft);
+             color: var(--brand-text); display: flex; align-items: center; justify-content: center;
+             font-weight: 800; font-size: 15px; flex-shrink: 0; text-transform: uppercase; }
+.wb-name { flex: 1; min-width: 0; font-weight: 700; font-size: 14px; white-space: nowrap;
+           overflow: hidden; text-overflow: ellipsis; }
+.wb-you { color: var(--brand-text); font-weight: 600; font-size: 12px; }
+.wb-pts { font-weight: 800; font-size: 14px; color: var(--brand-text); flex-shrink: 0; }
+.wb-pts span { font-size: 11px; color: var(--muted); font-weight: 600; }
+
+/* Challenge-Vorschlag */
+.suggest-box { display: flex; flex-direction: column; gap: 10px; background: var(--surface);
+               border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px; }
+.suggest-box textarea { width: 100%; resize: none; background: var(--surface-2); color: var(--text);
+               border: 1px solid var(--border); border-radius: var(--r-sm); padding: 10px 12px;
+               font: inherit; font-size: 14px; line-height: 1.4; }
+.suggest-box textarea:focus { outline: none; border-color: var(--brand); }
+.suggest-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.suggest-msg { font-size: 13px; color: var(--muted); }
+.suggest-msg.ok { color: var(--ok); }
+.suggest-msg.error { color: var(--danger); }
+.btn-sm { padding: 9px 14px; font-size: 14px; border-radius: var(--r-sm); flex-shrink: 0; }
+
+/* Toast (Serien-Belohnung u. a.) */
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 16px);
+  max-width: 90%; z-index: 60; opacity: 0; pointer-events: none;
+  background: var(--surface-2); border: 1px solid var(--brand);
+  box-shadow: 0 10px 40px rgba(110,98,230,0.35);
+  color: var(--text); font-size: 14px; line-height: 1.4; text-align: center;
+  padding: 14px 20px; border-radius: var(--r-lg);
+  transition: opacity .3s ease, transform .3s ease;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast b { color: var(--brand-text); font-weight: 800; }

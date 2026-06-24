@@ -144,6 +144,47 @@ function renderTopToday(list) {
     </div>`).join("");
   section.classList.remove("hidden");
 }
+// Kurze Einblendung unten (z. B. Serien-Belohnung).
+let toastTimer = null;
+function toast(html, ms) {
+  const el = $("toast");
+  if (!el) return;
+  el.innerHTML = html;
+  el.classList.remove("hidden");
+  void el.offsetWidth; // Reflow erzwingen, damit die Einblend-Transition greift (rAF wird im Hintergrund gedrosselt)
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    el.classList.remove("show");
+    setTimeout(() => el.classList.add("hidden"), 300);
+  }, ms || 4200);
+}
+
+// Serien-Meilenstein einmalig feiern (gemerkt in localStorage).
+function celebrateStreak(s) {
+  if (!s || !s.milestone) return;
+  const seen = parseInt(localStorage.getItem("sq-streak-celebrated") || "0", 10);
+  if (s.milestone.days > seen) {
+    localStorage.setItem("sq-streak-celebrated", String(s.milestone.days));
+    toast(`🔥 <b>${Feed.escape(s.milestone.label)}</b><br>+${s.milestone.xp} Bonus-XP kassiert!`, 5200);
+  }
+}
+
+function renderWeekly(list) {
+  const section = $("weeklySection");
+  const el = $("weeklyBoard");
+  if (!list || !list.length) { section.classList.add("hidden"); return; }
+  const medals = ["🥇", "🥈", "🥉"];
+  el.innerHTML = list.map((t, i) => `
+    <div class="wb-item${t.isMe ? " me" : ""}">
+      <div class="wb-rank">${medals[i] || (i + 1) + "."}</div>
+      <div class="wb-avatar">${Feed.escape(Feed.initial(t.username))}</div>
+      <div class="wb-name">${Feed.escape(t.username)}${t.isMe ? " <span class='wb-you'>(du)</span>" : ""}</div>
+      <div class="wb-pts">${t.points} <span>XP</span></div>
+    </div>`).join("");
+  section.classList.remove("hidden");
+}
+
 async function loadStatsAndTop() {
   try {
     const s = await Stats.forMe();
@@ -153,6 +194,8 @@ async function loadStatsAndTop() {
       { val: s.streak,        label: "Serie", cls: "streak", icon: "ti-flame" },
       { val: s.likesReceived, label: "Likes", cls: "likes",  icon: "ti-heart" },
     ]);
+    if (s) celebrateStreak(s);
+    Stats.weeklyBoard().then(renderWeekly).catch((e) => console.warn("[SideQuest] weekly:", e.message));
     const top = await Stats.topToday(state.challenges.map((c) => c.id));
     renderTopToday(top);
 
@@ -347,6 +390,25 @@ $("challengeBack").addEventListener("click", () => { renderOverview(); showScree
 $("feedBack").addEventListener("click", () => { renderOverview(); showScreen("overviewScreen"); });
 $("headerAvatar").addEventListener("click", openProfile);
 $("profileBack").addEventListener("click", () => showScreen("overviewScreen"));
+
+// Challenge-Idee vorschlagen
+$("suggestForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const input = $("suggestInput");
+  const msg = $("suggestMsg");
+  const btn = e.target.querySelector("button");
+  setMessage(msg, "");
+  btn.disabled = true;
+  try {
+    await Social.suggestChallenge(input.value);
+    input.value = "";
+    msg.textContent = "Danke! Idee eingereicht 💜";
+    msg.className = "suggest-msg ok";
+  } catch (err) {
+    msg.textContent = err.message || "Hat nicht geklappt.";
+    msg.className = "suggest-msg error";
+  } finally { btn.disabled = false; }
+});
 
 // Den gerade sichtbaren Screen neu laden.
 async function refreshCurrentScreen() {

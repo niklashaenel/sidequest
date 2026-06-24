@@ -31,6 +31,29 @@ const Stats = {
     return { level, progress, nextNeeded: Math.max(0, nextFloor - xp) };
   },
 
+  // Serien-Meilensteine: ab X Tagen Serie gibt es einmalig Bonus-XP + Glückwunsch.
+  streakMilestones: [
+    { days: 3,  xp: 25,  label: "3 Tage am Stück 🔥" },
+    { days: 7,  xp: 60,  label: "Eine ganze Woche! 🔥🔥" },
+    { days: 14, xp: 150, label: "14 Tage – Maschine! ⚡" },
+    { days: 30, xp: 400, label: "30 Tage – Legende! 👑" },
+    { days: 100,xp: 1500,label: "100 Tage – unsterblich! 🏆" },
+  ],
+
+  // Summe der Bonus-XP aller bereits erreichten Serien-Meilensteine.
+  streakBonus(streak) {
+    return Stats.streakMilestones
+      .filter((m) => streak >= m.days)
+      .reduce((sum, m) => sum + m.xp, 0);
+  },
+
+  // Höchster bereits erreichter Meilenstein (oder null) – für den Glückwunsch-Toast.
+  topMilestone(streak) {
+    let hit = null;
+    for (const m of Stats.streakMilestones) if (streak >= m.days) hit = m;
+    return hit;
+  },
+
   badges({ done, likesReceived, streak }) {
     return [
       { icon: "ti-camera",        label: "Erster Beitrag", unlocked: done >= 1 },
@@ -65,15 +88,52 @@ const Stats = {
     }
 
     const streak = Stats.computeStreak(posts);
-    const xp = done * 10 + likesReceived * 5;
+    const streakBonus = Stats.streakBonus(streak);
+    const xp = done * 10 + likesReceived * 5 + streakBonus;
     const lvl = Stats.level(xp);
 
     return {
-      done, likesReceived, streak, xp,
+      done, likesReceived, streak, xp, streakBonus,
+      milestone: Stats.topMilestone(streak),
       level: lvl.level, progress: lvl.progress, nextNeeded: lvl.nextNeeded,
       badges: Stats.badges({ done, likesReceived, streak }),
       posts,
     };
+  },
+
+  // Wochen-Bestenliste: Rangliste der letzten 7 Tage.
+  // Punkte = Beiträge*10 + erhaltene Likes*5 (nur auf Beiträge dieser Woche).
+  async weeklyBoard() {
+    const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+    const { data: subs } = await sb
+      .from("submissions")
+      .select("id, user_id, created_at")
+      .gte("created_at", since);
+    if (!subs || !subs.length) return [];
+
+    const likes = await Social.likesFor(subs.map((s) => s.id));
+    const userIds = [...new Set(subs.map((s) => s.user_id))];
+    const { data: profs } = await sb.from("profiles").select("id, username").in("id", userIds);
+    const nameById = {};
+    (profs || []).forEach((p) => { nameById[p.id] = p.username; });
+
+    const byUser = {};
+    for (const s of subs) {
+      const u = (byUser[s.user_id] = byUser[s.user_id] || { posts: 0, likes: 0 });
+      u.posts += 1;
+      u.likes += likes.countById[s.id] || 0;
+    }
+
+    const me = await Auth.getUser();
+    return Object.entries(byUser)
+      .map(([uid, v]) => ({
+        username: nameById[uid] || "Jemand",
+        points: v.posts * 10 + v.likes * 5,
+        posts: v.posts,
+        isMe: me && uid === me.id,
+      }))
+      .sort((a, b) => b.points - a.points || b.posts - a.posts)
+      .slice(0, 5);
   },
 
   // Community-Stat: wie viele Beiträge + wie viele Leute heute (zu den aktiven Challenges).
