@@ -596,6 +596,59 @@ async function openCollection() {
 }
 function closeCollection() { $("collectionModal").classList.add("hidden"); }
 
+// ----- Admin: Spezial-Titel verwalten (erstellen / zuweisen / entziehen) -----
+async function openTitleAdmin() {
+  $("titleAdminModal").classList.remove("hidden");
+  $("titleAdminList").innerHTML = `<p class="spinner-text">${t("common.loading")}</p>`;
+  await renderTitleAdmin();
+}
+function closeTitleAdmin() { $("titleAdminModal").classList.add("hidden"); }
+
+async function renderTitleAdmin() {
+  const el = $("titleAdminList");
+  let titles;
+  try { titles = await Social.adminTitles(); }
+  catch (e) { el.innerHTML = `<p class="spinner-text">${Feed.escape(t("common.error", { msg: e.message }))}</p>`; return; }
+  if (!titles.length) { el.innerHTML = `<p class="soc-empty">${Feed.escape(t("ta.noTitles"))}</p>`; return; }
+
+  el.innerHTML = titles.map((ti) => `
+    <div class="ta-item" data-id="${ti.id}">
+      <div class="ta-head">
+        <span class="ta-label">${Feed.escape(ti.label)}</span>
+        <button class="soc-btn ghost ta-del">${Feed.escape(t("ta.deleteTitle"))}</button>
+      </div>
+      <div class="ta-grantees">${Feed.escape(t("ta.assignedTo"))} ${ti.grantees.length
+        ? ti.grantees.map((g) => `<span class="ta-chip" data-uid="${Feed.escape(g.user_id)}">${Feed.escape(g.username)} <button class="ta-x">×</button></span>`).join("")
+        : `<span class="ta-none">${Feed.escape(t("ta.none"))}</span>`}</div>
+      <form class="ta-assign">
+        <input class="ta-assign-input" maxlength="40" placeholder="${Feed.escape(t("ta.assignPh"))}" />
+        <button type="submit" class="soc-btn">${Feed.escape(t("ta.assign"))}</button>
+      </form>
+    </div>`).join("");
+
+  el.querySelectorAll(".ta-item").forEach((item) => {
+    const id = Number(item.dataset.id);
+    item.querySelector(".ta-del").addEventListener("click", async () => {
+      const label = item.querySelector(".ta-label").textContent;
+      if (!confirm(t("ta.deleteConfirm", { label }))) return;
+      try { await Social.adminDeleteTitle(id); await renderTitleAdmin(); }
+      catch (e) { alert(t("common.error", { msg: e.message })); }
+    });
+    item.querySelectorAll(".ta-chip .ta-x").forEach((x) => x.addEventListener("click", async () => {
+      try { await Social.adminRevoke(id, x.closest(".ta-chip").dataset.uid); await renderTitleAdmin(); }
+      catch (e) { alert(t("common.error", { msg: e.message })); }
+    }));
+    item.querySelector(".ta-assign").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = item.querySelector(".ta-assign-input");
+      const name = input.value.trim(); if (!name) return;
+      const btn = e.target.querySelector("button"); btn.disabled = true;
+      try { const n = await Social.adminAssign(id, name); input.value = ""; toast(t("ta.assignedToast", { n })); await renderTitleAdmin(); }
+      catch (e2) { btn.disabled = false; alert(e2.message); }
+    });
+  });
+}
+
 // Avatar-Picker: aus den eigenen Beiträgen wählen (oder zurück auf Buchstabe).
 function openAvatarPicker(s) {
   const grid = $("avatarPickerGrid");
@@ -820,10 +873,24 @@ $("openCollectionBtn").addEventListener("click", openCollection);
 $("collectionClose").addEventListener("click", closeCollection);
 $("collectionModal").addEventListener("click", (e) => { if (e.target.id === "collectionModal") closeCollection(); });
 
-// Einstellungen (Sprache + Info)
-$("settingsBtn").addEventListener("click", () => $("settingsModal").classList.remove("hidden"));
+// Einstellungen (Sprache + Info + Admin)
+$("settingsBtn").addEventListener("click", () => {
+  $("settingsAdminBtn").classList.toggle("hidden", !state.profile.isAdmin); // Admin-Knopf nur für dich
+  $("settingsModal").classList.remove("hidden");
+});
 $("settingsClose").addEventListener("click", () => $("settingsModal").classList.add("hidden"));
 $("settingsModal").addEventListener("click", (e) => { if (e.target.id === "settingsModal") $("settingsModal").classList.add("hidden"); });
+
+// Admin: Spezial-Titel verwalten
+$("settingsAdminBtn").addEventListener("click", () => { $("settingsModal").classList.add("hidden"); openTitleAdmin(); });
+$("titleAdminClose").addEventListener("click", closeTitleAdmin);
+$("titleAdminModal").addEventListener("click", (e) => { if (e.target.id === "titleAdminModal") closeTitleAdmin(); });
+$("titleCreateForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const input = $("titleCreateInput"); const label = input.value.trim(); if (!label) return;
+  try { await Social.adminCreateTitle(label); input.value = ""; await renderTitleAdmin(); }
+  catch (err) { alert(t("common.error", { msg: err.message })); }
+});
 
 // Info-Panel „So funktioniert's" (aus den Einstellungen geöffnet)
 $("settingsInfoBtn").addEventListener("click", () => {

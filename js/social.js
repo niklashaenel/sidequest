@@ -255,6 +255,55 @@ const Social = {
     } catch (e) { console.warn("[SideQuest] mySpecialTitles:", e.message); return []; }
   },
 
+  // ---- Admin: Spezial-Titel verwalten (erstellen / zuweisen / entziehen) ----
+  // Liefert alle Titel inkl. Zuweisungen [{id,label,grantees:[{user_id,username}]}].
+  async adminTitles() {
+    const { data: titles, error } = await sb.from("special_titles").select("id, label").order("created_at", { ascending: true });
+    if (error) throw error;
+    const ids = (titles || []).map((t) => t.id);
+    const byTitle = {};
+    if (ids.length) {
+      const { data: grants } = await sb.from("title_grants").select("title_id, user_id").in("title_id", ids);
+      const uids = [...new Set((grants || []).map((g) => g.user_id))];
+      const { data: profs } = uids.length ? await sb.from("profiles").select("id, username").in("id", uids) : { data: [] };
+      const nameById = {}; (profs || []).forEach((p) => { nameById[p.id] = p.username; });
+      (grants || []).forEach((g) => {
+        (byTitle[g.title_id] = byTitle[g.title_id] || []).push({ user_id: g.user_id, username: nameById[g.user_id] || "?" });
+      });
+    }
+    return (titles || []).map((t) => ({ id: t.id, label: t.label, grantees: byTitle[t.id] || [] }));
+  },
+
+  async adminCreateTitle(label) {
+    const text = (label || "").trim();
+    if (!text) throw new Error("Leerer Titel.");
+    const { error } = await sb.from("special_titles").insert({ label: text });
+    if (error) throw error;
+  },
+
+  async adminDeleteTitle(id) {
+    const { error } = await sb.from("special_titles").delete().eq("id", id);
+    if (error) throw error;
+  },
+
+  // Per Anzeigename zuweisen (alle Treffer mit dem Namen). Gibt Anzahl zurück.
+  async adminAssign(titleId, username) {
+    const name = (username || "").trim();
+    if (!name) throw new Error("Kein Name.");
+    const { data: profs, error } = await sb.from("profiles").select("id").eq("username", name);
+    if (error) throw error;
+    if (!profs || !profs.length) throw new Error(t("ta.userNotFound", { name }));
+    const rows = profs.map((p) => ({ title_id: titleId, user_id: p.id }));
+    const { error: e2 } = await sb.from("title_grants").upsert(rows, { onConflict: "title_id,user_id", ignoreDuplicates: true });
+    if (e2) throw e2;
+    return profs.length;
+  },
+
+  async adminRevoke(titleId, userId) {
+    const { error } = await sb.from("title_grants").delete().eq("title_id", titleId).eq("user_id", userId);
+    if (error) throw error;
+  },
+
   // ---- Melden & Moderation ----
   // Beitrag melden. Doppel-Meldung (unique) wird stillschweigend ignoriert.
   async reportPost(submissionId, reason) {

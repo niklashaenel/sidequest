@@ -634,6 +634,23 @@ body { overscroll-behavior-y: contain; }
           min-width: 18px; height: 18px; border-radius: 999px; padding: 0 5px;
           display: inline-flex; align-items: center; justify-content: center; }
 
+/* v32: Spezial-Titel-Verwaltung (Admin) */
+.ta-create { display: flex; gap: 8px; margin-top: 16px; }
+.ta-create input, .ta-assign-input { flex: 1; min-width: 0; background: var(--surface-2); color: var(--text);
+  border: 1px solid var(--border); border-radius: var(--r-sm); padding: 9px 11px; font: inherit; font-size: 14px; }
+.ta-create input:focus, .ta-assign-input:focus { outline: none; border-color: var(--brand); }
+.ta-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.ta-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px; }
+.ta-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ta-label { font-weight: 800; font-size: 15px; }
+.soc-btn.ta-del { padding: 5px 10px; font-size: 12px; }
+.ta-grantees { margin: 8px 0; font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ta-chip { background: var(--brand-soft); color: var(--brand-text); border-radius: 999px; padding: 2px 6px 2px 10px;
+  font-weight: 700; display: inline-flex; align-items: center; gap: 3px; }
+.ta-x { background: none; border: none; color: var(--brand-text); cursor: pointer; font-size: 16px; line-height: 1; padding: 0 2px; }
+.ta-none { color: var(--muted-2); }
+.ta-assign { display: flex; gap: 8px; margin-top: 6px; }
+
 /* v28: Sprach-Umschalter (DE/EN) */
 .lang-toggle { display: flex; gap: 4px; width: fit-content; margin-left: auto; margin-right: auto;
                background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }

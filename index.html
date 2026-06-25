@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=31" />
+  <link rel="stylesheet" href="styles.css?v=32" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
@@ -250,6 +250,20 @@
         <button data-lang="en">EN</button>
       </div>
       <button id="settingsInfoBtn" class="btn btn-ghost" style="margin-top:18px"><i class="ti ti-help-circle"></i> <span data-i18n="title.info">So funktioniert's</span></button>
+      <button id="settingsAdminBtn" class="btn btn-ghost hidden" style="margin-top:10px"><i class="ti ti-crown"></i> <span data-i18n="ta.open">Spezial-Titel verwalten</span></button>
+    </div>
+  </div>
+
+  <!-- Admin: Spezial-Titel verwalten -->
+  <div id="titleAdminModal" class="modal hidden">
+    <div class="modal-card">
+      <button class="onboard-close" id="titleAdminClose" data-i18n-attr="common.close"><i class="ti ti-x"></i></button>
+      <h3 class="onboard-title" data-i18n="ta.title">👑 Spezial-Titel verwalten</h3>
+      <form id="titleCreateForm" class="ta-create">
+        <input id="titleCreateInput" maxlength="40" data-i18n-ph="ta.createPh" placeholder="Neuer Titel…" />
+        <button type="submit" class="btn btn-sm" data-i18n="ta.create">Erstellen</button>
+      </form>
+      <div id="titleAdminList" class="ta-list"></div>
     </div>
   </div>
 
@@ -311,16 +325,16 @@
     <button class="link-btn" id="onboardLater" data-i18n="onboard.later">Später</button>
   </div>
 
-  <script src="js/i18n.js?v=31"></script>
-  <script src="js/supabaseClient.js?v=31"></script>
-  <script src="js/auth.js?v=31"></script>
-  <script src="js/challenges.js?v=31"></script>
-  <script src="js/social.js?v=31"></script>
-  <script src="js/upload.js?v=31"></script>
-  <script src="js/feed.js?v=31"></script>
-  <script src="js/push.js?v=31"></script>
-  <script src="js/onboarding.js?v=31"></script>
-  <script src="js/stats.js?v=31"></script>
-  <script src="js/app.js?v=31"></script>
+  <script src="js/i18n.js?v=32"></script>
+  <script src="js/supabaseClient.js?v=32"></script>
+  <script src="js/auth.js?v=32"></script>
+  <script src="js/challenges.js?v=32"></script>
+  <script src="js/social.js?v=32"></script>
+  <script src="js/upload.js?v=32"></script>
+  <script src="js/feed.js?v=32"></script>
+  <script src="js/push.js?v=32"></script>
+  <script src="js/onboarding.js?v=32"></script>
+  <script src="js/stats.js?v=32"></script>
+  <script src="js/app.js?v=32"></script>
 </body>
 </html>
