@@ -21,7 +21,7 @@ const state = {
   current: null,      // gerade gewählte Challenge
   username: "",
   stats: null,        // letzte berechnete Statistik (für Avatar-Picker etc.)
-  profile: { avatar_url: null, title: null, frame: null }, // eigene Kosmetik
+  profile: { avatar_url: null, title: null, frame: null, unlockAll: false }, // eigene Kosmetik
   partCount: {},      // Teilnehmer je aktiver Challenge
 };
 
@@ -427,9 +427,10 @@ function renderProfile(s) {
 
 // Titel- und Rahmen-Auswahl rendern (gesperrt = noch nicht freigeschaltet).
 function renderCosmetics(s) {
+  const all = state.profile.unlockAll; // Test-Freischaltung
   const equippedTitle = state.profile.title || "Frischling";
   $("titleChips").innerHTML = TITLES.map((t) => {
-    const unlocked = t.req(s);
+    const unlocked = all || t.req(s);
     const equipped = equippedTitle === t.label;
     return `<button class="cos-chip${unlocked ? "" : " locked"}${equipped ? " equipped" : ""}"
       data-kind="title" data-val="${Feed.escape(t.label)}" ${unlocked ? "" : "disabled"}>
@@ -438,7 +439,7 @@ function renderCosmetics(s) {
 
   const equippedFrame = state.profile.frame || "none";
   $("frameChips").innerHTML = FRAMES.map((f) => {
-    const unlocked = f.req(s);
+    const unlocked = all || f.req(s);
     const equipped = equippedFrame === f.id;
     return `<button class="cos-chip frame-chip${unlocked ? "" : " locked"}${equipped ? " equipped" : ""}"
       data-kind="frame" data-val="${f.id}" ${unlocked ? "" : "disabled"}>
@@ -507,11 +508,11 @@ async function refreshGreeting() {
   const user = await Auth.getUser();
   if (!user) return;
   // Mit Kosmetik-Spalten laden; falls noch nicht angelegt -> Fallback auf username.
-  let res = await sb.from("profiles").select("username, avatar_url, title, frame").eq("id", user.id).maybeSingle();
+  let res = await sb.from("profiles").select("username, avatar_url, title, frame, unlock_all").eq("id", user.id).maybeSingle();
   if (res.error) res = await sb.from("profiles").select("username").eq("id", user.id).maybeSingle();
   const data = res.data || {};
   state.username = data.username || user.email.split("@")[0];
-  state.profile = { avatar_url: data.avatar_url || null, title: data.title || null, frame: data.frame || null };
+  state.profile = { avatar_url: data.avatar_url || null, title: data.title || null, frame: data.frame || null, unlockAll: !!data.unlock_all };
   $("greetingName").textContent = `Hi, ${state.username}!`;
   applyAvatarEl($("headerAvatar"), state.username, state.profile.avatar_url, state.profile.frame, "avatar");
 }
