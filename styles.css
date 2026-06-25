@@ -635,10 +635,11 @@ body { overscroll-behavior-y: contain; }
           display: inline-flex; align-items: center; justify-content: center; }
 
 /* v32: Spezial-Titel-Verwaltung (Admin) */
-.ta-create { display: flex; gap: 8px; margin-top: 16px; }
-.ta-create input, .ta-assign-input { flex: 1; min-width: 0; background: var(--surface-2); color: var(--text);
+.ta-create { display: flex; gap: 8px; margin-top: 16px; align-items: flex-start; }
+.ta-create textarea, .ta-assign-input { flex: 1; min-width: 0; background: var(--surface-2); color: var(--text);
   border: 1px solid var(--border); border-radius: var(--r-sm); padding: 9px 11px; font: inherit; font-size: 14px; }
-.ta-create input:focus, .ta-assign-input:focus { outline: none; border-color: var(--brand); }
+.ta-create textarea { resize: vertical; line-height: 1.4; }
+.ta-create textarea:focus, .ta-assign-input:focus { outline: none; border-color: var(--brand); }
 .ta-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
 .ta-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px; }
 .ta-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }

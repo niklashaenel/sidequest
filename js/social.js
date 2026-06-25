@@ -274,11 +274,13 @@ const Social = {
     return (titles || []).map((t) => ({ id: t.id, label: t.label, grantees: byTitle[t.id] || [] }));
   },
 
-  async adminCreateTitle(label) {
-    const text = (label || "").trim();
-    if (!text) throw new Error("Leerer Titel.");
-    const { error } = await sb.from("special_titles").insert({ label: text });
+  // Mehrere Titel auf einmal anlegen (einer pro Eintrag). Gibt die Anzahl zurück.
+  async adminCreateTitles(labels) {
+    const rows = (labels || []).map((l) => (l || "").trim()).filter(Boolean).map((label) => ({ label }));
+    if (!rows.length) return 0;
+    const { error } = await sb.from("special_titles").insert(rows);
     if (error) throw error;
+    return rows.length;
   },
 
   async adminDeleteTitle(id) {

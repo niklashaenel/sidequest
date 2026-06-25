@@ -887,8 +887,10 @@ $("titleAdminClose").addEventListener("click", closeTitleAdmin);
 $("titleAdminModal").addEventListener("click", (e) => { if (e.target.id === "titleAdminModal") closeTitleAdmin(); });
 $("titleCreateForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const input = $("titleCreateInput"); const label = input.value.trim(); if (!label) return;
-  try { await Social.adminCreateTitle(label); input.value = ""; await renderTitleAdmin(); }
+  const input = $("titleCreateInput");
+  const labels = input.value.split(/\r?\n|,/).map((s) => s.trim()).filter(Boolean); // eine Zeile (oder Komma) = ein Titel
+  if (!labels.length) return;
+  try { const n = await Social.adminCreateTitles(labels); input.value = ""; toast(t("ta.createdToast", { n })); await renderTitleAdmin(); }
   catch (err) { alert(t("common.error", { msg: err.message })); }
 });
 
