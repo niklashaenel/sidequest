@@ -244,9 +244,9 @@ function archiveGroup(label, items) {
   if (!items.length) return "";
   const rows = items.map((ch) => {
     const meta = Challenges.meta(ch.kind);
-    return `<button class="archive-item" data-q="${ch.id}" data-title="${Feed.escape(ch.title)}">
+    return `<button class="archive-item" data-q="${ch.id}" data-title="${Feed.escape(Challenges.titleOf(ch))}">
         <i class="ti ${meta.icon}"></i>
-        <span class="archive-title">${Feed.escape(ch.title)}</span>
+        <span class="archive-title">${Feed.escape(Challenges.titleOf(ch))}</span>
         <span class="archive-when">${archiveWhen(ch.ends_at)}</span>
       </button>`;
   }).join("");
@@ -667,7 +667,7 @@ function renderOverview() {
           <i class="ti ti-clock"></i> <span>${Challenges.formatRemaining(ch.ends_at)}</span>
         </div>
       </div>
-      <p class="cc-title">${Feed.escape(ch.title)}</p>
+      <p class="cc-title">${Feed.escape(Challenges.titleOf(ch))}</p>
       <div class="cc-meta">
         <span class="cc-part">${(state.partCount[ch.id] || 0) > 0
           ? `<i class="ti ti-users"></i> ${Feed.escape(t("cc.participants", { n: state.partCount[ch.id] }))}`
@@ -699,7 +699,7 @@ function showChallengeDetail(ch) {
   const badge = $("detailBadge");
   badge.className = "cc-badge";
   badge.textContent = meta.label;
-  $("questTitle").textContent = ch.title;
+  $("questTitle").textContent = Challenges.titleOf(ch);
   const cd = $("detailCountdown");
   cd.dataset.ends = ch.ends_at;
   cd.querySelector("span").textContent = Challenges.formatRemaining(ch.ends_at);
@@ -717,7 +717,7 @@ $("cameraInput").addEventListener("change", (e) => {
   if (!file) return;
   pickedFile = file;
   $("previewImage").src = URL.createObjectURL(file);
-  $("uploadQuestLabel").textContent = state.current ? state.current.title : "";
+  $("uploadQuestLabel").textContent = state.current ? Challenges.titleOf(state.current) : "";
   setMessage($("uploadMessage"), "");
   showScreen("uploadScreen");
 });
@@ -750,7 +750,7 @@ $("confirmUploadBtn").addEventListener("click", async () => {
 //  Feed
 // =====================================================================
 async function goToFeed(ch) {
-  $("feedQuestTitle").textContent = ch ? ch.title : "";
+  $("feedQuestTitle").textContent = ch ? Challenges.titleOf(ch) : "";
   showScreen("feedScreen");
   syncFeedToggle();
   await Feed.render(ch, () => {
@@ -815,8 +815,16 @@ $("openCollectionBtn").addEventListener("click", openCollection);
 $("collectionClose").addEventListener("click", closeCollection);
 $("collectionModal").addEventListener("click", (e) => { if (e.target.id === "collectionModal") closeCollection(); });
 
-// Info-Panel „So funktioniert's"
-$("infoBtn").addEventListener("click", () => $("infoModal").classList.remove("hidden"));
+// Einstellungen (Sprache + Info)
+$("settingsBtn").addEventListener("click", () => $("settingsModal").classList.remove("hidden"));
+$("settingsClose").addEventListener("click", () => $("settingsModal").classList.add("hidden"));
+$("settingsModal").addEventListener("click", (e) => { if (e.target.id === "settingsModal") $("settingsModal").classList.add("hidden"); });
+
+// Info-Panel „So funktioniert's" (aus den Einstellungen geöffnet)
+$("settingsInfoBtn").addEventListener("click", () => {
+  $("settingsModal").classList.add("hidden");
+  $("infoModal").classList.remove("hidden");
+});
 $("infoClose").addEventListener("click", () => $("infoModal").classList.add("hidden"));
 $("infoModal").addEventListener("click", (e) => { if (e.target.id === "infoModal") $("infoModal").classList.add("hidden"); });
 

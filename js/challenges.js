@@ -15,6 +15,12 @@ const Challenges = {
     return { label: t(m.labelKey), icon: m.icon, cls: m.cls };
   },
 
+  // Challenge-Titel in der aktuellen Sprache (englischer Titel, falls vorhanden + EN gewählt).
+  titleOf(q) {
+    if (!q) return "";
+    return (I18N.lang === "en" && q.title_en) ? q.title_en : q.title;
+  },
+
   // Sorgt (serverseitig) dafür, dass für JETZT eine Tages- + Stunden-Challenge
   // existiert – automatisch aus dem Challenge-Pool. Fehler nur loggen, nicht blockieren.
   async ensure() {
@@ -29,28 +35,24 @@ const Challenges = {
   // Alle Challenges, die GERADE aktiv sind (starts_at <= jetzt <= ends_at).
   async active() {
     const nowIso = new Date().toISOString();
-    const { data, error } = await sb
-      .from("quests")
-      .select("id, title, kind, starts_at, ends_at")
-      .lte("starts_at", nowIso)
-      .gte("ends_at", nowIso)
-      .order("ends_at", { ascending: true });
-    if (error) throw error;
-    return data || [];
+    const q = (cols) => sb.from("quests").select(cols)
+      .lte("starts_at", nowIso).gte("ends_at", nowIso).order("ends_at", { ascending: true });
+    let res = await q("id, title, title_en, kind, starts_at, ends_at");
+    if (res.error) res = await q("id, title, kind, starts_at, ends_at"); // title_en-Spalte noch nicht da
+    if (res.error) throw res.error;
+    return res.data || [];
   },
 
   // Vergangene Challenges der letzten 7 Tage (abgelaufen, nur noch ansehbar – kein Upload).
   async recent() {
     const now = new Date().toISOString();
     const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
-    const { data, error } = await sb
-      .from("quests")
-      .select("id, title, kind, starts_at, ends_at")
-      .lt("ends_at", now)
-      .gte("ends_at", since)
-      .order("ends_at", { ascending: false });
-    if (error) throw error;
-    return data || [];
+    const q = (cols) => sb.from("quests").select(cols)
+      .lt("ends_at", now).gte("ends_at", since).order("ends_at", { ascending: false });
+    let res = await q("id, title, title_en, kind, starts_at, ends_at");
+    if (res.error) res = await q("id, title, kind, starts_at, ends_at");
+    if (res.error) throw res.error;
+    return res.data || [];
   },
 
   // Für welche dieser Challenges hat der eingeloggte User schon eingereicht?

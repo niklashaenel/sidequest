@@ -226,12 +226,11 @@ const Stats = {
 
     const uids = [...new Set(ranked.map((s) => s.user_id))];
     const qids = [...new Set(ranked.map((s) => s.quest_id))];
-    const [profs, quests] = await Promise.all([
-      sb.from("profiles").select("id, username").in("id", uids),
-      sb.from("quests").select("id, title").in("id", qids),
-    ]);
+    let questsRes = await sb.from("quests").select("id, title, title_en").in("id", qids);
+    if (questsRes.error) questsRes = await sb.from("quests").select("id, title").in("id", qids);
+    const profs = await sb.from("profiles").select("id, username").in("id", uids);
     const nameById = {}; (profs.data || []).forEach((p) => { nameById[p.id] = p.username; });
-    const titleById = {}; (quests.data || []).forEach((q) => { titleById[q.id] = q.title; });
+    const titleById = {}; (questsRes.data || []).forEach((q) => { titleById[q.id] = Challenges.titleOf(q); });
 
     return ranked.map((s) => ({
       image_url: s.image_url,
