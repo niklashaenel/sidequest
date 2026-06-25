@@ -242,6 +242,55 @@ const Social = {
     if (error) throw error;
   },
 
+  // ---- Melden & Moderation ----
+  // Beitrag melden. Doppel-Meldung (unique) wird stillschweigend ignoriert.
+  async reportPost(submissionId, reason) {
+    const user = await Auth.getUser();
+    if (!user) throw new Error("Nicht eingeloggt.");
+    const { error } = await sb.from("reports")
+      .insert({ submission_id: submissionId, reporter: user.id, reason: reason || null });
+    if (error && error.code !== "23505") throw error; // 23505 = schon gemeldet
+  },
+
+  // Admin: alle versteckten (auto-deaktivierten) Beiträge + Melde-Infos.
+  async reportedPosts() {
+    const { data: subs, error } = await sb.from("submissions")
+      .select("id, user_id, image_url, quest_id, created_at").eq("hidden", true)
+      .order("created_at", { ascending: false });
+    if (error || !subs || !subs.length) return [];
+    const ids = subs.map((s) => s.id);
+    const [reps, profs, quests] = await Promise.all([
+      sb.from("reports").select("submission_id, reason").in("submission_id", ids),
+      sb.from("profiles").select("id, username").in("id", subs.map((s) => s.user_id)),
+      sb.from("quests").select("id, title").in("id", subs.map((s) => s.quest_id)),
+    ]);
+    const cnt = {}, reasons = {};
+    (reps.data || []).forEach((r) => {
+      cnt[r.submission_id] = (cnt[r.submission_id] || 0) + 1;
+      if (r.reason) (reasons[r.submission_id] = reasons[r.submission_id] || []).push(r.reason);
+    });
+    const nameById = {}; (profs.data || []).forEach((p) => { nameById[p.id] = p.username; });
+    const titleById = {}; (quests.data || []).forEach((q) => { titleById[q.id] = q.title; });
+    return subs.map((s) => ({
+      id: s.id, image_url: s.image_url,
+      username: nameById[s.user_id] || "Jemand",
+      quest_title: titleById[s.quest_id] || "",
+      count: cnt[s.id] || 0,
+      reasons: [...new Set(reasons[s.id] || [])],
+    }));
+  },
+
+  // Admin: Beitrag wieder freigeben oder löschen.
+  async moderate(id, action) {
+    if (action === "approve") {
+      const { error } = await sb.from("submissions").update({ hidden: false }).eq("id", id);
+      if (error) throw error;
+    } else {
+      const { error } = await sb.from("submissions").delete().eq("id", id);
+      if (error) throw error;
+    }
+  },
+
   // Eigene Profil-Kosmetik speichern (Avatar/Titel/Rahmen).
   async saveProfile(patch) {
     const user = await Auth.getUser();

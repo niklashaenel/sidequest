@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=24" />
+  <link rel="stylesheet" href="styles.css?v=25" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
@@ -68,6 +68,12 @@
 
       <!-- Stats-Leiste (Level/XP, Serie, Likes) -->
       <div id="statsStrip" class="stats-strip"></div>
+
+      <!-- Admin: gemeldete Beiträge (nur für dich sichtbar) -->
+      <div id="modSection" class="hidden">
+        <p class="section-label" style="margin-top:8px">🚩 Gemeldete Beiträge</p>
+        <div id="modList" class="mod-list"></div>
+      </div>
 
       <p class="section-label">Jetzt aktiv</p>
       <div id="challengeList" class="challenge-list"></div>
@@ -193,6 +199,20 @@
   <!-- Toast (z. B. Serien-Belohnung) -->
   <div id="toast" class="toast hidden"></div>
 
+  <!-- Beitrag melden -->
+  <div id="reportModal" class="modal hidden">
+    <div class="modal-card">
+      <button class="onboard-close" id="reportClose" aria-label="Schließen"><i class="ti ti-x"></i></button>
+      <h3 class="onboard-title">Beitrag melden</h3>
+      <p class="onboard-text">Warum meldest du diesen Beitrag? Bei mehreren Meldungen wird er automatisch ausgeblendet und geprüft.</p>
+      <div class="report-reasons">
+        <button class="btn btn-ghost" data-reason="Challenge nicht erfüllt"><i class="ti ti-target-off"></i> Challenge nicht erfüllt</button>
+        <button class="btn btn-ghost" data-reason="Unangemessen / anstößig"><i class="ti ti-mood-off"></i> Unangemessen / anstößig</button>
+        <button class="btn btn-ghost" data-reason="Spam / sonstiges"><i class="ti ti-alert-triangle"></i> Spam / sonstiges</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Info: So funktioniert SideQuest -->
   <div id="infoModal" class="modal hidden">
     <div class="modal-card">
@@ -251,15 +271,15 @@
     <button class="link-btn" id="onboardLater">Später</button>
   </div>
 
-  <script src="js/supabaseClient.js?v=24"></script>
-  <script src="js/auth.js?v=24"></script>
-  <script src="js/challenges.js?v=24"></script>
-  <script src="js/social.js?v=24"></script>
-  <script src="js/upload.js?v=24"></script>
-  <script src="js/feed.js?v=24"></script>
-  <script src="js/push.js?v=24"></script>
-  <script src="js/onboarding.js?v=24"></script>
-  <script src="js/stats.js?v=24"></script>
-  <script src="js/app.js?v=24"></script>
+  <script src="js/supabaseClient.js?v=25"></script>
+  <script src="js/auth.js?v=25"></script>
+  <script src="js/challenges.js?v=25"></script>
+  <script src="js/social.js?v=25"></script>
+  <script src="js/upload.js?v=25"></script>
+  <script src="js/feed.js?v=25"></script>
+  <script src="js/push.js?v=25"></script>
+  <script src="js/onboarding.js?v=25"></script>
+  <script src="js/stats.js?v=25"></script>
+  <script src="js/app.js?v=25"></script>
 </body>
 </html>

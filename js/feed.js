@@ -17,6 +17,17 @@ const Feed = {
     return by;
   },
 
+  // Beiträge einer Challenge laden – mit hidden-Spalte, sonst Fallback (Spalte noch nicht da).
+  async fetchSubs(questId) {
+    let res = await sb.from("submissions")
+      .select("id, user_id, image_url, created_at, hidden")
+      .eq("quest_id", questId).order("created_at", { ascending: false });
+    if (res.error) res = await sb.from("submissions")
+      .select("id, user_id, image_url, created_at")
+      .eq("quest_id", questId).order("created_at", { ascending: false });
+    return res;
+  },
+
   formatTime(iso) {
     const d = new Date(iso);
     const pad = (n) => String(n).padStart(2, "0");
@@ -87,10 +98,7 @@ const Feed = {
 
     // 1) Alle Beiträge zur Challenge (neueste zuerst) + Folgen + Freunde – parallel.
     const [subsRes, follows, friends] = await Promise.all([
-      sb.from("submissions")
-        .select("id, user_id, image_url, created_at")
-        .eq("quest_id", quest.id)
-        .order("created_at", { ascending: false }),
+      Feed.fetchSubs(quest.id),
       Social.myFollows(),
       Social.friendData(),
     ]);
@@ -99,15 +107,18 @@ const Feed = {
       return;
     }
 
+    // Gemeldete/auto-deaktivierte Beiträge raus (hidden).
+    const rows = (subsRes.data || []).filter((s) => !s.hidden);
+
     // Frühe-Vögel: die ersten 1-3 Beiträge (chronologisch) der Challenge bekommen ein Abzeichen.
-    const allByTime = [...(subsRes.data || [])].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    const allByTime = [...rows].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     const earlyRank = {};
     allByTime.slice(0, 3).forEach((s, i) => { earlyRank[s.id] = i + 1; });
 
     // 2) Im Freunde-Modus nur Beiträge von Gefolgten (und mir selbst).
     const subs = (mode === "friends")
-      ? (subsRes.data || []).filter((s) => follows.has(s.user_id) || s.user_id === myId)
-      : (subsRes.data || []);
+      ? rows.filter((s) => follows.has(s.user_id) || s.user_id === myId)
+      : rows;
 
     list.innerHTML = "";
     if (!subs.length) {
@@ -168,6 +179,7 @@ const Feed = {
           <button class="fi-act fi-comment-toggle" aria-label="Kommentare">
             <i class="ti ti-message-circle"></i><span class="comment-count">${commentCount}</span>
           </button>
+          ${isMine ? "" : '<button class="fi-act fi-report" aria-label="Melden" title="Beitrag melden"><i class="ti ti-flag"></i></button>'}
         </div>
         ${Feed.reactionBar(reactions.countById[item.id] || {}, reactions.mineById[item.id])}
         <div class="fi-comments hidden"></div>`;
@@ -243,6 +255,12 @@ const Feed = {
         } catch (e) { friendBtn.disabled = false; alert("Hat nicht geklappt: " + e.message); }
         finally { fbBusy = false; }
       });
+    }
+
+    // Beitrag melden (öffnet Melde-Dialog; Auto-Deaktivierung ab mehreren Meldungen serverseitig)
+    const reportBtn = el.querySelector(".fi-report");
+    if (reportBtn && typeof openReport === "function") {
+      reportBtn.addEventListener("click", () => openReport(item.id));
     }
 
     // Reaktionen (eine pro User; Tippen setzt/wechselt/entfernt)

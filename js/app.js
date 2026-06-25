@@ -21,7 +21,7 @@ const state = {
   current: null,      // gerade gewählte Challenge
   username: "",
   stats: null,        // letzte berechnete Statistik (für Avatar-Picker etc.)
-  profile: { avatar_url: null, title: null, frame: null, unlockAll: false }, // eigene Kosmetik
+  profile: { avatar_url: null, title: null, frame: null, unlockAll: false, isAdmin: false }, // eigene Kosmetik
   partCount: {},      // Teilnehmer je aktiver Challenge
 };
 
@@ -267,6 +267,57 @@ function renderArchive(list) {
   sec.classList.remove("hidden");
 }
 
+// ----- Melden -----
+let reportTargetId = null;
+function openReport(submissionId) {
+  reportTargetId = submissionId;
+  $("reportModal").classList.remove("hidden");
+}
+function closeReport() { reportTargetId = null; $("reportModal").classList.add("hidden"); }
+async function submitReport(reason) {
+  const id = reportTargetId;
+  if (!id) return;
+  closeReport();
+  try {
+    await Social.reportPost(id, reason);
+    toast("🚩 Danke! Der Beitrag wurde gemeldet.");
+  } catch (e) { alert("Melden fehlgeschlagen: " + e.message); }
+}
+
+// ----- Admin: gemeldete Beiträge moderieren -----
+function renderMod(list) {
+  const sec = $("modSection"), el = $("modList");
+  if (!sec) return;
+  if (!list || !list.length) { sec.classList.add("hidden"); el.innerHTML = ""; return; }
+  el.innerHTML = list.map((p) => `
+    <div class="mod-item" data-id="${p.id}">
+      <img src="${Feed.escape(p.image_url)}" alt="" loading="lazy" />
+      <div class="mod-info">
+        <div class="mod-user">${Feed.escape(p.username)} <span class="mod-count">🚩 ${p.count}</span></div>
+        <div class="mod-quest">${Feed.escape(p.quest_title)}</div>
+        ${p.reasons.length ? `<div class="mod-reasons">${p.reasons.map((r) => Feed.escape(r)).join(" · ")}</div>` : ""}
+        <div class="mod-actions">
+          <button class="soc-btn" data-act="approve"><i class="ti ti-check"></i> Freigeben</button>
+          <button class="soc-btn ghost" data-act="delete"><i class="ti ti-trash"></i> Löschen</button>
+        </div>
+      </div>
+    </div>`).join("");
+  el.querySelectorAll(".mod-item").forEach((row) => {
+    row.querySelectorAll("button").forEach((b) => b.addEventListener("click", async () => {
+      const act = b.dataset.act;
+      if (act === "delete" && !confirm("Beitrag endgültig löschen?")) return;
+      row.querySelectorAll("button").forEach((x) => (x.disabled = true));
+      try { await Social.moderate(Number(row.dataset.id), act); loadMod(); }
+      catch (e) { row.querySelectorAll("button").forEach((x) => (x.disabled = false)); alert("Fehler: " + e.message); }
+    }));
+  });
+  sec.classList.remove("hidden");
+}
+function loadMod() {
+  if (!state.profile.isAdmin) { const sec = $("modSection"); if (sec) sec.classList.add("hidden"); return; }
+  Social.reportedPosts().then(renderMod).catch((e) => console.warn("[SideQuest] mod:", e.message));
+}
+
 function renderWeekly(list) {
   const section = $("weeklySection");
   const el = $("weeklyBoard");
@@ -295,6 +346,7 @@ async function loadStatsAndTop() {
     Stats.weeklyBoard().then(renderWeekly).catch((e) => console.warn("[SideQuest] weekly:", e.message));
     Stats.bestPhotos().then(renderBest).catch((e) => console.warn("[SideQuest] best:", e.message));
     Challenges.recent().then(renderArchive).catch((e) => console.warn("[SideQuest] archive:", e.message));
+    loadMod(); // Admin: gemeldete Beiträge
     const top = await Stats.topToday(state.challenges.map((c) => c.id));
     renderTopToday(top);
 
@@ -521,11 +573,11 @@ async function refreshGreeting() {
   const user = await Auth.getUser();
   if (!user) return;
   // Mit Kosmetik-Spalten laden; falls noch nicht angelegt -> Fallback auf username.
-  let res = await sb.from("profiles").select("username, avatar_url, title, frame, unlock_all").eq("id", user.id).maybeSingle();
+  let res = await sb.from("profiles").select("username, avatar_url, title, frame, unlock_all, is_admin").eq("id", user.id).maybeSingle();
   if (res.error) res = await sb.from("profiles").select("username").eq("id", user.id).maybeSingle();
   const data = res.data || {};
   state.username = data.username || user.email.split("@")[0];
-  state.profile = { avatar_url: data.avatar_url || null, title: data.title || null, frame: data.frame || null, unlockAll: !!data.unlock_all };
+  state.profile = { avatar_url: data.avatar_url || null, title: data.title || null, frame: data.frame || null, unlockAll: !!data.unlock_all, isAdmin: !!data.is_admin };
   $("greetingName").textContent = `Hi, ${state.username}!`;
   applyAvatarEl($("headerAvatar"), state.username, state.profile.avatar_url, state.profile.frame, "avatar");
 }
@@ -686,6 +738,12 @@ $("avatarFile").addEventListener("change", async (e) => {
     alert("Hochladen fehlgeschlagen: " + err.message);
   }
 });
+
+// Melde-Dialog
+$("reportClose").addEventListener("click", closeReport);
+$("reportModal").addEventListener("click", (e) => { if (e.target.id === "reportModal") closeReport(); });
+document.querySelectorAll("#reportModal [data-reason]").forEach((b) =>
+  b.addEventListener("click", () => submitReport(b.dataset.reason)));
 
 // Info-Panel „So funktioniert's"
 $("infoBtn").addEventListener("click", () => $("infoModal").classList.remove("hidden"));

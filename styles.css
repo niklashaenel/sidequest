@@ -585,3 +585,25 @@ body { overscroll-behavior-y: contain; }
   66%  { box-shadow: 0 0 0 2px #4d9bff, 0 0 10px rgba(77,155,255,0.6); }
   100% { box-shadow: 0 0 0 2px #ff4d4d, 0 0 10px rgba(255,77,77,0.6); }
 }
+
+/* ===================================================================
+   v25: Melden + Admin-Moderation
+   =================================================================== */
+.fi-report { margin-left: auto; color: var(--muted-2); }
+.fi-report:hover { color: var(--danger); }
+
+.report-reasons { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.report-reasons .btn { justify-content: flex-start; }
+
+.mod-list { display: flex; flex-direction: column; gap: 10px; }
+.mod-item { display: flex; gap: 12px; background: var(--surface); border: 1px solid var(--danger);
+            border-radius: var(--r-md); padding: 10px; }
+.mod-item img { width: 70px; height: 70px; border-radius: 10px; object-fit: cover;
+                background: var(--surface-2); flex-shrink: 0; }
+.mod-info { flex: 1; min-width: 0; }
+.mod-user { font-weight: 800; font-size: 14px; }
+.mod-count { color: var(--danger); font-size: 12px; font-weight: 700; }
+.mod-quest { color: var(--muted); font-size: 12px; margin-top: 1px; }
+.mod-reasons { color: var(--muted-2); font-size: 11px; margin-top: 3px; line-height: 1.4; }
+.mod-actions { display: flex; gap: 8px; margin-top: 8px; }
+.mod-actions .soc-btn { padding: 6px 10px; font-size: 12px; }
