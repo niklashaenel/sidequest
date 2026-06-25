@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=27" />
+  <link rel="stylesheet" href="styles.css?v=28" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
@@ -24,9 +24,9 @@
   <header id="appHeader" class="hidden">
     <span class="logo">Side<span class="dot">Quest</span></span>
     <div class="header-right">
-      <button id="infoBtn" class="icon-btn" aria-label="Info" title="So funktioniert's"><i class="ti ti-help-circle"></i></button>
-      <button id="headerAvatar" class="avatar" aria-label="Profil" title="Profil">?</button>
-      <button id="logoutBtn" class="icon-btn" aria-label="Abmelden" title="Abmelden"><i class="ti ti-logout"></i></button>
+      <button id="infoBtn" class="icon-btn" data-i18n-attr="title.info"><i class="ti ti-help-circle"></i></button>
+      <button id="headerAvatar" class="avatar" data-i18n-attr="title.profile">?</button>
+      <button id="logoutBtn" class="icon-btn" data-i18n-attr="title.logout"><i class="ti ti-logout"></i></button>
     </div>
   </header>
 
@@ -36,34 +36,39 @@
     <section id="authScreen" class="screen">
       <div class="card">
         <h1 class="brand-big">Side<span class="dot">Quest</span></h1>
-        <p class="subtitle">Eine Challenge. Erst posten, dann sehen.</p>
+        <p class="subtitle" data-i18n="auth.tagline">Eine Challenge. Erst posten, dann sehen.</p>
 
         <label id="usernameField" class="field hidden">
-          <span>Anzeigename</span>
-          <input id="usernameInput" type="text" autocomplete="username" placeholder="z. B. Niklas" />
+          <span data-i18n="auth.username">Anzeigename</span>
+          <input id="usernameInput" type="text" autocomplete="username" data-i18n-ph="auth.username.ph" placeholder="z. B. Niklas" />
         </label>
         <label class="field">
-          <span>E-Mail</span>
+          <span data-i18n="auth.email">E-Mail</span>
           <input id="emailInput" type="email" autocomplete="email" placeholder="du@beispiel.de" />
         </label>
         <label class="field">
-          <span>Passwort</span>
-          <input id="passwordInput" type="password" autocomplete="current-password" placeholder="mind. 6 Zeichen" />
+          <span data-i18n="auth.password">Passwort</span>
+          <input id="passwordInput" type="password" autocomplete="current-password" data-i18n-ph="auth.password.ph" placeholder="mind. 6 Zeichen" />
         </label>
 
-        <button id="primaryAuthBtn" class="btn">Login</button>
+        <button id="primaryAuthBtn" class="btn" data-i18n="auth.login">Login</button>
         <p class="toggle-line">
-          <span id="toggleText">Noch kein Konto?</span>
-          <button id="toggleModeBtn" class="link-btn">Registrieren</button>
+          <span id="toggleText" data-i18n="auth.noAccount">Noch kein Konto?</span>
+          <button id="toggleModeBtn" class="link-btn" data-i18n="auth.register">Registrieren</button>
         </p>
         <p id="authMessage" class="message"></p>
+
+        <div class="lang-toggle" style="margin-top:18px">
+          <button data-lang="de">DE</button>
+          <button data-lang="en">EN</button>
+        </div>
       </div>
     </section>
 
     <!-- ===== Screen 2: Challenge-Übersicht ===== -->
     <section id="overviewScreen" class="screen hidden">
-      <h2 class="greeting" id="greetingName">Los geht's!</h2>
-      <p class="greeting-sub">Wähle eine Challenge und zeig, was du drauf hast.</p>
+      <h2 class="greeting" id="greetingName" data-i18n="ov.greetingDefault">Los geht's!</h2>
+      <p class="greeting-sub" data-i18n="ov.sub">Wähle eine Challenge und zeig, was du drauf hast.</p>
       <p id="community" class="community hidden"></p>
 
       <!-- Stats-Leiste (Level/XP, Serie, Likes) -->
@@ -71,55 +76,56 @@
 
       <!-- Admin: gemeldete Beiträge (nur für dich sichtbar) -->
       <div id="modSection" class="hidden">
-        <p class="section-label" style="margin-top:8px">🚩 Gemeldete Beiträge</p>
+        <p class="section-label" style="margin-top:8px" data-i18n="ov.reported">🚩 Gemeldete Beiträge</p>
         <div id="modList" class="mod-list"></div>
       </div>
 
-      <p class="section-label">Jetzt aktiv</p>
+      <p class="section-label" data-i18n="ov.active">Jetzt aktiv</p>
       <div id="challengeList" class="challenge-list"></div>
 
       <!-- Top-3 beliebteste Beiträge heute -->
       <div id="topTodaySection" class="hidden">
-        <p class="section-label" style="margin-top:24px">🏆 Beliebt heute</p>
+        <p class="section-label" style="margin-top:24px" data-i18n="ov.popularToday">🏆 Beliebt heute</p>
         <div id="topToday" class="top-today"></div>
       </div>
 
       <!-- Wochen-Bestenliste -->
       <div id="weeklySection" class="hidden">
-        <p class="section-label" style="margin-top:24px">🏅 Bestenliste der Woche</p>
+        <p class="section-label" style="margin-top:24px" data-i18n="ov.weeklyBoard">🏅 Bestenliste der Woche</p>
         <div id="weeklyBoard" class="weekly-board"></div>
       </div>
 
       <!-- Beste Bilder der Woche -->
       <div id="bestSection" class="hidden">
-        <p class="section-label" style="margin-top:24px">📸 Beste Bilder der Woche</p>
+        <p class="section-label" style="margin-top:24px" data-i18n="ov.bestPhotos">📸 Beste Bilder der Woche</p>
         <div id="bestPhotos" class="best-grid"></div>
       </div>
 
       <!-- Vergangene Challenges (Archiv, ~1 Woche) -->
       <div id="archiveSection" class="hidden">
-        <p class="section-label" style="margin-top:24px">🗄️ Vergangene Challenges</p>
+        <p class="section-label" style="margin-top:24px" data-i18n="ov.archive">🗄️ Vergangene Challenges</p>
         <div id="archiveList" class="archive-list"></div>
       </div>
 
       <!-- Challenge-Idee vorschlagen -->
-      <p class="section-label" style="margin-top:24px">💡 Challenge vorschlagen</p>
+      <p class="section-label" style="margin-top:24px" data-i18n="ov.suggest">💡 Challenge vorschlagen</p>
       <form id="suggestForm" class="suggest-box">
         <textarea id="suggestInput" maxlength="280" rows="2"
+          data-i18n-ph="ov.suggest.ph"
           placeholder="Deine Idee für eine Challenge… (z. B. „Zeig deinen letzten Suchverlauf")"></textarea>
         <div class="suggest-row">
           <span id="suggestMsg" class="suggest-msg"></span>
-          <button type="submit" class="btn btn-sm"><i class="ti ti-bulb"></i> Vorschlagen</button>
+          <button type="submit" class="btn btn-sm"><i class="ti ti-bulb"></i> <span data-i18n="ov.suggest.btn">Vorschlagen</span></button>
         </div>
       </form>
     </section>
 
     <!-- ===== Profil ===== -->
     <section id="profileScreen" class="screen hidden">
-      <button class="back-btn" id="profileBack"><i class="ti ti-arrow-left"></i> Übersicht</button>
+      <button class="back-btn" id="profileBack"><i class="ti ti-arrow-left"></i> <span data-i18n="nav.overview">Übersicht</span></button>
       <div class="profile-head">
-        <button id="profileAvatar" class="profile-avatar" aria-label="Profilbild ändern" title="Profilbild ändern">?</button>
-        <span class="avatar-edit-hint"><i class="ti ti-pencil"></i> Profilbild ändern</span>
+        <button id="profileAvatar" class="profile-avatar" data-i18n-attr="prof.editAvatar">?</button>
+        <span class="avatar-edit-hint"><i class="ti ti-pencil"></i> <span data-i18n="prof.editAvatar">Profilbild ändern</span></span>
         <h2 id="profileName" class="profile-name">…</h2>
         <span id="profileTitle" class="profile-title hidden"></span>
         <div class="profile-level">
@@ -131,54 +137,54 @@
       <div id="profileStats" class="stats-strip" style="margin-top:4px"></div>
 
       <!-- Push-Benachrichtigungen aktivieren (nur sichtbar, wenn möglich) -->
-      <button id="profileNotifyBtn" class="btn btn-ghost hidden" style="margin-top:14px"><i class="ti ti-bell"></i> Benachrichtigungen aktivieren</button>
+      <button id="profileNotifyBtn" class="btn btn-ghost hidden" style="margin-top:14px"><i class="ti ti-bell"></i> <span data-i18n="prof.notify">Benachrichtigungen aktivieren</span></button>
 
-      <button id="openFriendsBtn" class="btn btn-ghost" style="margin-top:14px"><i class="ti ti-users"></i> Freunde &amp; Anfragen <span id="friendsBadge" class="hbadge hidden"></span></button>
-      <button id="openCollectionBtn" class="btn" style="margin-top:10px"><i class="ti ti-trophy"></i> Sammlung &amp; Erfolge</button>
+      <button id="openFriendsBtn" class="btn btn-ghost" style="margin-top:14px"><i class="ti ti-users"></i> <span data-i18n="prof.friends">Freunde &amp; Anfragen</span> <span id="friendsBadge" class="hbadge hidden"></span></button>
+      <button id="openCollectionBtn" class="btn" style="margin-top:10px"><i class="ti ti-trophy"></i> <span data-i18n="prof.collection">Sammlung &amp; Erfolge</span></button>
 
-      <p class="section-label" style="margin-top:22px">Deine Beiträge</p>
+      <p class="section-label" style="margin-top:22px" data-i18n="prof.yourPosts">Deine Beiträge</p>
       <div id="profilePosts" class="post-grid"></div>
-      <p id="profileNoPosts" class="empty-state hidden"><i class="ti ti-camera"></i>Noch keine Beiträge. Mach deine erste Challenge!</p>
+      <p id="profileNoPosts" class="empty-state hidden"><i class="ti ti-camera"></i><span data-i18n="prof.noPosts">Noch keine Beiträge. Mach deine erste Challenge!</span></p>
     </section>
 
     <!-- ===== Screen 3: Challenge-Detail (Foto machen) ===== -->
     <section id="challengeScreen" class="screen hidden">
-      <button class="back-btn" id="challengeBack"><i class="ti ti-arrow-left"></i> Übersicht</button>
+      <button class="back-btn" id="challengeBack"><i class="ti ti-arrow-left"></i> <span data-i18n="nav.overview">Übersicht</span></button>
       <div class="card">
         <div class="detail-head">
           <div id="detailIcon" class="cc-icon"></div>
           <span id="detailBadge" class="cc-badge"></span>
         </div>
-        <h2 id="questTitle" class="quest-title">Lade Challenge…</h2>
+        <h2 id="questTitle" class="quest-title" data-i18n="detail.loading">Lade Challenge…</h2>
         <span id="detailCountdown" class="countdown-pill"><i class="ti ti-clock"></i> <span></span></span>
         <input id="cameraInput" type="file" accept="image/*" capture="environment" class="hidden" />
-        <button id="startQuestBtn" class="btn"><i class="ti ti-camera"></i> Challenge starten</button>
+        <button id="startQuestBtn" class="btn"><i class="ti ti-camera"></i> <span data-i18n="cc.start">Challenge starten</span></button>
         <p id="questMessage" class="message"></p>
       </div>
     </section>
 
     <!-- ===== Screen 4: Upload (Vorschau) ===== -->
     <section id="uploadScreen" class="screen hidden">
-      <button class="back-btn" id="uploadBack"><i class="ti ti-arrow-left"></i> Zurück</button>
+      <button class="back-btn" id="uploadBack"><i class="ti ti-arrow-left"></i> <span data-i18n="nav.back">Zurück</span></button>
       <div class="card">
         <p id="uploadQuestLabel" class="section-label" style="margin:0"></p>
-        <img id="previewImage" class="preview" alt="Vorschau deines Fotos" />
-        <button id="confirmUploadBtn" class="btn"><i class="ti ti-upload"></i> Hochladen &amp; freischalten</button>
-        <button id="retakeBtn" class="link-btn">Neues Foto machen</button>
+        <img id="previewImage" class="preview" alt="" />
+        <button id="confirmUploadBtn" class="btn"><i class="ti ti-upload"></i> <span data-i18n="up.uploadUnlock">Hochladen &amp; freischalten</span></button>
+        <button id="retakeBtn" class="link-btn" data-i18n="up.retake">Neues Foto machen</button>
         <p id="uploadMessage" class="message"></p>
       </div>
     </section>
 
     <!-- ===== Screen 5: Feed ===== -->
     <section id="feedScreen" class="screen hidden">
-      <button class="back-btn" id="feedBack"><i class="ti ti-arrow-left"></i> Übersicht</button>
+      <button class="back-btn" id="feedBack"><i class="ti ti-arrow-left"></i> <span data-i18n="nav.overview">Übersicht</span></button>
       <h2 id="feedQuestTitle" class="feed-quest"></h2>
       <div id="feedToggle" class="seg-toggle">
-        <button data-mode="all" class="active"><i class="ti ti-world"></i> Alle</button>
-        <button data-mode="friends"><i class="ti ti-users"></i> Folge ich</button>
+        <button data-mode="all" class="active"><i class="ti ti-world"></i> <span data-i18n="feed.all">Alle</span></button>
+        <button data-mode="friends"><i class="ti ti-users"></i> <span data-i18n="feed.following">Folge ich</span></button>
       </div>
       <div id="feedList" class="feed-list"></div>
-      <p id="feedEmpty" class="empty-state hidden"><i class="ti ti-photo"></i>Noch keine weiteren Beiträge. Du bist früh dran!</p>
+      <p id="feedEmpty" class="empty-state hidden"></p>
     </section>
 
   </main>
@@ -189,15 +195,15 @@
   <!-- Freunde & Anfragen -->
   <div id="friendsModal" class="modal hidden">
     <div class="modal-card">
-      <button class="onboard-close" id="friendsClose" aria-label="Schließen"><i class="ti ti-x"></i></button>
-      <h3 class="onboard-title">👥 Freunde</h3>
+      <button class="onboard-close" id="friendsClose" data-i18n-attr="common.close"><i class="ti ti-x"></i></button>
+      <h3 class="onboard-title" data-i18n="fr.title">👥 Freunde</h3>
       <div id="friendRequestsSection" class="hidden">
-        <p class="section-label" style="margin-top:14px">🤝 Freundschaftsanfragen</p>
+        <p class="section-label" style="margin-top:14px" data-i18n="fr.requests">🤝 Freundschaftsanfragen</p>
         <div id="friendRequests" class="soc-list"></div>
       </div>
-      <p class="section-label" style="margin-top:16px">Freunde (<span id="friendsCount">0</span>)</p>
+      <p class="section-label" style="margin-top:16px"><span data-i18n="fr.friends">Freunde</span> (<span id="friendsCount">0</span>)</p>
       <div id="friendsList" class="soc-list"></div>
-      <p class="section-label" style="margin-top:18px">Folge ich (<span id="followsCount">0</span>)</p>
+      <p class="section-label" style="margin-top:18px"><span data-i18n="fr.following">Folge ich</span> (<span id="followsCount">0</span>)</p>
       <div id="followsList" class="soc-list"></div>
     </div>
   </div>
@@ -205,12 +211,12 @@
   <!-- Sammlung & Erfolge (Titel + Rahmen freischalten/ausrüsten) -->
   <div id="collectionModal" class="modal hidden">
     <div class="modal-card">
-      <button class="onboard-close" id="collectionClose" aria-label="Schließen"><i class="ti ti-x"></i></button>
-      <h3 class="onboard-title">🏆 Sammlung</h3>
+      <button class="onboard-close" id="collectionClose" data-i18n-attr="common.close"><i class="ti ti-x"></i></button>
+      <h3 class="onboard-title" data-i18n="col.title">🏆 Sammlung</h3>
       <p class="onboard-text" id="collectionCount"></p>
-      <p class="section-label" style="margin-top:16px">Titel</p>
+      <p class="section-label" style="margin-top:16px" data-i18n="col.titles">Titel</p>
       <div id="collectionTitles" class="skin-list"></div>
-      <p class="section-label" style="margin-top:18px">Rahmen</p>
+      <p class="section-label" style="margin-top:18px" data-i18n="col.frames">Rahmen</p>
       <div id="collectionFrames" class="skin-list"></div>
     </div>
   </div>
@@ -218,13 +224,13 @@
   <!-- Beitrag melden -->
   <div id="reportModal" class="modal hidden">
     <div class="modal-card">
-      <button class="onboard-close" id="reportClose" aria-label="Schließen"><i class="ti ti-x"></i></button>
-      <h3 class="onboard-title">Beitrag melden</h3>
-      <p class="onboard-text">Warum meldest du diesen Beitrag? Bei mehreren Meldungen wird er automatisch ausgeblendet und geprüft.</p>
+      <button class="onboard-close" id="reportClose" data-i18n-attr="common.close"><i class="ti ti-x"></i></button>
+      <h3 class="onboard-title" data-i18n="rep.title">Beitrag melden</h3>
+      <p class="onboard-text" data-i18n="rep.desc">Warum meldest du diesen Beitrag? Bei mehreren Meldungen wird er automatisch ausgeblendet und geprüft.</p>
       <div class="report-reasons">
-        <button class="btn btn-ghost" data-reason="Challenge nicht erfüllt"><i class="ti ti-target-off"></i> Challenge nicht erfüllt</button>
-        <button class="btn btn-ghost" data-reason="Unangemessen / anstößig"><i class="ti ti-mood-off"></i> Unangemessen / anstößig</button>
-        <button class="btn btn-ghost" data-reason="Spam / sonstiges"><i class="ti ti-alert-triangle"></i> Spam / sonstiges</button>
+        <button class="btn btn-ghost" data-reason="Challenge nicht erfüllt"><i class="ti ti-target-off"></i> <span data-i18n="rep.reason1">Challenge nicht erfüllt</span></button>
+        <button class="btn btn-ghost" data-reason="Unangemessen / anstößig"><i class="ti ti-mood-off"></i> <span data-i18n="rep.reason2">Unangemessen / anstößig</span></button>
+        <button class="btn btn-ghost" data-reason="Spam / sonstiges"><i class="ti ti-alert-triangle"></i> <span data-i18n="rep.reason3">Spam / sonstiges</span></button>
       </div>
     </div>
   </div>
@@ -232,34 +238,38 @@
   <!-- Info: So funktioniert SideQuest -->
   <div id="infoModal" class="modal hidden">
     <div class="modal-card">
-      <button class="onboard-close" id="infoClose" aria-label="Schließen"><i class="ti ti-x"></i></button>
-      <h3 class="onboard-title">So funktioniert SideQuest</h3>
-      <p class="onboard-text">Eine Foto-Challenge nach der anderen – <b>erst posten, dann sehen.</b> 📸</p>
+      <button class="onboard-close" id="infoClose" data-i18n-attr="common.close"><i class="ti ti-x"></i></button>
+      <h3 class="onboard-title" data-i18n="info.title">So funktioniert SideQuest</h3>
+      <div class="lang-toggle" style="margin:12px 0 4px">
+        <button data-lang="de">DE</button>
+        <button data-lang="en">EN</button>
+      </div>
+      <p class="onboard-text" data-i18n-html="info.intro">Eine Foto-Challenge nach der anderen – <b>erst posten, dann sehen.</b> 📸</p>
       <div class="info-list">
         <div class="info-item"><div class="info-ic"><i class="ti ti-bolt"></i></div>
-          <div><b>Challenges</b><p>Stündlich & täglich neue Foto-Aufgaben mit Countdown. Tippe eine an und leg los.</p></div></div>
+          <div><b data-i18n="info.1.t">Challenges</b><p data-i18n="info.1.d">Stündlich & täglich neue Foto-Aufgaben mit Countdown. Tippe eine an und leg los.</p></div></div>
         <div class="info-item"><div class="info-ic"><i class="ti ti-camera"></i></div>
-          <div><b>Posten schaltet frei</b><p>Mach ein Foto und lad es hoch – erst danach siehst du die Beiträge der anderen im Feed.</p></div></div>
+          <div><b data-i18n="info.2.t">Posten schaltet frei</b><p data-i18n="info.2.d">Mach ein Foto und lad es hoch – erst danach siehst du die Beiträge der anderen im Feed.</p></div></div>
         <div class="info-item"><div class="info-ic"><i class="ti ti-star"></i></div>
-          <div><b>Level & XP</b><p>+10 XP pro Beitrag, +5 für jedes erhaltene Like. Genug XP = nächstes Level.</p></div></div>
+          <div><b data-i18n="info.3.t">Level & XP</b><p data-i18n="info.3.d">+10 XP pro Beitrag, +5 für jedes erhaltene Like. Genug XP = nächstes Level.</p></div></div>
         <div class="info-item"><div class="info-ic"><i class="ti ti-flame"></i></div>
-          <div><b>Serie</b><p>Poste jeden Tag, um deine Serie zu halten. Meilensteine (3/7/14/30 Tage) geben fette Bonus-XP.</p></div></div>
+          <div><b data-i18n="info.4.t">Serie</b><p data-i18n="info.4.d">Poste jeden Tag, um deine Serie zu halten. Meilensteine (3/7/14/30 Tage) geben fette Bonus-XP.</p></div></div>
         <div class="info-item"><div class="info-ic"><i class="ti ti-mood-smile"></i></div>
-          <div><b>Reaktionen, Likes & Kommentare</b><p>Reagiere mit 😂🔥😍, vergib Likes und schreib Kommentare unter die Beiträge.</p></div></div>
+          <div><b data-i18n="info.5.t">Reaktionen, Likes & Kommentare</b><p data-i18n="info.5.d">Reagiere mit 😂🔥😍, vergib Likes und schreib Kommentare unter die Beiträge.</p></div></div>
         <div class="info-item"><div class="info-ic"><i class="ti ti-users"></i></div>
-          <div><b>Folgen & Freunde</b><p>Folge jedem (eigener „Folge ich"-Feed). Freunde brauchen eine Anfrage – beide müssen zustimmen.</p></div></div>
+          <div><b data-i18n="info.6.t">Folgen & Freunde</b><p data-i18n="info.6.d">Folge jedem (eigener „Folge ich"-Feed). Freunde brauchen eine Anfrage – beide müssen zustimmen.</p></div></div>
         <div class="info-item"><div class="info-ic"><i class="ti ti-palette"></i></div>
-          <div><b>Profil anpassen</b><p>Profilbild aus deinen Fotos wählen, Titel & Rahmen freischalten (z. B. Neon-Glow bei langer Serie).</p></div></div>
+          <div><b data-i18n="info.7.t">Profil anpassen</b><p data-i18n="info.7.d">Profilbild aus deinen Fotos wählen, Titel & Rahmen freischalten (z. B. Neon-Glow bei langer Serie).</p></div></div>
         <div class="info-item"><div class="info-ic"><i class="ti ti-trophy"></i></div>
-          <div><b>Bestenliste & beste Bilder</b><p>Wöchentliches Ranking und die Top-Fotos der Woche – sei ganz oben dabei.</p></div></div>
+          <div><b data-i18n="info.8.t">Bestenliste & beste Bilder</b><p data-i18n="info.8.d">Wöchentliches Ranking und die Top-Fotos der Woche – sei ganz oben dabei.</p></div></div>
         <div class="info-item"><div class="info-ic"><i class="ti ti-medal"></i></div>
-          <div><b>Früher Vogel</b><p>Die ersten 3 Beiträge einer Challenge bekommen ein 🥇🥈🥉-Abzeichen. Sei schnell!</p></div></div>
+          <div><b data-i18n="info.9.t">Früher Vogel</b><p data-i18n="info.9.d">Die ersten 3 Beiträge einer Challenge bekommen ein 🥇🥈🥉-Abzeichen. Sei schnell!</p></div></div>
         <div class="info-item"><div class="info-ic"><i class="ti ti-archive"></i></div>
-          <div><b>Archiv</b><p>Verpasst? Vergangene Challenges der Woche kannst du unten weiter ansehen.</p></div></div>
+          <div><b data-i18n="info.10.t">Archiv</b><p data-i18n="info.10.d">Verpasst? Vergangene Challenges der Woche kannst du unten weiter ansehen.</p></div></div>
         <div class="info-item"><div class="info-ic"><i class="ti ti-bell"></i></div>
-          <div><b>Benachrichtigungen</b><p>Im Profil aktivieren, damit du keine neue Challenge verpasst.</p></div></div>
+          <div><b data-i18n="info.11.t">Benachrichtigungen</b><p data-i18n="info.11.d">Im Profil aktivieren, damit du keine neue Challenge verpasst.</p></div></div>
         <div class="info-item"><div class="info-ic"><i class="ti ti-bulb"></i></div>
-          <div><b>Eigene Ideen</b><p>Unten auf der Übersicht kannst du eigene Challenge-Ideen vorschlagen.</p></div></div>
+          <div><b data-i18n="info.12.t">Eigene Ideen</b><p data-i18n="info.12.d">Unten auf der Übersicht kannst du eigene Challenge-Ideen vorschlagen.</p></div></div>
       </div>
     </div>
   </div>
@@ -267,10 +277,10 @@
   <!-- Avatar-Picker: Profilbild aus eigenen Fotos wählen -->
   <div id="avatarPicker" class="modal hidden">
     <div class="modal-card">
-      <button class="onboard-close" id="avatarPickerClose" aria-label="Schließen"><i class="ti ti-x"></i></button>
-      <h3 class="onboard-title">Profilbild wählen</h3>
-      <p class="onboard-text">Nimm eins deiner Fotos – oder zurück zum Buchstaben.</p>
-      <p id="avatarPickerHint" class="onboard-text hidden">Tipp auf „Galerie", um ein beliebiges Bild zu nehmen.</p>
+      <button class="onboard-close" id="avatarPickerClose" data-i18n-attr="common.close"><i class="ti ti-x"></i></button>
+      <h3 class="onboard-title" data-i18n="ap.title">Profilbild wählen</h3>
+      <p class="onboard-text" data-i18n="ap.desc">Nimm eins deiner Fotos – oder zurück zum Buchstaben.</p>
+      <p id="avatarPickerHint" class="onboard-text hidden" data-i18n="ap.hint">Tipp auf „Galerie", um ein beliebiges Bild zu nehmen.</p>
       <input id="avatarFile" type="file" accept="image/*" class="hidden" />
       <div id="avatarPickerGrid" class="ap-grid"></div>
     </div>
@@ -278,24 +288,25 @@
 
   <!-- Willkommens-Hinweis: Zum Startbildschirm hinzufügen -->
   <div id="onboardCard" class="onboard hidden">
-    <button class="onboard-close" id="onboardClose" aria-label="Schließen"><i class="ti ti-x"></i></button>
+    <button class="onboard-close" id="onboardClose" data-i18n-attr="common.close"><i class="ti ti-x"></i></button>
     <div class="onboard-icon"><i class="ti ti-device-mobile-share"></i></div>
-    <h3 class="onboard-title">SideQuest als App installieren</h3>
+    <h3 class="onboard-title" data-i18n="onboard.title">SideQuest als App installieren</h3>
     <p class="onboard-text" id="onboardText"></p>
-    <button class="btn" id="onboardInstallBtn"><i class="ti ti-download"></i> App installieren</button>
-    <button class="btn btn-ghost hidden" id="onboardNotifyBtn"><i class="ti ti-bell"></i> Benachrichtigungen erlauben</button>
-    <button class="link-btn" id="onboardLater">Später</button>
+    <button class="btn" id="onboardInstallBtn"><i class="ti ti-download"></i> <span data-i18n="onboard.install">App installieren</span></button>
+    <button class="btn btn-ghost hidden" id="onboardNotifyBtn"><i class="ti ti-bell"></i> <span data-i18n="onboard.notify">Benachrichtigungen erlauben</span></button>
+    <button class="link-btn" id="onboardLater" data-i18n="onboard.later">Später</button>
   </div>
 
-  <script src="js/supabaseClient.js?v=27"></script>
-  <script src="js/auth.js?v=27"></script>
-  <script src="js/challenges.js?v=27"></script>
-  <script src="js/social.js?v=27"></script>
-  <script src="js/upload.js?v=27"></script>
-  <script src="js/feed.js?v=27"></script>
-  <script src="js/push.js?v=27"></script>
-  <script src="js/onboarding.js?v=27"></script>
-  <script src="js/stats.js?v=27"></script>
-  <script src="js/app.js?v=27"></script>
+  <script src="js/i18n.js?v=28"></script>
+  <script src="js/supabaseClient.js?v=28"></script>
+  <script src="js/auth.js?v=28"></script>
+  <script src="js/challenges.js?v=28"></script>
+  <script src="js/social.js?v=28"></script>
+  <script src="js/upload.js?v=28"></script>
+  <script src="js/feed.js?v=28"></script>
+  <script src="js/push.js?v=28"></script>
+  <script src="js/onboarding.js?v=28"></script>
+  <script src="js/stats.js?v=28"></script>
+  <script src="js/app.js?v=28"></script>
 </body>
 </html>

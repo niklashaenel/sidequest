@@ -33,11 +33,11 @@ const Stats = {
 
   // Serien-Meilensteine: ab X Tagen Serie gibt es einmalig Bonus-XP + Glückwunsch.
   streakMilestones: [
-    { days: 3,  xp: 25,  label: "3 Tage am Stück 🔥" },
-    { days: 7,  xp: 60,  label: "Eine ganze Woche! 🔥🔥" },
-    { days: 14, xp: 150, label: "14 Tage – Maschine! ⚡" },
-    { days: 30, xp: 400, label: "30 Tage – Legende! 👑" },
-    { days: 100,xp: 1500,label: "100 Tage – unsterblich! 🏆" },
+    { days: 3,  xp: 25,  label: "3 Tage am Stück 🔥",        labelEn: "3 days in a row 🔥" },
+    { days: 7,  xp: 60,  label: "Eine ganze Woche! 🔥🔥",     labelEn: "A whole week! 🔥🔥" },
+    { days: 14, xp: 150, label: "14 Tage – Maschine! ⚡",     labelEn: "14 days – machine! ⚡" },
+    { days: 30, xp: 400, label: "30 Tage – Legende! 👑",      labelEn: "30 days – legend! 👑" },
+    { days: 100,xp: 1500,label: "100 Tage – unsterblich! 🏆", labelEn: "100 days – immortal! 🏆" },
   ],
 
   // Summe der Bonus-XP aller bereits erreichten Serien-Meilensteine.

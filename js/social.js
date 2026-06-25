@@ -28,7 +28,7 @@ const Social = {
   // Like setzen oder entfernen. Gibt den neuen Zustand zurück (true = jetzt geliked).
   async toggleLike(submissionId, currentlyLiked) {
     const user = await Auth.getUser();
-    if (!user) throw new Error("Nicht eingeloggt.");
+    if (!user) throw new Error(t("err.notLoggedIn"));
 
     if (currentlyLiked) {
       const { error } = await sb.from("likes")
@@ -71,7 +71,7 @@ const Social = {
   // Reaktion setzen/wechseln/entfernen. Gibt das neue eigene Emoji zurück (oder null).
   async setReaction(submissionId, emoji, current) {
     const user = await Auth.getUser();
-    if (!user) throw new Error("Nicht eingeloggt.");
+    if (!user) throw new Error(t("err.notLoggedIn"));
     if (current === emoji) {
       const { error } = await sb.from("reactions")
         .delete().eq("submission_id", submissionId).eq("user_id", user.id);
@@ -118,7 +118,7 @@ const Social = {
     return rows.map((r) => ({
       body: r.body,
       created_at: r.created_at,
-      username: nameById[r.user_id] || "Jemand",
+      username: nameById[r.user_id] || t("feed.someone"),
     }));
   },
 
@@ -159,7 +159,7 @@ const Social = {
   // Folgen / Entfolgen. Gibt den neuen Zustand zurück (true = folge jetzt).
   async toggleFollow(friendId, currentlyFollowing) {
     const user = await Auth.getUser();
-    if (!user) throw new Error("Nicht eingeloggt.");
+    if (!user) throw new Error(t("err.notLoggedIn"));
     if (user.id === friendId) throw new Error("Dir selbst kannst du nicht folgen.");
     if (currentlyFollowing) {
       const { error } = await sb.from("friendships")
@@ -200,7 +200,7 @@ const Social = {
   // Rückgabe: "requested" | "accepted" | "pending" | "friends".
   async sendFriendRequest(addresseeId) {
     const user = await Auth.getUser();
-    if (!user) throw new Error("Nicht eingeloggt.");
+    if (!user) throw new Error(t("err.notLoggedIn"));
     if (user.id === addresseeId) throw new Error("Dich selbst kannst du nicht anfragen.");
     const { data: existing } = await sb.from("friend_requests")
       .select("id, requester, addressee, status")
@@ -236,7 +236,7 @@ const Social = {
   // Freundschaft beenden (akzeptierte Zeile in beliebiger Richtung löschen).
   async unfriend(otherId) {
     const user = await Auth.getUser();
-    if (!user) throw new Error("Nicht eingeloggt.");
+    if (!user) throw new Error(t("err.notLoggedIn"));
     const { error } = await sb.from("friend_requests").delete().eq("status", "accepted")
       .or(`and(requester.eq.${user.id},addressee.eq.${otherId}),and(requester.eq.${otherId},addressee.eq.${user.id})`);
     if (error) throw error;
@@ -246,7 +246,7 @@ const Social = {
   // Beitrag melden. Doppel-Meldung (unique) wird stillschweigend ignoriert.
   async reportPost(submissionId, reason) {
     const user = await Auth.getUser();
-    if (!user) throw new Error("Nicht eingeloggt.");
+    if (!user) throw new Error(t("err.notLoggedIn"));
     const { error } = await sb.from("reports")
       .insert({ submission_id: submissionId, reporter: user.id, reason: reason || null });
     if (error && error.code !== "23505") throw error; // 23505 = schon gemeldet
@@ -294,7 +294,7 @@ const Social = {
   // Eigene Profil-Kosmetik speichern (Avatar/Titel/Rahmen).
   async saveProfile(patch) {
     const user = await Auth.getUser();
-    if (!user) throw new Error("Nicht eingeloggt.");
+    if (!user) throw new Error(t("err.notLoggedIn"));
     const { error } = await sb.from("profiles").update(patch).eq("id", user.id);
     if (error) throw error;
   },
@@ -303,9 +303,9 @@ const Social = {
   // im Supabase-Dashboard und übernimmt gute Ideen in den challenge_pool).
   async suggestChallenge(text) {
     const user = await Auth.getUser();
-    if (!user) throw new Error("Nicht eingeloggt.");
+    if (!user) throw new Error(t("err.notLoggedIn"));
     const body = (text || "").trim();
-    if (body.length < 4) throw new Error("Bitte etwas mehr beschreiben.");
+    if (body.length < 4) throw new Error(t("ov.suggest.short"));
     const { error } = await sb.from("challenge_ideas")
       .insert({ user_id: user.id, text: body.slice(0, 280) });
     if (error) throw error;
@@ -314,7 +314,7 @@ const Social = {
   // Neuen Kommentar speichern.
   async addComment(submissionId, body) {
     const user = await Auth.getUser();
-    if (!user) throw new Error("Nicht eingeloggt.");
+    if (!user) throw new Error(t("err.notLoggedIn"));
     const text = (body || "").trim();
     if (!text) return;
     const { error } = await sb.from("comments")

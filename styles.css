@@ -633,3 +633,10 @@ body { overscroll-behavior-y: contain; }
 .hbadge { background: var(--danger); color: #fff; font-size: 11px; font-weight: 800;
           min-width: 18px; height: 18px; border-radius: 999px; padding: 0 5px;
           display: inline-flex; align-items: center; justify-content: center; }
+
+/* v28: Sprach-Umschalter (DE/EN) */
+.lang-toggle { display: flex; gap: 4px; width: fit-content; margin-left: auto; margin-right: auto;
+               background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
+.lang-toggle button { background: none; border: none; color: var(--muted); font: inherit; font-size: 12px;
+               font-weight: 800; padding: 5px 13px; border-radius: 999px; cursor: pointer; }
+.lang-toggle button.active { background: var(--brand); color: var(--brand-ink); }

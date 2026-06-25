@@ -36,14 +36,14 @@ const Onboarding = {
     document.getElementById("onboardNotifyBtn").addEventListener("click", async () => {
       const btn = document.getElementById("onboardNotifyBtn");
       btn.disabled = true;
-      btn.innerHTML = 'Moment…';
+      btn.innerHTML = t("auth.moment");
       const ok = await Push.enable();
       if (ok) {
-        btn.innerHTML = '<i class="ti ti-check"></i> Aktiviert';
+        btn.innerHTML = `<i class="ti ti-check"></i> ${t("onboard.activated")}`;
         setTimeout(Onboarding.dismiss, 1000);
       } else {
         btn.disabled = false;
-        btn.innerHTML = '<i class="ti ti-bell"></i> Benachrichtigungen erlauben';
+        btn.innerHTML = `<i class="ti ti-bell"></i> ${t("onboard.notify")}`;
       }
     });
   },
@@ -64,26 +64,21 @@ const Onboarding = {
     const notifyBtn  = document.getElementById("onboardNotifyBtn");
 
     if (showInstall) {
-      title.textContent = "SideQuest als App installieren";
+      title.textContent = t("onboard.title");
       if (Onboarding.isIOS()) {
-        text.innerHTML = 'Tippe unten auf das <b>Teilen-Symbol</b> ' +
-          '(Quadrat mit Pfeil nach oben) und dann auf <b>„Zum Home-Bildschirm"</b>. ' +
-          'Danach kannst du auch Benachrichtigungen erlauben.';
+        text.innerHTML = t("onboard.iosText");
         installBtn.classList.add("hidden");
       } else if (Onboarding.deferredPrompt) {
-        text.textContent = "Installiere SideQuest mit einem Tipp – dann liegt es als App " +
-          "auf deinem Startbildschirm und du verpasst keine Challenge.";
+        text.innerHTML = t("onboard.androidText");
         installBtn.classList.remove("hidden");
       } else {
-        text.innerHTML = 'Öffne das Browser-Menü <b>(⋮)</b> und wähle ' +
-          '<b>„App installieren"</b> bzw. <b>„Zum Startbildschirm hinzufügen"</b>.';
+        text.innerHTML = t("onboard.genericText");
         installBtn.classList.add("hidden");
       }
     } else {
       // Schon installiert -> nur noch Benachrichtigungen anbieten.
-      title.textContent = "Bleib auf dem Laufenden";
-      text.textContent = "Erlaube Benachrichtigungen, dann sagen wir dir Bescheid, " +
-        "sobald eine neue Challenge startet.";
+      title.textContent = t("onboard.titleNotify");
+      text.innerHTML = t("onboard.notifyText");
       installBtn.classList.add("hidden");
     }
 

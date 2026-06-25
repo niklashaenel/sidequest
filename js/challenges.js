@@ -4,14 +4,15 @@
 
 const Challenges = {
 
-  // Anzeige-Infos je Challenge-Typ (Label, Icon-CSS-Klasse, Tabler-Icon).
+  // Anzeige-Infos je Challenge-Typ (Label-Key, Icon-CSS-Klasse, Tabler-Icon).
   kindMeta: {
-    hourly:  { label: "Stündlich",       icon: "ti-bolt", cls: "k-hourly"  },
-    daily:   { label: "Tages-Challenge", icon: "ti-sun",  cls: "k-daily"   },
-    special: { label: "Spezial-Event",   icon: "ti-star", cls: "k-special" },
+    hourly:  { labelKey: "kind.hourly",  icon: "ti-bolt", cls: "k-hourly"  },
+    daily:   { labelKey: "kind.daily",   icon: "ti-sun",  cls: "k-daily"   },
+    special: { labelKey: "kind.special", icon: "ti-star", cls: "k-special" },
   },
   meta(kind) {
-    return Challenges.kindMeta[kind] || { label: "Challenge", icon: "ti-flag", cls: "k-daily" };
+    const m = Challenges.kindMeta[kind] || { labelKey: "kind.generic", icon: "ti-flag", cls: "k-daily" };
+    return { label: t(m.labelKey), icon: m.icon, cls: m.cls };
   },
 
   // Sorgt (serverseitig) dafür, dass für JETZT eine Tages- + Stunden-Challenge
@@ -69,16 +70,16 @@ const Challenges = {
   // Restzeit bis ends_at hübsch formatieren, z. B. "23:11 Min", "6 Std", "2 Tage".
   formatRemaining(endsAtIso) {
     const ms = new Date(endsAtIso).getTime() - Date.now();
-    if (ms <= 0) return "abgelaufen";
+    if (ms <= 0) return t("time.expired");
     const totalMin = Math.floor(ms / 60000);
     const days = Math.floor(totalMin / 1440);
     const hours = Math.floor((totalMin % 1440) / 60);
     const mins = totalMin % 60;
     const secs = Math.floor((ms % 60000) / 1000);
-    if (days >= 1) return days + (days === 1 ? " Tag" : " Tage");
-    if (hours >= 1) return hours + " Std " + mins + " Min";
+    if (days >= 1) return days + " " + (days === 1 ? t("time.day") : t("time.days"));
+    if (hours >= 1) return hours + " " + t("word.std") + " " + mins + " " + t("word.min");
     // Unter 1 Stunde: live mitzählende mm:ss-Anzeige
-    return String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0") + " Min";
+    return String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0") + " " + t("word.min");
   },
 
   // Soll der Countdown sekündlich blinken/warnen? (unter 1 Stunde Restzeit)

@@ -48,7 +48,7 @@ const Feed = {
 
   // Abzeichen für die frühesten Beiträge (wie „erster Kommentar" auf TikTok).
   earlyLabel(rank) {
-    return rank === 1 ? "🥇 Erster!" : rank === 2 ? "🥈 2." : "🥉 3.";
+    return rank === 1 ? t("early.first") : rank === 2 ? t("early.second") : t("early.third");
   },
 
   // Avatar als HTML: eigenes Foto (avatar_url) oder Anfangsbuchstabe, mit optionalem Rahmen.
@@ -93,7 +93,7 @@ const Feed = {
     const myId = me ? me.id : null;
     const list  = document.getElementById("feedList");
     const empty = document.getElementById("feedEmpty");
-    list.innerHTML = '<p class="spinner-text">Lade Beiträge…</p>';
+    list.innerHTML = `<p class="spinner-text">${t("feed.loading")}</p>`;
     empty.classList.add("hidden");
 
     // 1) Alle Beiträge zur Challenge (neueste zuerst) + Folgen + Freunde – parallel.
@@ -103,7 +103,7 @@ const Feed = {
       Social.friendData(),
     ]);
     if (subsRes.error) {
-      list.innerHTML = `<p class="spinner-text">Fehler beim Laden: ${Feed.escape(subsRes.error.message)}</p>`;
+      list.innerHTML = `<p class="spinner-text">${Feed.escape(t("feed.loadError", { msg: subsRes.error.message }))}</p>`;
       return;
     }
 
@@ -123,8 +123,8 @@ const Feed = {
     list.innerHTML = "";
     if (!subs.length) {
       empty.innerHTML = (mode === "friends")
-        ? '<i class="ti ti-users"></i>Noch keine Beiträge von Freunden. Folge Leuten im „Alle"-Tab!'
-        : '<i class="ti ti-photo"></i>Noch keine weiteren Beiträge. Du bist früh dran!';
+        ? `<i class="ti ti-users"></i>${Feed.escape(t("feed.emptyFriends"))}`
+        : `<i class="ti ti-photo"></i>${Feed.escape(t("feed.emptyAll"))}`;
       empty.classList.remove("hidden");
       return;
     }
@@ -142,7 +142,7 @@ const Feed = {
     // 4) Jeden Beitrag rendern + interaktiv machen.
     for (const item of subs) {
       const prof = profById[item.user_id] || {};
-      const username = prof.username || "Jemand";
+      const username = prof.username || t("feed.someone");
       const liked = likes.likedByMe.has(item.id);
       const likeCount = likes.countById[item.id] || 0;
       const commentCount = commentCounts[item.id] || 0;
@@ -163,12 +163,12 @@ const Feed = {
             <div class="fi-time">${Feed.formatTime(item.created_at)}</div>
           </div>
           ${isMine
-            ? '<button class="fi-del" aria-label="Beitrag löschen"><i class="ti ti-trash"></i></button>'
+            ? '<button class="fi-del"><i class="ti ti-trash"></i></button>'
             : `<div class="fi-head-actions">
-                 <button class="fi-follow${following ? " following" : ""}" data-uid="${uid}">${following ? "Folge ich" : "+ Folgen"}</button>
+                 <button class="fi-follow${following ? " following" : ""}" data-uid="${uid}">${following ? t("feed.following2") : t("feed.follow")}</button>
                  ${isFriend
-                   ? '<span class="fi-friend done" title="Befreundet"><i class="ti ti-user-check"></i></span>'
-                   : `<button class="fi-friend${reqPending ? " pending" : ""}" data-uid="${uid}" ${reqPending ? "disabled" : ""} aria-label="Als Freund anfragen" title="Als Freund anfragen"><i class="ti ti-user-plus"></i></button>`}
+                   ? `<span class="fi-friend done" title="${Feed.escape(t("friend.added.title"))}"><i class="ti ti-user-check"></i></span>`
+                   : `<button class="fi-friend${reqPending ? " pending" : ""}" data-uid="${uid}" ${reqPending ? "disabled" : ""} title="${Feed.escape(t("friend.add.title"))}"><i class="ti ti-user-plus"></i></button>`}
                </div>`}
         </div>
         <img class="fi-img" src="${Feed.escape(item.image_url)}" alt="Beitrag von ${Feed.escape(username)}" loading="lazy" />
@@ -179,7 +179,7 @@ const Feed = {
           <button class="fi-act fi-comment-toggle" aria-label="Kommentare">
             <i class="ti ti-message-circle"></i><span class="comment-count">${commentCount}</span>
           </button>
-          ${isMine ? "" : '<button class="fi-act fi-report" aria-label="Melden" title="Beitrag melden"><i class="ti ti-flag"></i></button>'}
+          ${isMine ? "" : `<button class="fi-act fi-report" title="${Feed.escape(t("rep.title"))}"><i class="ti ti-flag"></i></button>`}
         </div>
         ${Feed.reactionBar(reactions.countById[item.id] || {}, reactions.mineById[item.id])}
         <div class="fi-comments hidden"></div>`;
@@ -223,14 +223,14 @@ const Feed = {
         const prev = following;
         following = !following;
         followBtn.classList.toggle("following", following);
-        followBtn.textContent = following ? "Folge ich" : "+ Folgen";
+        followBtn.textContent = following ? t("feed.following2") : t("feed.follow");
         try {
           await Social.toggleFollow(followBtn.dataset.uid, prev);
         } catch (e) {
           following = prev;
           followBtn.classList.toggle("following", following);
-          followBtn.textContent = following ? "Folge ich" : "+ Folgen";
-          alert("Hat nicht geklappt: " + e.message);
+          followBtn.textContent = following ? t("feed.following2") : t("feed.follow");
+          alert(t("common.failed", { msg: e.message }));
         } finally { fBusy = false; }
       });
     }
@@ -247,12 +247,12 @@ const Feed = {
           if (res === "accepted" || res === "friends") {
             friendBtn.classList.add("done");
             friendBtn.innerHTML = '<i class="ti ti-user-check"></i>';
-            friendBtn.title = "Befreundet";
+            friendBtn.title = t("friend.added.title");
           } else {
             friendBtn.classList.add("pending");
-            friendBtn.title = "Anfrage gesendet";
+            friendBtn.title = t("friend.requested.title");
           }
-        } catch (e) { friendBtn.disabled = false; alert("Hat nicht geklappt: " + e.message); }
+        } catch (e) { friendBtn.disabled = false; alert(t("common.failed", { msg: e.message })); }
         finally { fbBusy = false; }
       });
     }
@@ -300,7 +300,7 @@ const Feed = {
     const del = el.querySelector(".fi-del");
     if (del) {
       del.addEventListener("click", async () => {
-        if (!confirm("Diesen Beitrag wirklich löschen?")) return;
+        if (!confirm(t("post.delConfirm"))) return;
         del.disabled = true;
         try {
           await Social.deleteSubmission(item.id, item.image_url);
@@ -310,7 +310,7 @@ const Feed = {
           if (typeof onDeleted === "function") onDeleted(item);
         } catch (e) {
           del.disabled = false;
-          alert("Löschen fehlgeschlagen: " + e.message);
+          alert(t("post.delFailed", { msg: e.message }));
         }
       });
     }
@@ -318,20 +318,20 @@ const Feed = {
 
   // Kommentarbereich eines Beitrags füllen (Liste + Eingabefeld).
   async renderComments(box, submissionId, countEl) {
-    box.innerHTML = '<p class="comment-empty">Lade Kommentare…</p>';
+    box.innerHTML = `<p class="comment-empty">${t("comments.loading")}</p>`;
     let comments = [];
     try { comments = await Social.commentsFor(submissionId); }
-    catch (e) { box.innerHTML = `<p class="comment-empty">Fehler: ${Feed.escape(e.message)}</p>`; return; }
+    catch (e) { box.innerHTML = `<p class="comment-empty">${Feed.escape(t("common.error", { msg: e.message }))}</p>`; return; }
 
     const renderList = () => {
       const items = comments.map((c) =>
         `<p class="comment"><b>${Feed.escape(c.username)}</b>${Feed.escape(c.body)}<span class="c-time">${Feed.formatTime(c.created_at)}</span></p>`
       ).join("");
       box.innerHTML =
-        (comments.length ? items : '<p class="comment-empty">Noch keine Kommentare. Schreib den ersten!</p>') +
+        (comments.length ? items : `<p class="comment-empty">${Feed.escape(t("comments.empty"))}</p>`) +
         `<form class="comment-form">
-           <input type="text" placeholder="Kommentar schreiben…" maxlength="300" />
-           <button type="submit">Senden</button>
+           <input type="text" placeholder="${Feed.escape(t("comments.ph"))}" maxlength="300" />
+           <button type="submit">${Feed.escape(t("comments.send"))}</button>
          </form>`;
 
       const form = box.querySelector(".comment-form");
@@ -343,12 +343,12 @@ const Feed = {
         input.disabled = true;
         try {
           await Social.addComment(submissionId, text);
-          comments.push({ body: text, created_at: new Date().toISOString(), username: "Du" });
+          comments.push({ body: text, created_at: new Date().toISOString(), username: t("feed.you") });
           if (countEl) countEl.textContent = comments.length;
           renderList();
         } catch (err) {
           input.disabled = false;
-          alert("Kommentar fehlgeschlagen: " + err.message);
+          alert(t("comment.failed", { msg: err.message }));
         }
       });
     };

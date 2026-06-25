@@ -1,0 +1,430 @@
+// =====================================================================
+//  i18n.js – Sprachumschaltung Deutsch / English
+// =====================================================================
+//
+//  Statische Texte: data-i18n="key" (textContent), data-i18n-html (innerHTML),
+//  data-i18n-ph (placeholder), data-i18n-attr (title + aria-label).
+//  Dynamische Texte im JS: t("key", { param: wert }).
+
+const I18N = {
+  lang: localStorage.getItem("sq-lang") || "de",
+
+  dict: {
+    de: {
+      // Header / allgemein
+      "nav.overview": "Übersicht",
+      "nav.back": "Zurück",
+      "title.info": "So funktioniert's",
+      "title.profile": "Profil",
+      "title.logout": "Abmelden",
+      "common.close": "Schließen",
+      "common.loading": "Lädt…",
+      "common.error": "Fehler: {msg}",
+      "common.saveFailed": "Speichern fehlgeschlagen: {msg}",
+      "common.failed": "Hat nicht geklappt: {msg}",
+      "lang.label": "Sprache",
+
+      // Auth
+      "auth.tagline": "Eine Challenge. Erst posten, dann sehen.",
+      "auth.username": "Anzeigename",
+      "auth.username.ph": "z. B. Niklas",
+      "auth.email": "E-Mail",
+      "auth.password": "Passwort",
+      "auth.password.ph": "mind. 6 Zeichen",
+      "auth.login": "Login",
+      "auth.register": "Registrieren",
+      "auth.noAccount": "Noch kein Konto?",
+      "auth.haveAccount": "Schon ein Konto?",
+      "auth.moment": "Moment…",
+      "auth.needCreds": "Bitte E-Mail und Passwort eingeben.",
+      "auth.needName": "Bitte einen Anzeigenamen wählen.",
+      "auth.accountCreated": "Konto angelegt. Bitte E-Mail bestätigen, dann einloggen.",
+
+      // Übersicht
+      "ov.greetingDefault": "Los geht's!",
+      "ov.greeting": "Hi, {name}!",
+      "ov.sub": "Wähle eine Challenge und zeig, was du drauf hast.",
+      "ov.active": "Jetzt aktiv",
+      "ov.reported": "🚩 Gemeldete Beiträge",
+      "ov.popularToday": "🏆 Beliebt heute",
+      "ov.weeklyBoard": "🏅 Bestenliste der Woche",
+      "ov.bestPhotos": "📸 Beste Bilder der Woche",
+      "ov.archive": "🗄️ Vergangene Challenges",
+      "ov.suggest": "💡 Challenge vorschlagen",
+      "ov.suggest.ph": "Deine Idee für eine Challenge… (z. B. „Zeig deinen letzten Suchverlauf\")",
+      "ov.suggest.btn": "Vorschlagen",
+      "ov.suggest.thanks": "Danke! Idee eingereicht 💜",
+      "ov.suggest.short": "Bitte etwas mehr beschreiben.",
+      "ov.empty": "Gerade keine aktive Challenge. Schau später wieder vorbei!",
+      "ov.communityOne": "🔥 <b>{posts}</b> Beitrag heute · <b>{people}</b> dabei",
+      "ov.communityMany": "🔥 <b>{posts}</b> Beiträge heute · <b>{people}</b> dabei",
+
+      // Stats
+      "stat.level": "Level",
+      "stat.streak": "Serie",
+      "stat.likes": "Likes",
+      "stat.done": "Erledigt",
+      "stat.likesReceived": "Likes erhalten",
+
+      // Challenge-Karte / Typen / Zeit
+      "cc.start": "Challenge starten",
+      "cc.doneView": "Erledigt – Feed ansehen",
+      "cc.participants": "{n} dabei",
+      "cc.beFirst": "Sei der/die Erste!",
+      "kind.hourly": "Stündlich",
+      "kind.daily": "Tages-Challenge",
+      "kind.special": "Spezial-Event",
+      "kind.generic": "Challenge",
+      "time.expired": "abgelaufen",
+      "time.day": "Tag",
+      "time.days": "Tage",
+      "time.today": "heute",
+      "time.yesterday": "gestern",
+      "word.std": "Std",
+      "word.min": "Min",
+      "ov.archiveHourly": "⚡ Stunden-Challenges",
+      "ov.archiveDaily": "🌙 Tages-Challenges",
+      "wb.you": "du",
+      "detail.loading": "Lade Challenge…",
+
+      // Upload
+      "up.uploadUnlock": "Hochladen & freischalten",
+      "up.retake": "Neues Foto machen",
+      "up.uploading": "Lade hoch…",
+
+      // Feed
+      "feed.all": "Alle",
+      "feed.following": "Folge ich",
+      "feed.emptyAll": "Noch keine weiteren Beiträge. Du bist früh dran!",
+      "feed.emptyFriends": "Noch keine Beiträge von Freunden. Folge Leuten im „Alle\"-Tab!",
+      "feed.loading": "Lade Beiträge…",
+      "feed.loadError": "Fehler beim Laden: {msg}",
+      "feed.follow": "+ Folgen",
+      "feed.following2": "Folge ich",
+      "feed.someone": "Jemand",
+      "feed.you": "Du",
+      "early.first": "🥇 Erster!",
+      "early.second": "🥈 2.",
+      "early.third": "🥉 3.",
+      "friend.add.title": "Als Freund anfragen",
+      "friend.added.title": "Befreundet",
+      "friend.requested.title": "Anfrage gesendet",
+      "comments.loading": "Lade Kommentare…",
+      "comments.empty": "Noch keine Kommentare. Schreib den ersten!",
+      "comments.ph": "Kommentar schreiben…",
+      "comments.send": "Senden",
+      "comment.failed": "Kommentar fehlgeschlagen: {msg}",
+      "post.delConfirm": "Diesen Beitrag wirklich löschen?",
+      "post.delFailed": "Löschen fehlgeschlagen: {msg}",
+
+      // Profil
+      "prof.editAvatar": "Profilbild ändern",
+      "prof.notify": "Benachrichtigungen aktivieren",
+      "prof.friends": "Freunde & Anfragen",
+      "prof.collection": "Sammlung & Erfolge",
+      "prof.yourPosts": "Deine Beiträge",
+      "prof.noPosts": "Noch keine Beiträge. Mach deine erste Challenge!",
+      "prof.levelLabel": "Level {n}",
+      "prof.nextLevel": "Noch {xp} XP bis Level {lvl}",
+      "prof.maxLevel": "Höchstes Level!",
+      "notify.enabled": "🔔 Benachrichtigungen aktiviert! Du verpasst keine Challenge mehr.",
+
+      // Freunde
+      "fr.title": "👥 Freunde",
+      "fr.requests": "🤝 Freundschaftsanfragen",
+      "fr.friends": "Freunde",
+      "fr.following": "Folge ich",
+      "fr.accept": "Annehmen",
+      "fr.remove": "Entfernen",
+      "fr.unfollow": "Entfolgen",
+      "fr.addFriend": "+ Freund",
+      "fr.isFriend": "✓ Freund",
+      "fr.requested": "angefragt",
+      "fr.noFriends": "Noch keine Freunde – schick im Feed eine Anfrage! 🤝",
+      "fr.noFollows": "Du folgst noch niemandem. Im Feed auf „+ Folgen\" tippen.",
+      "fr.endConfirm": "Freundschaft beenden?",
+
+      // Sammlung
+      "col.title": "🏆 Sammlung",
+      "col.titles": "Titel",
+      "col.frames": "Rahmen",
+      "col.unlocked": "{got}/{total} freigeschaltet",
+      "col.equip": "Ausrüsten",
+
+      // Melden / Moderation
+      "rep.title": "Beitrag melden",
+      "rep.desc": "Warum meldest du diesen Beitrag? Bei mehreren Meldungen wird er automatisch ausgeblendet und geprüft.",
+      "rep.reason1": "Challenge nicht erfüllt",
+      "rep.reason2": "Unangemessen / anstößig",
+      "rep.reason3": "Spam / sonstiges",
+      "rep.thanks": "🚩 Danke! Der Beitrag wurde gemeldet.",
+      "rep.failed": "Melden fehlgeschlagen: {msg}",
+      "mod.approve": "Freigeben",
+      "mod.delete": "Löschen",
+      "mod.delConfirm": "Beitrag endgültig löschen?",
+
+      // Avatar-Picker
+      "ap.title": "Profilbild wählen",
+      "ap.desc": "Nimm eins deiner Fotos – oder zurück zum Buchstaben.",
+      "ap.hint": "Tipp auf „Galerie\", um ein beliebiges Bild zu nehmen.",
+      "ap.gallery": "Galerie",
+      "ap.uploadFailed": "Hochladen fehlgeschlagen: {msg}",
+
+      // Info-Panel
+      "info.title": "So funktioniert SideQuest",
+      "info.intro": "Eine Foto-Challenge nach der anderen – <b>erst posten, dann sehen.</b> 📸",
+      "info.1.t": "Challenges", "info.1.d": "Stündlich & täglich neue Foto-Aufgaben mit Countdown. Tippe eine an und leg los.",
+      "info.2.t": "Posten schaltet frei", "info.2.d": "Mach ein Foto und lad es hoch – erst danach siehst du die Beiträge der anderen im Feed.",
+      "info.3.t": "Level & XP", "info.3.d": "+10 XP pro Beitrag, +5 für jedes erhaltene Like. Genug XP = nächstes Level.",
+      "info.4.t": "Serie", "info.4.d": "Poste jeden Tag, um deine Serie zu halten. Meilensteine (3/7/14/30 Tage) geben fette Bonus-XP.",
+      "info.5.t": "Reaktionen, Likes & Kommentare", "info.5.d": "Reagiere mit 😂🔥😍, vergib Likes und schreib Kommentare unter die Beiträge.",
+      "info.6.t": "Folgen & Freunde", "info.6.d": "Folge jedem (eigener „Folge ich\"-Feed). Freunde brauchen eine Anfrage – beide müssen zustimmen.",
+      "info.7.t": "Profil anpassen", "info.7.d": "Profilbild aus deinen Fotos wählen, Titel & Rahmen freischalten (z. B. Neon-Glow bei langer Serie).",
+      "info.8.t": "Bestenliste & beste Bilder", "info.8.d": "Wöchentliches Ranking und die Top-Fotos der Woche – sei ganz oben dabei.",
+      "info.9.t": "Früher Vogel", "info.9.d": "Die ersten 3 Beiträge einer Challenge bekommen ein 🥇🥈🥉-Abzeichen. Sei schnell!",
+      "info.10.t": "Archiv", "info.10.d": "Verpasst? Vergangene Challenges der Woche kannst du unten weiter ansehen.",
+      "info.11.t": "Benachrichtigungen", "info.11.d": "Im Profil aktivieren, damit du keine neue Challenge verpasst.",
+      "info.12.t": "Eigene Ideen", "info.12.d": "Unten auf der Übersicht kannst du eigene Challenge-Ideen vorschlagen.",
+
+      // Onboarding
+      "onboard.title": "SideQuest als App installieren",
+      "onboard.titleNotify": "Bleib auf dem Laufenden",
+      "onboard.install": "App installieren",
+      "onboard.notify": "Benachrichtigungen erlauben",
+      "onboard.later": "Später",
+      "onboard.activated": "Aktiviert",
+      "onboard.iosText": "Tippe unten auf das <b>Teilen-Symbol</b> (Quadrat mit Pfeil nach oben) und dann auf <b>„Zum Home-Bildschirm\"</b>. Danach kannst du auch Benachrichtigungen erlauben.",
+      "onboard.androidText": "Installiere SideQuest mit einem Tipp – dann liegt es als App auf deinem Startbildschirm und du verpasst keine Challenge.",
+      "onboard.genericText": "Öffne das Browser-Menü <b>(⋮)</b> und wähle <b>„App installieren\"</b> bzw. <b>„Zum Startbildschirm hinzufügen\"</b>.",
+      "onboard.notifyText": "Erlaube Benachrichtigungen, dann sagen wir dir Bescheid, sobald eine neue Challenge startet.",
+
+      // Fehler
+      "err.invalidLogin": "E-Mail oder Passwort falsch.",
+      "err.alreadyRegistered": "Diese E-Mail ist schon registriert. Bitte einloggen.",
+      "err.passwordShort": "Passwort muss mindestens 6 Zeichen haben.",
+      "err.emailNotConfirmed": "E-Mail noch nicht bestätigt.",
+      "err.network": "Keine Verbindung zu Supabase. URL/Key prüfen.",
+      "err.rls": "Keine Berechtigung (RLS). Policies prüfen.",
+      "err.notLoggedIn": "Nicht eingeloggt.",
+
+      // Serien-Toast
+      "toast.streak": "🔥 <b>{label}</b><br>+{xp} Bonus-XP kassiert!",
+    },
+
+    en: {
+      "nav.overview": "Overview",
+      "nav.back": "Back",
+      "title.info": "How it works",
+      "title.profile": "Profile",
+      "title.logout": "Log out",
+      "common.close": "Close",
+      "common.loading": "Loading…",
+      "common.error": "Error: {msg}",
+      "common.saveFailed": "Saving failed: {msg}",
+      "common.failed": "Didn't work: {msg}",
+      "lang.label": "Language",
+
+      "auth.tagline": "One challenge. Post first, then see.",
+      "auth.username": "Display name",
+      "auth.username.ph": "e.g. Alex",
+      "auth.email": "Email",
+      "auth.password": "Password",
+      "auth.password.ph": "at least 6 characters",
+      "auth.login": "Log in",
+      "auth.register": "Sign up",
+      "auth.noAccount": "No account yet?",
+      "auth.haveAccount": "Already have an account?",
+      "auth.moment": "One sec…",
+      "auth.needCreds": "Please enter email and password.",
+      "auth.needName": "Please choose a display name.",
+      "auth.accountCreated": "Account created. Please confirm your email, then log in.",
+
+      "ov.greetingDefault": "Let's go!",
+      "ov.greeting": "Hi, {name}!",
+      "ov.sub": "Pick a challenge and show what you've got.",
+      "ov.active": "Active now",
+      "ov.reported": "🚩 Reported posts",
+      "ov.popularToday": "🏆 Popular today",
+      "ov.weeklyBoard": "🏅 Leaderboard of the week",
+      "ov.bestPhotos": "📸 Best photos of the week",
+      "ov.archive": "🗄️ Past challenges",
+      "ov.suggest": "💡 Suggest a challenge",
+      "ov.suggest.ph": "Your challenge idea… (e.g. \"Show your last search history\")",
+      "ov.suggest.btn": "Suggest",
+      "ov.suggest.thanks": "Thanks! Idea submitted 💜",
+      "ov.suggest.short": "Please describe it a bit more.",
+      "ov.empty": "No active challenge right now. Check back later!",
+      "ov.communityOne": "🔥 <b>{posts}</b> post today · <b>{people}</b> joined",
+      "ov.communityMany": "🔥 <b>{posts}</b> posts today · <b>{people}</b> joined",
+
+      "stat.level": "Level",
+      "stat.streak": "Streak",
+      "stat.likes": "Likes",
+      "stat.done": "Done",
+      "stat.likesReceived": "Likes received",
+
+      "cc.start": "Start challenge",
+      "cc.doneView": "Done – view feed",
+      "cc.participants": "{n} joined",
+      "cc.beFirst": "Be the first!",
+      "kind.hourly": "Hourly",
+      "kind.daily": "Daily challenge",
+      "kind.special": "Special event",
+      "kind.generic": "Challenge",
+      "time.expired": "expired",
+      "time.day": "day",
+      "time.days": "days",
+      "time.today": "today",
+      "time.yesterday": "yesterday",
+      "word.std": "h",
+      "word.min": "min",
+      "ov.archiveHourly": "⚡ Hourly challenges",
+      "ov.archiveDaily": "🌙 Daily challenges",
+      "wb.you": "you",
+      "detail.loading": "Loading challenge…",
+
+      "up.uploadUnlock": "Upload & unlock",
+      "up.retake": "Retake photo",
+      "up.uploading": "Uploading…",
+
+      "feed.all": "All",
+      "feed.following": "Following",
+      "feed.emptyAll": "No other posts yet. You're early!",
+      "feed.emptyFriends": "No posts from people you follow yet. Follow people in the \"All\" tab!",
+      "feed.loading": "Loading posts…",
+      "feed.loadError": "Loading error: {msg}",
+      "feed.follow": "+ Follow",
+      "feed.following2": "Following",
+      "feed.someone": "Someone",
+      "feed.you": "You",
+      "early.first": "🥇 First!",
+      "early.second": "🥈 2nd",
+      "early.third": "🥉 3rd",
+      "friend.add.title": "Send friend request",
+      "friend.added.title": "Friends",
+      "friend.requested.title": "Request sent",
+      "comments.loading": "Loading comments…",
+      "comments.empty": "No comments yet. Be the first!",
+      "comments.ph": "Write a comment…",
+      "comments.send": "Send",
+      "comment.failed": "Comment failed: {msg}",
+      "post.delConfirm": "Really delete this post?",
+      "post.delFailed": "Delete failed: {msg}",
+
+      "prof.editAvatar": "Change profile picture",
+      "prof.notify": "Enable notifications",
+      "prof.friends": "Friends & requests",
+      "prof.collection": "Collection & achievements",
+      "prof.yourPosts": "Your posts",
+      "prof.noPosts": "No posts yet. Do your first challenge!",
+      "prof.levelLabel": "Level {n}",
+      "prof.nextLevel": "{xp} XP to level {lvl}",
+      "prof.maxLevel": "Max level!",
+      "notify.enabled": "🔔 Notifications on! You won't miss a challenge.",
+
+      "fr.title": "👥 Friends",
+      "fr.requests": "🤝 Friend requests",
+      "fr.friends": "Friends",
+      "fr.following": "Following",
+      "fr.accept": "Accept",
+      "fr.remove": "Remove",
+      "fr.unfollow": "Unfollow",
+      "fr.addFriend": "+ Friend",
+      "fr.isFriend": "✓ Friend",
+      "fr.requested": "requested",
+      "fr.noFriends": "No friends yet – send a request in the feed! 🤝",
+      "fr.noFollows": "You're not following anyone yet. Tap \"+ Follow\" in the feed.",
+      "fr.endConfirm": "End friendship?",
+
+      "col.title": "🏆 Collection",
+      "col.titles": "Titles",
+      "col.frames": "Frames",
+      "col.unlocked": "{got}/{total} unlocked",
+      "col.equip": "Equip",
+
+      "rep.title": "Report post",
+      "rep.desc": "Why are you reporting this post? After several reports it's hidden automatically and reviewed.",
+      "rep.reason1": "Challenge not completed",
+      "rep.reason2": "Inappropriate / offensive",
+      "rep.reason3": "Spam / other",
+      "rep.thanks": "🚩 Thanks! The post was reported.",
+      "rep.failed": "Report failed: {msg}",
+      "mod.approve": "Approve",
+      "mod.delete": "Delete",
+      "mod.delConfirm": "Delete post permanently?",
+
+      "ap.title": "Choose profile picture",
+      "ap.desc": "Pick one of your photos – or back to the letter.",
+      "ap.hint": "Tap \"Gallery\" to pick any image.",
+      "ap.gallery": "Gallery",
+      "ap.uploadFailed": "Upload failed: {msg}",
+
+      "info.title": "How SideQuest works",
+      "info.intro": "One photo challenge after another – <b>post first, then see.</b> 📸",
+      "info.1.t": "Challenges", "info.1.d": "New photo tasks every hour & day, with a countdown. Tap one and get going.",
+      "info.2.t": "Posting unlocks the feed", "info.2.d": "Take a photo and upload it – only then do you see everyone else's posts.",
+      "info.3.t": "Level & XP", "info.3.d": "+10 XP per post, +5 for every like you get. Enough XP = next level.",
+      "info.4.t": "Streak", "info.4.d": "Post every day to keep your streak. Milestones (3/7/14/30 days) give big bonus XP.",
+      "info.5.t": "Reactions, likes & comments", "info.5.d": "React with 😂🔥😍, give likes and write comments under the posts.",
+      "info.6.t": "Following & friends", "info.6.d": "Follow anyone (your own \"Following\" feed). Friends need a request – both have to agree.",
+      "info.7.t": "Customize your profile", "info.7.d": "Pick a profile picture from your photos, unlock titles & frames (e.g. Neon Glow for a long streak).",
+      "info.8.t": "Leaderboard & best photos", "info.8.d": "Weekly ranking and the top photos of the week – aim for the top.",
+      "info.9.t": "Early bird", "info.9.d": "The first 3 posts of a challenge get a 🥇🥈🥉 badge. Be quick!",
+      "info.10.t": "Archive", "info.10.d": "Missed one? You can still view this week's past challenges below.",
+      "info.11.t": "Notifications", "info.11.d": "Turn them on in your profile so you never miss a new challenge.",
+      "info.12.t": "Your own ideas", "info.12.d": "At the bottom of the overview you can suggest your own challenge ideas.",
+
+      "onboard.title": "Install SideQuest as an app",
+      "onboard.titleNotify": "Stay in the loop",
+      "onboard.install": "Install app",
+      "onboard.notify": "Allow notifications",
+      "onboard.later": "Later",
+      "onboard.activated": "Activated",
+      "onboard.iosText": "Tap the <b>Share</b> icon below (square with an up arrow), then <b>\"Add to Home Screen\"</b>. After that you can also allow notifications.",
+      "onboard.androidText": "Install SideQuest with one tap – then it sits on your home screen like a real app and you won't miss a challenge.",
+      "onboard.genericText": "Open the browser menu <b>(⋮)</b> and choose <b>\"Install app\"</b> or <b>\"Add to Home Screen\"</b>.",
+      "onboard.notifyText": "Allow notifications and we'll let you know as soon as a new challenge starts.",
+
+      "err.invalidLogin": "Wrong email or password.",
+      "err.alreadyRegistered": "This email is already registered. Please log in.",
+      "err.passwordShort": "Password must be at least 6 characters.",
+      "err.emailNotConfirmed": "Email not confirmed yet.",
+      "err.network": "No connection to Supabase. Check URL/key.",
+      "err.rls": "No permission (RLS). Check policies.",
+      "err.notLoggedIn": "Not logged in.",
+
+      "toast.streak": "🔥 <b>{label}</b><br>+{xp} bonus XP earned!",
+    },
+  },
+
+  t(key, params) {
+    const table = I18N.dict[I18N.lang] || I18N.dict.de;
+    let s = table[key];
+    if (s == null) s = I18N.dict.de[key];
+    if (s == null) return key;
+    if (params) s = s.replace(/\{(\w+)\}/g, (_, k) => (params[k] != null ? params[k] : "{" + k + "}"));
+    return s;
+  },
+
+  apply(root) {
+    const scope = root || document;
+    scope.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = I18N.t(el.dataset.i18n); });
+    scope.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = I18N.t(el.dataset.i18nHtml); });
+    scope.querySelectorAll("[data-i18n-ph]").forEach((el) => { el.placeholder = I18N.t(el.dataset.i18nPh); });
+    scope.querySelectorAll("[data-i18n-attr]").forEach((el) => {
+      const v = I18N.t(el.dataset.i18nAttr); el.title = v; el.setAttribute("aria-label", v);
+    });
+    document.querySelectorAll(".lang-toggle button").forEach((b) =>
+      b.classList.toggle("active", b.dataset.lang === I18N.lang));
+  },
+
+  set(lang) {
+    I18N.lang = lang;
+    localStorage.setItem("sq-lang", lang);
+    document.documentElement.lang = lang;
+    I18N.apply();
+    if (typeof relocalize === "function") relocalize(); // dynamische Screens neu zeichnen
+  },
+};
+
+const t = (key, params) => I18N.t(key, params);

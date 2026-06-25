@@ -32,7 +32,7 @@ const Upload = {
   // Gibt die öffentliche URL zurück.
   async avatar(file) {
     const user = await Auth.getUser();
-    if (!user) throw new Error("Nicht eingeloggt.");
+    if (!user) throw new Error(t("err.notLoggedIn"));
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
     const path = `avatars/${user.id}-${Date.now()}.${ext}`;
     const { error: upErr } = await sb.storage
@@ -46,7 +46,7 @@ const Upload = {
   // Foto hochladen + Eintrag schreiben.
   async submit(file, quest) {
     const user = await Auth.getUser();
-    if (!user) throw new Error("Nicht eingeloggt.");
+    if (!user) throw new Error(t("err.notLoggedIn"));
 
     // Dateiendung aus dem Dateinamen ziehen (Standard: jpg).
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();

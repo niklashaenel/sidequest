@@ -29,32 +29,32 @@ const state = {
 // Sammlungs-Metriken a. Freigeschaltet, sobald cur(a) >= target (oder Test-Freischaltung).
 // Titel: gespeichert wird das Label. Rahmen: gespeichert wird die id.
 const TITLES = [
-  { label: "Frischling",          icon: "ti-seeding",      task: "Bist am Start",                  target: 0,   cur: () => 1 },
-  { label: "Stammgast",           icon: "ti-photo",        task: "5 Challenges erledigen",         target: 5,   cur: (a) => a.done },
-  { label: "Plaudertasche 💬",     icon: "ti-message",      task: "20 Kommentare schreiben",        target: 20,  cur: (a) => a.comments },
-  { label: "Serientäter 🔥",       icon: "ti-flame",        task: "7 Tage Serie halten",            target: 7,   cur: (a) => a.streak },
-  { label: "Liebling ❤️",          icon: "ti-heart",        task: "25 Likes erhalten",              target: 25,  cur: (a) => a.likesReceived },
-  { label: "Frühaufsteher 🐦",     icon: "ti-medal",        task: "5× unter den ersten 3 sein",     target: 5,   cur: (a) => a.top3Count },
-  { label: "Veteran 🎖️",           icon: "ti-award",        task: "25 Challenges erledigen",        target: 25,  cur: (a) => a.done },
-  { label: "Allgegenwärtig 🌗",    icon: "ti-clock",        task: "Zu allen 4 Tageszeiten posten",  target: 4,   cur: (a) => a.hoursCovered },
-  { label: "Publikumsliebling 🌟", icon: "ti-stars",        task: "75 Likes erhalten",              target: 75,  cur: (a) => a.likesReceived },
-  { label: "Geist 👻",             icon: "ti-ghost",        task: "In unter 60 Sek. nach Start posten", target: 1, cur: (a) => a.within60 },
-  { label: "Unaufhaltsam ⚡",       icon: "ti-bolt",         task: "30 Tage Serie — kein Aussetzer",  target: 30,  cur: (a) => a.streak },
-  { label: "Der Erste 🥇",         icon: "ti-trophy",       task: "10× als Erste:r einer Challenge", target: 10,  cur: (a) => a.firstCount },
-  { label: "Influencer 📣",        icon: "ti-speakerphone", task: "200 Likes erhalten",             target: 200, cur: (a) => a.likesReceived },
-  { label: "Großmeister 🧠",        icon: "ti-brain",        task: "Level 20 erreichen",             target: 20,  cur: (a) => a.level },
-  { label: "Mythos 🐉",            icon: "ti-dragon",       task: "Level 30 — fast unmöglich",       target: 30,  cur: (a) => a.level },
+  { label: "Frischling",          icon: "ti-seeding",      task: "Bist am Start",                  taskEn: "You're here",                    target: 0,   cur: () => 1 },
+  { label: "Stammgast",           icon: "ti-photo",        task: "5 Challenges erledigen",         taskEn: "Complete 5 challenges",         target: 5,   cur: (a) => a.done },
+  { label: "Plaudertasche 💬",     icon: "ti-message",      task: "20 Kommentare schreiben",        taskEn: "Write 20 comments",             target: 20,  cur: (a) => a.comments },
+  { label: "Serientäter 🔥",       icon: "ti-flame",        task: "7 Tage Serie halten",            taskEn: "Keep a 7-day streak",           target: 7,   cur: (a) => a.streak },
+  { label: "Liebling ❤️",          icon: "ti-heart",        task: "25 Likes erhalten",              taskEn: "Get 25 likes",                  target: 25,  cur: (a) => a.likesReceived },
+  { label: "Frühaufsteher 🐦",     icon: "ti-medal",        task: "5× unter den ersten 3 sein",     taskEn: "Be in the first 3 five times",  target: 5,   cur: (a) => a.top3Count },
+  { label: "Veteran 🎖️",           icon: "ti-award",        task: "25 Challenges erledigen",        taskEn: "Complete 25 challenges",        target: 25,  cur: (a) => a.done },
+  { label: "Allgegenwärtig 🌗",    icon: "ti-clock",        task: "Zu allen 4 Tageszeiten posten",  taskEn: "Post at all 4 times of day",    target: 4,   cur: (a) => a.hoursCovered },
+  { label: "Publikumsliebling 🌟", icon: "ti-stars",        task: "75 Likes erhalten",              taskEn: "Get 75 likes",                  target: 75,  cur: (a) => a.likesReceived },
+  { label: "Geist 👻",             icon: "ti-ghost",        task: "In unter 60 Sek. nach Start posten", taskEn: "Post within 60s of start",  target: 1,   cur: (a) => a.within60 },
+  { label: "Unaufhaltsam ⚡",       icon: "ti-bolt",         task: "30 Tage Serie — kein Aussetzer",  taskEn: "30-day streak — no misses",     target: 30,  cur: (a) => a.streak },
+  { label: "Der Erste 🥇",         icon: "ti-trophy",       task: "10× als Erste:r einer Challenge", taskEn: "Be first in a challenge 10×",   target: 10,  cur: (a) => a.firstCount },
+  { label: "Influencer 📣",        icon: "ti-speakerphone", task: "200 Likes erhalten",             taskEn: "Get 200 likes",                 target: 200, cur: (a) => a.likesReceived },
+  { label: "Großmeister 🧠",        icon: "ti-brain",        task: "Level 20 erreichen",             taskEn: "Reach level 20",                target: 20,  cur: (a) => a.level },
+  { label: "Mythos 🐉",            icon: "ti-dragon",       task: "Level 30 — fast unmöglich",       taskEn: "Level 30 — nearly impossible",  target: 30,  cur: (a) => a.level },
 ];
 const FRAMES = [
-  { id: "none",       label: "Kein Rahmen",   icon: "ti-circle",   task: "Standard",                    target: 0,  cur: () => 1 },
-  { id: "bronze",     label: "Bronze",        icon: "ti-medal",    task: "10 Challenges erledigen",     target: 10, cur: (a) => a.done },
-  { id: "silber",     label: "Silber",        icon: "ti-medal",    task: "50 Likes erhalten",           target: 50, cur: (a) => a.likesReceived },
-  { id: "gold",       label: "Gold",          icon: "ti-medal",    task: "Level 10 erreichen",          target: 10, cur: (a) => a.level },
-  { id: "glow",       label: "Neon-Glow ✨",   icon: "ti-sparkles", task: "14 Tage Serie halten",        target: 14, cur: (a) => a.streak },
-  { id: "diamant",    label: "Diamant 💎",     icon: "ti-diamond",  task: "Ein Beitrag mit 25+ Likes",   target: 25, cur: (a) => a.maxLikes },
-  { id: "feuer",      label: "Feuer 🔥",       icon: "ti-flame",    task: "30 Tage Serie halten",        target: 30, cur: (a) => a.streak },
-  { id: "platin",     label: "Platin",        icon: "ti-shield",   task: "50 Challenges erledigen",     target: 50, cur: (a) => a.done },
-  { id: "regenbogen", label: "Regenbogen 🌈",  icon: "ti-rainbow",  task: "Level 30 — die Königsklasse", target: 30, cur: (a) => a.level },
+  { id: "none",       label: "Kein Rahmen",   icon: "ti-circle",   task: "Standard",                    taskEn: "Default",                    target: 0,  cur: () => 1 },
+  { id: "bronze",     label: "Bronze",        icon: "ti-medal",    task: "10 Challenges erledigen",     taskEn: "Complete 10 challenges",     target: 10, cur: (a) => a.done },
+  { id: "silber",     label: "Silber",        icon: "ti-medal",    task: "50 Likes erhalten",           taskEn: "Get 50 likes",               target: 50, cur: (a) => a.likesReceived },
+  { id: "gold",       label: "Gold",          icon: "ti-medal",    task: "Level 10 erreichen",          taskEn: "Reach level 10",             target: 10, cur: (a) => a.level },
+  { id: "glow",       label: "Neon-Glow ✨",   icon: "ti-sparkles", task: "14 Tage Serie halten",        taskEn: "Keep a 14-day streak",       target: 14, cur: (a) => a.streak },
+  { id: "diamant",    label: "Diamant 💎",     icon: "ti-diamond",  task: "Ein Beitrag mit 25+ Likes",   taskEn: "A post with 25+ likes",      target: 25, cur: (a) => a.maxLikes },
+  { id: "feuer",      label: "Feuer 🔥",       icon: "ti-flame",    task: "30 Tage Serie halten",        taskEn: "Keep a 30-day streak",       target: 30, cur: (a) => a.streak },
+  { id: "platin",     label: "Platin",        icon: "ti-shield",   task: "50 Challenges erledigen",     taskEn: "Complete 50 challenges",     target: 50, cur: (a) => a.done },
+  { id: "regenbogen", label: "Regenbogen 🌈",  icon: "ti-rainbow",  task: "Level 30 — die Königsklasse", taskEn: "Level 30 — the king's class", target: 30, cur: (a) => a.level },
 ];
 
 // Avatar-Element (Header/Profil) setzen: eigenes Foto oder Buchstabe, plus Rahmen-Klasse.
@@ -72,9 +72,9 @@ let registerMode = false;
 // =====================================================================
 function applyAuthMode() {
   $("usernameField").classList.toggle("hidden", !registerMode);
-  $("primaryAuthBtn").textContent = registerMode ? "Registrieren" : "Login";
-  $("toggleText").textContent     = registerMode ? "Schon ein Konto?" : "Noch kein Konto?";
-  $("toggleModeBtn").textContent  = registerMode ? "Login" : "Registrieren";
+  $("primaryAuthBtn").textContent = registerMode ? t("auth.register") : t("auth.login");
+  $("toggleText").textContent     = registerMode ? t("auth.haveAccount") : t("auth.noAccount");
+  $("toggleModeBtn").textContent  = registerMode ? t("auth.login") : t("auth.register");
   setMessage($("authMessage"), "");
 }
 $("toggleModeBtn").addEventListener("click", () => { registerMode = !registerMode; applyAuthMode(); });
@@ -85,17 +85,17 @@ $("primaryAuthBtn").addEventListener("click", async () => {
   const username = $("usernameInput").value.trim();
   const btn = $("primaryAuthBtn");
 
-  if (!email || !password) return setMessage($("authMessage"), "Bitte E-Mail und Passwort eingeben.", "error");
-  if (registerMode && !username) return setMessage($("authMessage"), "Bitte einen Anzeigenamen wählen.", "error");
+  if (!email || !password) return setMessage($("authMessage"), t("auth.needCreds"), "error");
+  if (registerMode && !username) return setMessage($("authMessage"), t("auth.needName"), "error");
 
   btn.disabled = true;
-  setMessage($("authMessage"), "Moment…");
+  setMessage($("authMessage"), t("auth.moment"));
   try {
     if (registerMode) {
       const res = await Auth.register(username, email, password);
       if (!res.session) {
         registerMode = false; applyAuthMode();
-        setMessage($("authMessage"), "Konto angelegt. Bitte E-Mail bestätigen, dann einloggen.", "ok");
+        setMessage($("authMessage"), t("auth.accountCreated"), "ok");
         return;
       }
     } else {
@@ -129,7 +129,7 @@ profileNotifyBtn.addEventListener("click", async () => {
   const ok = await Push.enable();
   profileNotifyBtn.disabled = false;
   refreshNotifyBtn();
-  if (ok) alert("🔔 Benachrichtigungen aktiviert! Du verpasst keine Challenge mehr.");
+  if (ok) alert(t("notify.enabled"));
 });
 
 async function loadOverview() {
@@ -141,7 +141,7 @@ async function loadOverview() {
     state.challenges = await Challenges.active();
     state.doneIds = await Challenges.doneIds(state.challenges.map((c) => c.id));
   } catch (err) {
-    listEl.innerHTML = `<p class="spinner-text">Fehler: ${Feed.escape(err.message)}</p>`;
+    listEl.innerHTML = `<p class="spinner-text">${Feed.escape(t("common.error", { msg: err.message }))}</p>`;
     return;
   }
   try { state.partCount = await Stats.participantCounts(state.challenges.map((c) => c.id)); }
@@ -209,7 +209,8 @@ function celebrateStreak(s) {
   const seen = parseInt(localStorage.getItem("sq-streak-celebrated") || "0", 10);
   if (s.milestone.days > seen) {
     localStorage.setItem("sq-streak-celebrated", String(s.milestone.days));
-    toast(`🔥 <b>${Feed.escape(s.milestone.label)}</b><br>+${s.milestone.xp} Bonus-XP kassiert!`, 5200);
+    const mLabel = (I18N.lang === "en" && s.milestone.labelEn) ? s.milestone.labelEn : s.milestone.label;
+    toast(t("toast.streak", { label: Feed.escape(mLabel), xp: s.milestone.xp }), 5200);
   }
 }
 
@@ -234,8 +235,8 @@ function archiveWhen(iso) {
   const dayDiff = Math.round(
     (new Date(now.getFullYear(), now.getMonth(), now.getDate()) -
      new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
-  if (dayDiff <= 0) return "heute " + hm;
-  if (dayDiff === 1) return "gestern " + hm;
+  if (dayDiff <= 0) return t("time.today") + " " + hm;
+  if (dayDiff === 1) return t("time.yesterday") + " " + hm;
   return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}. ${hm}`;
 }
 
@@ -263,7 +264,7 @@ function renderArchive(list) {
   if (!list || !list.length) { sec.classList.add("hidden"); return; }
   const hourly = list.filter((c) => c.kind === "hourly");
   const daily  = list.filter((c) => c.kind !== "hourly"); // daily + special
-  el.innerHTML = archiveGroup("⚡ Stunden-Challenges", hourly) + archiveGroup("🌙 Tages-Challenges", daily);
+  el.innerHTML = archiveGroup(t("ov.archiveHourly"), hourly) + archiveGroup(t("ov.archiveDaily"), daily);
 
   el.querySelectorAll(".arc-group-head").forEach((h) =>
     h.addEventListener("click", () => h.parentElement.classList.toggle("open")));
@@ -285,8 +286,8 @@ async function submitReport(reason) {
   closeReport();
   try {
     await Social.reportPost(id, reason);
-    toast("🚩 Danke! Der Beitrag wurde gemeldet.");
-  } catch (e) { alert("Melden fehlgeschlagen: " + e.message); }
+    toast(t("rep.thanks"));
+  } catch (e) { alert(t("rep.failed", { msg: e.message })); }
 }
 
 // ----- Admin: gemeldete Beiträge moderieren -----
@@ -302,18 +303,18 @@ function renderMod(list) {
         <div class="mod-quest">${Feed.escape(p.quest_title)}</div>
         ${p.reasons.length ? `<div class="mod-reasons">${p.reasons.map((r) => Feed.escape(r)).join(" · ")}</div>` : ""}
         <div class="mod-actions">
-          <button class="soc-btn" data-act="approve"><i class="ti ti-check"></i> Freigeben</button>
-          <button class="soc-btn ghost" data-act="delete"><i class="ti ti-trash"></i> Löschen</button>
+          <button class="soc-btn" data-act="approve"><i class="ti ti-check"></i> ${t("mod.approve")}</button>
+          <button class="soc-btn ghost" data-act="delete"><i class="ti ti-trash"></i> ${t("mod.delete")}</button>
         </div>
       </div>
     </div>`).join("");
   el.querySelectorAll(".mod-item").forEach((row) => {
     row.querySelectorAll("button").forEach((b) => b.addEventListener("click", async () => {
       const act = b.dataset.act;
-      if (act === "delete" && !confirm("Beitrag endgültig löschen?")) return;
+      if (act === "delete" && !confirm(t("mod.delConfirm"))) return;
       row.querySelectorAll("button").forEach((x) => (x.disabled = true));
       try { await Social.moderate(Number(row.dataset.id), act); loadMod(); }
-      catch (e) { row.querySelectorAll("button").forEach((x) => (x.disabled = false)); alert("Fehler: " + e.message); }
+      catch (e) { row.querySelectorAll("button").forEach((x) => (x.disabled = false)); alert(t("common.error", { msg: e.message })); }
     }));
   });
   sec.classList.remove("hidden");
@@ -328,12 +329,12 @@ function renderWeekly(list) {
   const el = $("weeklyBoard");
   if (!list || !list.length) { section.classList.add("hidden"); return; }
   const medals = ["🥇", "🥈", "🥉"];
-  el.innerHTML = list.map((t, i) => `
-    <div class="wb-item${t.isMe ? " me" : ""}">
+  el.innerHTML = list.map((w, i) => `
+    <div class="wb-item${w.isMe ? " me" : ""}">
       <div class="wb-rank">${medals[i] || (i + 1) + "."}</div>
-      <div class="wb-avatar">${Feed.escape(Feed.initial(t.username))}</div>
-      <div class="wb-name">${Feed.escape(t.username)}${t.isMe ? " <span class='wb-you'>(du)</span>" : ""}</div>
-      <div class="wb-pts">${t.points} <span>XP</span></div>
+      <div class="wb-avatar">${Feed.escape(Feed.initial(w.username))}</div>
+      <div class="wb-name">${Feed.escape(w.username)}${w.isMe ? ` <span class="wb-you">(${Feed.escape(t("wb.you"))})</span>` : ""}</div>
+      <div class="wb-pts">${w.points} <span>XP</span></div>
     </div>`).join("");
   section.classList.remove("hidden");
 }
@@ -343,9 +344,9 @@ async function loadStatsAndTop() {
     const s = await Stats.forMe();
     state.stats = s;
     if (s) renderStatsStrip($("statsStrip"), [
-      { val: s.level,         label: "Level", cls: "level" },
-      { val: s.streak,        label: "Serie", cls: "streak", icon: "ti-flame" },
-      { val: s.likesReceived, label: "Likes", cls: "likes",  icon: "ti-heart" },
+      { val: s.level,         label: t("stat.level"), cls: "level" },
+      { val: s.streak,        label: t("stat.streak"), cls: "streak", icon: "ti-flame" },
+      { val: s.likesReceived, label: t("stat.likes"), cls: "likes",  icon: "ti-heart" },
     ]);
     if (s) celebrateStreak(s);
     Stats.weeklyBoard().then(renderWeekly).catch((e) => console.warn("[SideQuest] weekly:", e.message));
@@ -358,7 +359,7 @@ async function loadStatsAndTop() {
     const com = await Stats.community(state.challenges.map((c) => c.id));
     const comEl = $("community");
     if (com.posts > 0) {
-      comEl.innerHTML = `🔥 <b>${com.posts}</b> ${com.posts === 1 ? "Beitrag" : "Beiträge"} heute · <b>${com.people}</b> dabei`;
+      comEl.innerHTML = t(com.posts === 1 ? "ov.communityOne" : "ov.communityMany", { posts: com.posts, people: com.people });
       comEl.classList.remove("hidden");
     } else {
       comEl.classList.add("hidden");
@@ -390,7 +391,7 @@ async function refreshFriendsBadge() {
 
 async function openFriends() {
   $("friendsModal").classList.remove("hidden");
-  $("friendsList").innerHTML = '<p class="spinner-text">Lädt…</p>';
+  $("friendsList").innerHTML = `<p class="spinner-text">${t("common.loading")}</p>`;
   await renderSocial().catch((e) => console.warn("[SideQuest] social:", e.message));
   refreshFriendsBadge();
 }
@@ -411,14 +412,14 @@ async function renderSocial() {
   if (fd.incoming.length) {
     reqWrap.innerHTML = fd.incoming.map((r) =>
       `<div class="soc-row" data-id="${r.id}" data-uid="${Feed.escape(r.uid)}">${avatarOf(r.uid)}<span class="soc-name">${Feed.escape(nameOf(r.uid))}</span>
-        <button class="soc-btn accept" data-act="accept"><i class="ti ti-check"></i> Annehmen</button>
+        <button class="soc-btn accept" data-act="accept"><i class="ti ti-check"></i> ${t("fr.accept")}</button>
         <button class="soc-btn ghost" data-act="decline" aria-label="Ablehnen"><i class="ti ti-x"></i></button></div>`).join("");
     reqSec.classList.remove("hidden");
     reqWrap.querySelectorAll(".soc-btn").forEach((b) => b.addEventListener("click", async () => {
       const rowEl = b.closest(".soc-row");
       rowEl.querySelectorAll(".soc-btn").forEach((x) => (x.disabled = true));
       try { await Social.respondFriend(Number(rowEl.dataset.id), b.dataset.act === "accept"); await renderSocial(); }
-      catch (e) { rowEl.querySelectorAll(".soc-btn").forEach((x) => (x.disabled = false)); alert("Fehler: " + e.message); }
+      catch (e) { rowEl.querySelectorAll(".soc-btn").forEach((x) => (x.disabled = false)); alert(t("common.error", { msg: e.message })); }
     }));
   } else { reqSec.classList.add("hidden"); }
 
@@ -427,13 +428,13 @@ async function renderSocial() {
   $("friendsCount").textContent = friends.length;
   const frWrap = $("friendsList");
   frWrap.innerHTML = friends.length
-    ? friends.map((uid) => row(uid, '<button class="soc-btn ghost" data-act="unfriend">Entfernen</button>')).join("")
-    : '<p class="soc-empty">Noch keine Freunde – schick im Feed eine Anfrage! 🤝</p>';
+    ? friends.map((uid) => row(uid, `<button class="soc-btn ghost" data-act="unfriend">${t("fr.remove")}</button>`)).join("")
+    : `<p class="soc-empty">${Feed.escape(t("fr.noFriends"))}</p>`;
   frWrap.querySelectorAll('[data-act="unfriend"]').forEach((b) => b.addEventListener("click", async () => {
-    if (!confirm("Freundschaft beenden?")) return;
+    if (!confirm(t("fr.endConfirm"))) return;
     b.disabled = true;
     try { await Social.unfriend(b.closest(".soc-row").dataset.uid); await renderSocial(); }
-    catch (e) { b.disabled = false; alert("Fehler: " + e.message); }
+    catch (e) { b.disabled = false; alert(t("common.error", { msg: e.message })); }
   }));
 
   // Folge ich
@@ -442,39 +443,39 @@ async function renderSocial() {
   const fl = [...follows];
   foWrap.innerHTML = fl.length
     ? fl.map((uid) => {
-        const tag = fd.friends.has(uid) ? '<span class="soc-tag">✓ Freund</span>'
-          : fd.outgoing.has(uid) ? '<span class="soc-tag">angefragt</span>'
-          : '<button class="soc-btn" data-act="friend">+ Freund</button>';
-        return row(uid, tag + '<button class="soc-btn ghost" data-act="unfollow">Entfolgen</button>');
+        const tag = fd.friends.has(uid) ? `<span class="soc-tag">${t("fr.isFriend")}</span>`
+          : fd.outgoing.has(uid) ? `<span class="soc-tag">${t("fr.requested")}</span>`
+          : `<button class="soc-btn" data-act="friend">${t("fr.addFriend")}</button>`;
+        return row(uid, tag + `<button class="soc-btn ghost" data-act="unfollow">${t("fr.unfollow")}</button>`);
       }).join("")
-    : '<p class="soc-empty">Du folgst noch niemandem. Im Feed auf „+ Folgen" tippen.</p>';
+    : `<p class="soc-empty">${Feed.escape(t("fr.noFollows"))}</p>`;
   foWrap.querySelectorAll('[data-act="unfollow"]').forEach((b) => b.addEventListener("click", async () => {
     b.disabled = true;
     try { await Social.toggleFollow(b.closest(".soc-row").dataset.uid, true); await renderSocial(); }
-    catch (e) { b.disabled = false; alert("Fehler: " + e.message); }
+    catch (e) { b.disabled = false; alert(t("common.error", { msg: e.message })); }
   }));
   foWrap.querySelectorAll('[data-act="friend"]').forEach((b) => b.addEventListener("click", async () => {
     b.disabled = true;
     try { await Social.sendFriendRequest(b.closest(".soc-row").dataset.uid); await renderSocial(); }
-    catch (e) { b.disabled = false; alert("Fehler: " + e.message); }
+    catch (e) { b.disabled = false; alert(t("common.error", { msg: e.message })); }
   }));
 }
 function renderProfile(s) {
   if (!s) return;
   applyAvatarEl($("profileAvatar"), state.username, state.profile.avatar_url, state.profile.frame, "profile-avatar");
-  $("profileName").textContent = state.username || "Du";
+  $("profileName").textContent = state.username || t("feed.you");
   const pt = $("profileTitle");
   pt.textContent = state.profile.title || "";
   pt.classList.toggle("hidden", !state.profile.title);
-  $("profileLevelLabel").textContent = "Level " + s.level;
+  $("profileLevelLabel").textContent = t("prof.levelLabel", { n: s.level });
   $("profileXpFill").style.width = Math.round(s.progress * 100) + "%";
   $("profileXpHint").textContent = s.nextNeeded > 0
-    ? `Noch ${s.nextNeeded} XP bis Level ${s.level + 1}` : "Höchstes Level!";
+    ? t("prof.nextLevel", { xp: s.nextNeeded, lvl: s.level + 1 }) : t("prof.maxLevel");
 
   renderStatsStrip($("profileStats"), [
-    { val: s.done,          label: "Erledigt",      cls: "level" },
-    { val: s.streak,        label: "Serie",         cls: "streak", icon: "ti-flame" },
-    { val: s.likesReceived, label: "Likes erhalten",cls: "likes",  icon: "ti-heart" },
+    { val: s.done,          label: t("stat.done"),      cls: "level" },
+    { val: s.streak,        label: t("stat.streak"),         cls: "streak", icon: "ti-flame" },
+    { val: s.likesReceived, label: t("stat.likesReceived"),cls: "likes",  icon: "ti-heart" },
   ]);
 
   const grid = $("profilePosts"), none = $("profileNoPosts");
@@ -490,7 +491,7 @@ function renderProfile(s) {
     grid.querySelectorAll(".post-del").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const p = s.posts.find((x) => String(x.id) === btn.dataset.id);
-        if (!p || !confirm("Diesen Beitrag wirklich löschen?")) return;
+        if (!p || !confirm(t("post.delConfirm"))) return;
         btn.disabled = true;
         try {
           await Social.deleteSubmission(p.id, p.image_url);
@@ -498,7 +499,7 @@ function renderProfile(s) {
           const fresh = await Stats.forMe();
           state.stats = fresh;
           renderProfile(fresh);
-        } catch (e) { btn.disabled = false; alert("Löschen fehlgeschlagen: " + e.message); }
+        } catch (e) { btn.disabled = false; alert(t("post.delFailed", { msg: e.message })); }
       });
     });
   }
@@ -521,13 +522,13 @@ function skinRow(item, kind, a) {
   const btn = equipped
     ? '<button class="skin-btn on" disabled><i class="ti ti-check"></i></button>'
     : unlocked
-      ? `<button class="skin-btn" data-kind="${kind}" data-val="${Feed.escape(val)}">Ausrüsten</button>`
+      ? `<button class="skin-btn" data-kind="${kind}" data-val="${Feed.escape(val)}">${t("col.equip")}</button>`
       : '<button class="skin-btn locked" disabled><i class="ti ti-lock"></i></button>';
   return `<div class="skin-row${unlocked ? "" : " locked"}">
       ${preview}
       <div class="skin-main">
         <div class="skin-name">${Feed.escape(item.label)}</div>
-        <div class="skin-task">${unlocked ? "✓ " : ""}${Feed.escape(item.task)}${item.target > 0 && !unlocked ? ` · ${have}/${item.target}` : ""}</div>
+        <div class="skin-task">${unlocked ? "✓ " : ""}${Feed.escape((I18N.lang === "en" && item.taskEn) ? item.taskEn : item.task)}${item.target > 0 && !unlocked ? ` · ${have}/${item.target}` : ""}</div>
         ${item.target > 0 ? `<div class="skin-bar"><div style="width:${pct}%"></div></div>` : ""}
       </div>
       ${btn}
@@ -539,7 +540,7 @@ function renderCollection(a) {
   $("collectionFrames").innerHTML = FRAMES.map((f) => skinRow(f, "frame", a)).join("");
   const total = TITLES.length + FRAMES.length;
   const got = TITLES.filter((t) => skinUnlocked(t, a)).length + FRAMES.filter((f) => skinUnlocked(f, a)).length;
-  $("collectionCount").textContent = `${got}/${total} freigeschaltet`;
+  $("collectionCount").textContent = t("col.unlocked", { got, total });
 
   document.querySelectorAll("#collectionModal .skin-btn[data-kind]").forEach((b) => {
     b.addEventListener("click", async () => {
@@ -558,14 +559,14 @@ function renderCollection(a) {
         pt.textContent = state.profile.title || "";
         pt.classList.toggle("hidden", !state.profile.title);
         renderCollection(a);
-      } catch (e) { b.disabled = false; alert("Speichern fehlgeschlagen: " + e.message); }
+      } catch (e) { b.disabled = false; alert(t("common.saveFailed", { msg: e.message })); }
     });
   });
 }
 
 async function openCollection() {
   $("collectionModal").classList.remove("hidden");
-  $("collectionTitles").innerHTML = '<p class="spinner-text">Lädt…</p>';
+  $("collectionTitles").innerHTML = `<p class="spinner-text">${t("common.loading")}</p>`;
   $("collectionFrames").innerHTML = "";
   $("collectionCount").textContent = "";
   try {
@@ -574,7 +575,7 @@ async function openCollection() {
     a.unlockAll = state.profile.unlockAll;
     renderCollection(a);
   } catch (e) {
-    $("collectionTitles").innerHTML = `<p class="spinner-text">Fehler: ${Feed.escape(e.message)}</p>`;
+    $("collectionTitles").innerHTML = `<p class="spinner-text">${Feed.escape(t("common.error", { msg: e.message }))}</p>`;
   }
 }
 function closeCollection() { $("collectionModal").classList.add("hidden"); }
@@ -584,7 +585,7 @@ function openAvatarPicker(s) {
   const grid = $("avatarPickerGrid");
   const posts = (s && s.posts) || [];
   const cells = [
-    `<button class="ap-cell ap-upload" data-upload="1"><i class="ti ti-photo-up"></i><span>Galerie</span></button>`,
+    `<button class="ap-cell ap-upload" data-upload="1"><i class="ti ti-photo-up"></i><span>${t("ap.gallery")}</span></button>`,
     `<button class="ap-cell ap-letter" data-url="">${Feed.escape(Feed.initial(state.username))}</button>`,
   ].concat(posts.map((p) =>
       `<button class="ap-cell" data-url="${Feed.escape(p.image_url)}"><img src="${Feed.escape(p.image_url)}" alt="" loading="lazy" /></button>`));
@@ -603,7 +604,7 @@ function openAvatarPicker(s) {
         closeAvatarPicker();
       } catch (e) {
         grid.querySelectorAll(".ap-cell").forEach((x) => (x.disabled = false));
-        alert("Speichern fehlgeschlagen: " + e.message);
+        alert(t("common.saveFailed", { msg: e.message }));
       }
     });
   });
@@ -636,7 +637,7 @@ function renderOverview() {
 
   if (!state.challenges.length) {
     listEl.innerHTML =
-      '<div class="empty-state"><i class="ti ti-mood-empty"></i>Gerade keine aktive Challenge. Schau später wieder vorbei!</div>';
+      `<div class="empty-state"><i class="ti ti-mood-empty"></i>${Feed.escape(t("ov.empty"))}</div>`;
     return;
   }
 
@@ -658,12 +659,12 @@ function renderOverview() {
       <p class="cc-title">${Feed.escape(ch.title)}</p>
       <div class="cc-meta">
         <span class="cc-part">${(state.partCount[ch.id] || 0) > 0
-          ? `<i class="ti ti-users"></i> ${state.partCount[ch.id]} dabei`
-          : '<i class="ti ti-sparkles"></i> Sei der/die Erste!'}</span>
+          ? `<i class="ti ti-users"></i> ${Feed.escape(t("cc.participants", { n: state.partCount[ch.id] }))}`
+          : `<i class="ti ti-sparkles"></i> ${Feed.escape(t("cc.beFirst"))}`}</span>
         <span class="cc-xp">+10 XP</span>
       </div>
       <div class="cc-action ${done ? "done" : ""}">
-        ${done ? '<i class="ti ti-check"></i> Erledigt – Feed ansehen' : "Challenge starten"}
+        ${done ? `<i class="ti ti-check"></i> ${Feed.escape(t("cc.doneView"))}` : Feed.escape(t("cc.start"))}
       </div>`;
     card.addEventListener("click", () => openChallenge(ch));
     listEl.appendChild(card);
@@ -783,7 +784,7 @@ $("avatarFile").addEventListener("change", async (e) => {
     closeAvatarPicker();
   } catch (err) {
     grid.querySelectorAll(".ap-cell").forEach((x) => (x.disabled = false));
-    alert("Hochladen fehlgeschlagen: " + err.message);
+    alert(t("ap.uploadFailed", { msg: err.message }));
   }
 });
 
@@ -819,10 +820,10 @@ $("suggestForm").addEventListener("submit", async (e) => {
   try {
     await Social.suggestChallenge(input.value);
     input.value = "";
-    msg.textContent = "Danke! Idee eingereicht 💜";
+    msg.textContent = t("ov.suggest.thanks");
     msg.className = "suggest-msg ok";
   } catch (err) {
-    msg.textContent = err.message || "Hat nicht geklappt.";
+    msg.textContent = err.message || t("common.failed", { msg: "" });
     msg.className = "suggest-msg error";
   } finally { btn.disabled = false; }
 });
@@ -892,18 +893,35 @@ setInterval(() => {
 // =====================================================================
 function uebersetzeFehler(err) {
   const msg = (err && err.message) ? err.message : String(err);
-  if (/Invalid login credentials/i.test(msg)) return "E-Mail oder Passwort falsch.";
-  if (/User already registered/i.test(msg))   return "Diese E-Mail ist schon registriert. Bitte einloggen.";
-  if (/Password should be at least/i.test(msg)) return "Passwort muss mindestens 6 Zeichen haben.";
-  if (/Email not confirmed/i.test(msg))        return "E-Mail noch nicht bestätigt.";
-  if (/Failed to fetch|NetworkError/i.test(msg)) return "Keine Verbindung zu Supabase. URL/Key prüfen.";
-  if (/row-level security/i.test(msg))         return "Keine Berechtigung (RLS). Policies prüfen.";
+  if (/Invalid login credentials/i.test(msg)) return t("err.invalidLogin");
+  if (/User already registered/i.test(msg))   return t("err.alreadyRegistered");
+  if (/Password should be at least/i.test(msg)) return t("err.passwordShort");
+  if (/Email not confirmed/i.test(msg))        return t("err.emailNotConfirmed");
+  if (/Failed to fetch|NetworkError/i.test(msg)) return t("err.network");
+  if (/row-level security/i.test(msg))         return t("err.rls");
   return msg;
 }
 
 // =====================================================================
+//  Sprache (i18n)
+// =====================================================================
+// Sichtbaren Screen + offene Overlays nach Sprachwechsel neu zeichnen.
+function relocalize() {
+  if (!$("overviewScreen").classList.contains("hidden")) { renderOverview(); loadStatsAndTop(); }
+  else if (!$("profileScreen").classList.contains("hidden")) { if (state.stats) renderProfile(state.stats); refreshNotifyBtn(); }
+  else if (!$("challengeScreen").classList.contains("hidden") && state.current) showChallengeDetail(state.current);
+  else if (!$("feedScreen").classList.contains("hidden") && state.current) goToFeed(state.current);
+  if (!$("collectionModal").classList.contains("hidden")) openCollection();
+  if (!$("friendsModal").classList.contains("hidden")) renderSocial();
+}
+document.querySelectorAll(".lang-toggle button").forEach((b) =>
+  b.addEventListener("click", () => I18N.set(b.dataset.lang)));
+
+// =====================================================================
 //  Start: Session beobachten
 // =====================================================================
+document.documentElement.lang = I18N.lang;
+I18N.apply();          // statische Texte in der gewählten Sprache
 applyAuthMode();
 Onboarding.init();
 Push.init();
