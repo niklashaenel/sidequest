@@ -653,6 +653,11 @@ $("profileAvatar").addEventListener("click", () => openAvatarPicker(state.stats)
 $("avatarPickerClose").addEventListener("click", closeAvatarPicker);
 $("avatarPicker").addEventListener("click", (e) => { if (e.target.id === "avatarPicker") closeAvatarPicker(); });
 
+// Info-Panel „So funktioniert's"
+$("infoBtn").addEventListener("click", () => $("infoModal").classList.remove("hidden"));
+$("infoClose").addEventListener("click", () => $("infoModal").classList.add("hidden"));
+$("infoModal").addEventListener("click", (e) => { if (e.target.id === "infoModal") $("infoModal").classList.add("hidden"); });
+
 // Challenge-Idee vorschlagen
 $("suggestForm").addEventListener("submit", async (e) => {
   e.preventDefault();

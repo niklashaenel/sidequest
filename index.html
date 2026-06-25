@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=21" />
+  <link rel="stylesheet" href="styles.css?v=22" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
@@ -24,6 +24,7 @@
   <header id="appHeader" class="hidden">
     <span class="logo">Side<span class="dot">Quest</span></span>
     <div class="header-right">
+      <button id="infoBtn" class="icon-btn" aria-label="Info" title="So funktioniert's"><i class="ti ti-help-circle"></i></button>
       <button id="headerAvatar" class="avatar" aria-label="Profil" title="Profil">?</button>
       <button id="logoutBtn" class="icon-btn" aria-label="Abmelden" title="Abmelden"><i class="ti ti-logout"></i></button>
     </div>
@@ -192,6 +193,41 @@
   <!-- Toast (z. B. Serien-Belohnung) -->
   <div id="toast" class="toast hidden"></div>
 
+  <!-- Info: So funktioniert SideQuest -->
+  <div id="infoModal" class="modal hidden">
+    <div class="modal-card">
+      <button class="onboard-close" id="infoClose" aria-label="Schließen"><i class="ti ti-x"></i></button>
+      <h3 class="onboard-title">So funktioniert SideQuest</h3>
+      <p class="onboard-text">Eine Foto-Challenge nach der anderen – <b>erst posten, dann sehen.</b> 📸</p>
+      <div class="info-list">
+        <div class="info-item"><div class="info-ic"><i class="ti ti-bolt"></i></div>
+          <div><b>Challenges</b><p>Stündlich & täglich neue Foto-Aufgaben mit Countdown. Tippe eine an und leg los.</p></div></div>
+        <div class="info-item"><div class="info-ic"><i class="ti ti-camera"></i></div>
+          <div><b>Posten schaltet frei</b><p>Mach ein Foto und lad es hoch – erst danach siehst du die Beiträge der anderen im Feed.</p></div></div>
+        <div class="info-item"><div class="info-ic"><i class="ti ti-star"></i></div>
+          <div><b>Level & XP</b><p>+10 XP pro Beitrag, +5 für jedes erhaltene Like. Genug XP = nächstes Level.</p></div></div>
+        <div class="info-item"><div class="info-ic"><i class="ti ti-flame"></i></div>
+          <div><b>Serie</b><p>Poste jeden Tag, um deine Serie zu halten. Meilensteine (3/7/14/30 Tage) geben fette Bonus-XP.</p></div></div>
+        <div class="info-item"><div class="info-ic"><i class="ti ti-mood-smile"></i></div>
+          <div><b>Reaktionen, Likes & Kommentare</b><p>Reagiere mit 😂🔥😍, vergib Likes und schreib Kommentare unter die Beiträge.</p></div></div>
+        <div class="info-item"><div class="info-ic"><i class="ti ti-users"></i></div>
+          <div><b>Folgen & Freunde</b><p>Folge jedem (eigener „Folge ich"-Feed). Freunde brauchen eine Anfrage – beide müssen zustimmen.</p></div></div>
+        <div class="info-item"><div class="info-ic"><i class="ti ti-palette"></i></div>
+          <div><b>Profil anpassen</b><p>Profilbild aus deinen Fotos wählen, Titel & Rahmen freischalten (z. B. Neon-Glow bei langer Serie).</p></div></div>
+        <div class="info-item"><div class="info-ic"><i class="ti ti-trophy"></i></div>
+          <div><b>Bestenliste & beste Bilder</b><p>Wöchentliches Ranking und die Top-Fotos der Woche – sei ganz oben dabei.</p></div></div>
+        <div class="info-item"><div class="info-ic"><i class="ti ti-medal"></i></div>
+          <div><b>Früher Vogel</b><p>Die ersten 3 Beiträge einer Challenge bekommen ein 🥇🥈🥉-Abzeichen. Sei schnell!</p></div></div>
+        <div class="info-item"><div class="info-ic"><i class="ti ti-archive"></i></div>
+          <div><b>Archiv</b><p>Verpasst? Vergangene Challenges der Woche kannst du unten weiter ansehen.</p></div></div>
+        <div class="info-item"><div class="info-ic"><i class="ti ti-bell"></i></div>
+          <div><b>Benachrichtigungen</b><p>Im Profil aktivieren, damit du keine neue Challenge verpasst.</p></div></div>
+        <div class="info-item"><div class="info-ic"><i class="ti ti-bulb"></i></div>
+          <div><b>Eigene Ideen</b><p>Unten auf der Übersicht kannst du eigene Challenge-Ideen vorschlagen.</p></div></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Avatar-Picker: Profilbild aus eigenen Fotos wählen -->
   <div id="avatarPicker" class="modal hidden">
     <div class="modal-card">
@@ -214,15 +250,15 @@
     <button class="link-btn" id="onboardLater">Später</button>
   </div>
 
-  <script src="js/supabaseClient.js?v=21"></script>
-  <script src="js/auth.js?v=21"></script>
-  <script src="js/challenges.js?v=21"></script>
-  <script src="js/social.js?v=21"></script>
-  <script src="js/upload.js?v=21"></script>
-  <script src="js/feed.js?v=21"></script>
-  <script src="js/push.js?v=21"></script>
-  <script src="js/onboarding.js?v=21"></script>
-  <script src="js/stats.js?v=21"></script>
-  <script src="js/app.js?v=21"></script>
+  <script src="js/supabaseClient.js?v=22"></script>
+  <script src="js/auth.js?v=22"></script>
+  <script src="js/challenges.js?v=22"></script>
+  <script src="js/social.js?v=22"></script>
+  <script src="js/upload.js?v=22"></script>
+  <script src="js/feed.js?v=22"></script>
+  <script src="js/push.js?v=22"></script>
+  <script src="js/onboarding.js?v=22"></script>
+  <script src="js/stats.js?v=22"></script>
+  <script src="js/app.js?v=22"></script>
 </body>
 </html>
