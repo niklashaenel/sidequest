@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=25" />
+  <link rel="stylesheet" href="styles.css?v=26" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
@@ -143,12 +143,8 @@
       <p class="section-label" style="margin-top:18px">Folge ich (<span id="followsCount">0</span>)</p>
       <div id="followsList" class="soc-list"></div>
 
-      <p class="section-label" style="margin-top:22px">Titel</p>
-      <div id="titleChips" class="cos-chips"></div>
-      <p class="section-label" style="margin-top:18px">Rahmen</p>
-      <div id="frameChips" class="cos-chips"></div>
-      <p class="section-label" style="margin-top:22px">Abzeichen</p>
-      <div id="profileBadges" class="badges"></div>
+      <button id="openCollectionBtn" class="btn" style="margin-top:18px"><i class="ti ti-trophy"></i> Sammlung &amp; Erfolge</button>
+
       <p class="section-label" style="margin-top:22px">Deine Beiträge</p>
       <div id="profilePosts" class="post-grid"></div>
       <p id="profileNoPosts" class="empty-state hidden"><i class="ti ti-camera"></i>Noch keine Beiträge. Mach deine erste Challenge!</p>
@@ -198,6 +194,19 @@
 
   <!-- Toast (z. B. Serien-Belohnung) -->
   <div id="toast" class="toast hidden"></div>
+
+  <!-- Sammlung & Erfolge (Titel + Rahmen freischalten/ausrüsten) -->
+  <div id="collectionModal" class="modal hidden">
+    <div class="modal-card">
+      <button class="onboard-close" id="collectionClose" aria-label="Schließen"><i class="ti ti-x"></i></button>
+      <h3 class="onboard-title">🏆 Sammlung</h3>
+      <p class="onboard-text" id="collectionCount"></p>
+      <p class="section-label" style="margin-top:16px">Titel</p>
+      <div id="collectionTitles" class="skin-list"></div>
+      <p class="section-label" style="margin-top:18px">Rahmen</p>
+      <div id="collectionFrames" class="skin-list"></div>
+    </div>
+  </div>
 
   <!-- Beitrag melden -->
   <div id="reportModal" class="modal hidden">
@@ -271,15 +280,15 @@
     <button class="link-btn" id="onboardLater">Später</button>
   </div>
 
-  <script src="js/supabaseClient.js?v=25"></script>
-  <script src="js/auth.js?v=25"></script>
-  <script src="js/challenges.js?v=25"></script>
-  <script src="js/social.js?v=25"></script>
-  <script src="js/upload.js?v=25"></script>
-  <script src="js/feed.js?v=25"></script>
-  <script src="js/push.js?v=25"></script>
-  <script src="js/onboarding.js?v=25"></script>
-  <script src="js/stats.js?v=25"></script>
-  <script src="js/app.js?v=25"></script>
+  <script src="js/supabaseClient.js?v=26"></script>
+  <script src="js/auth.js?v=26"></script>
+  <script src="js/challenges.js?v=26"></script>
+  <script src="js/social.js?v=26"></script>
+  <script src="js/upload.js?v=26"></script>
+  <script src="js/feed.js?v=26"></script>
+  <script src="js/push.js?v=26"></script>
+  <script src="js/onboarding.js?v=26"></script>
+  <script src="js/stats.js?v=26"></script>
+  <script src="js/app.js?v=26"></script>
 </body>
 </html>

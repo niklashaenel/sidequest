@@ -144,6 +144,62 @@ const Stats = {
     return { posts: rows.length, people: new Set(rows.map((r) => r.user_id)).size };
   },
 
+  // Erfolgs-Metriken für die Skin-Freischaltung (Sammlung-Overlay).
+  // Liefert ein Objekt mit allen Werten, die die Aufgaben prüfen.
+  async collection() {
+    const base = await Stats.forMe();
+    if (!base) return null;
+    const user = await Auth.getUser();
+    const posts = base.posts;
+    const postIds = posts.map((p) => p.id);
+    const questIds = [...new Set(posts.map((p) => p.quest_id))];
+
+    // Höchste Like-Zahl auf einem einzelnen Beitrag (für „viral")
+    let maxLikes = 0;
+    if (postIds.length) {
+      const { data } = await sb.from("likes").select("submission_id").in("submission_id", postIds);
+      const c = {}; (data || []).forEach((r) => { c[r.submission_id] = (c[r.submission_id] || 0) + 1; });
+      const vals = Object.values(c); if (vals.length) maxLikes = Math.max(...vals);
+    }
+
+    // Geschriebene Kommentare
+    let comments = 0;
+    { const { count } = await sb.from("comments").select("*", { count: "exact", head: true }).eq("user_id", user.id); comments = count || 0; }
+
+    // Ranking pro Challenge: wie oft Erste:r / unter Top-3 / in unter 60 Sek.
+    let firstCount = 0, top3Count = 0, within60 = 0;
+    if (questIds.length) {
+      const [subsRes, questsRes] = await Promise.all([
+        sb.from("submissions").select("quest_id, user_id, created_at").in("quest_id", questIds),
+        sb.from("quests").select("id, starts_at").in("id", questIds),
+      ]);
+      const startById = {}; (questsRes.data || []).forEach((q) => { startById[q.id] = q.starts_at; });
+      const byQuest = {};
+      (subsRes.data || []).forEach((s) => { (byQuest[s.quest_id] = byQuest[s.quest_id] || []).push(s); });
+      for (const qid of questIds) {
+        const arr = (byQuest[qid] || []).slice().sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        const idx = arr.findIndex((s) => s.user_id === user.id);
+        if (idx === 0) firstCount++;
+        if (idx >= 0 && idx < 3) top3Count++;
+        const mine = arr[idx];
+        if (mine && startById[qid]) {
+          const sec = (new Date(mine.created_at) - new Date(startById[qid])) / 1000;
+          if (sec >= 0 && sec <= 60) within60++;
+        }
+      }
+    }
+
+    // Tageszeiten-Abdeckung (Nacht/Vormittag/Nachmittag/Abend)
+    const parts = new Set();
+    posts.forEach((p) => { const h = new Date(p.created_at).getHours(); parts.add(h < 6 ? 0 : h < 12 ? 1 : h < 18 ? 2 : 3); });
+
+    return {
+      done: base.done, streak: base.streak, likesReceived: base.likesReceived, level: base.level,
+      maxLikes, comments, firstCount, top3Count, within60: within60 > 0 ? 1 : 0,
+      hoursCovered: parts.size,
+    };
+  },
+
   // Wie viele haben je aktiver Challenge schon gepostet? (für „N dabei" auf der Karte)
   async participantCounts(challengeIds) {
     const map = {};

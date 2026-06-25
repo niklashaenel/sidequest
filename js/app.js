@@ -25,31 +25,36 @@ const state = {
   partCount: {},      // Teilnehmer je aktiver Challenge
 };
 
-// Freischaltbare Titel (gespeichert wird das Label) und Rahmen (gespeichert wird die id).
+// Jeder Skin ist ein Erfolg: Aufgabe (task) + Ziel (target) + aktueller Wert (cur) aus den
+// Sammlungs-Metriken a. Freigeschaltet, sobald cur(a) >= target (oder Test-Freischaltung).
+// Titel: gespeichert wird das Label. Rahmen: gespeichert wird die id.
 const TITLES = [
-  { label: "Frischling",      req: () => true },
-  { label: "Stammgast",       req: (s) => s.done >= 5 },
-  { label: "Serientäter 🔥",   req: (s) => s.streak >= 7 },
-  { label: "Liebling ❤️",      req: (s) => s.likesReceived >= 25 },
-  { label: "Veteran 🎖️",       req: (s) => s.done >= 20 },
-  { label: "Legende 👑",       req: (s) => s.level >= 10 },
-  { label: "Süchtig 💉",       req: (s) => s.done >= 50 },
-  { label: "Publikumsliebling 🌟", req: (s) => s.likesReceived >= 75 },
-  { label: "Unaufhaltsam ⚡",   req: (s) => s.streak >= 30 },
-  { label: "Ikone 💎",         req: (s) => s.likesReceived >= 150 },
-  { label: "Großmeister 🧠",    req: (s) => s.level >= 20 },
-  { label: "Mythos 🐉",        req: (s) => s.level >= 30 },
+  { label: "Frischling",          icon: "ti-seeding",      task: "Bist am Start",                  target: 0,   cur: () => 1 },
+  { label: "Stammgast",           icon: "ti-photo",        task: "5 Challenges erledigen",         target: 5,   cur: (a) => a.done },
+  { label: "Plaudertasche 💬",     icon: "ti-message",      task: "20 Kommentare schreiben",        target: 20,  cur: (a) => a.comments },
+  { label: "Serientäter 🔥",       icon: "ti-flame",        task: "7 Tage Serie halten",            target: 7,   cur: (a) => a.streak },
+  { label: "Liebling ❤️",          icon: "ti-heart",        task: "25 Likes erhalten",              target: 25,  cur: (a) => a.likesReceived },
+  { label: "Frühaufsteher 🐦",     icon: "ti-medal",        task: "5× unter den ersten 3 sein",     target: 5,   cur: (a) => a.top3Count },
+  { label: "Veteran 🎖️",           icon: "ti-award",        task: "25 Challenges erledigen",        target: 25,  cur: (a) => a.done },
+  { label: "Allgegenwärtig 🌗",    icon: "ti-clock",        task: "Zu allen 4 Tageszeiten posten",  target: 4,   cur: (a) => a.hoursCovered },
+  { label: "Publikumsliebling 🌟", icon: "ti-stars",        task: "75 Likes erhalten",              target: 75,  cur: (a) => a.likesReceived },
+  { label: "Geist 👻",             icon: "ti-ghost",        task: "In unter 60 Sek. nach Start posten", target: 1, cur: (a) => a.within60 },
+  { label: "Unaufhaltsam ⚡",       icon: "ti-bolt",         task: "30 Tage Serie — kein Aussetzer",  target: 30,  cur: (a) => a.streak },
+  { label: "Der Erste 🥇",         icon: "ti-trophy",       task: "10× als Erste:r einer Challenge", target: 10,  cur: (a) => a.firstCount },
+  { label: "Influencer 📣",        icon: "ti-speakerphone", task: "200 Likes erhalten",             target: 200, cur: (a) => a.likesReceived },
+  { label: "Großmeister 🧠",        icon: "ti-brain",        task: "Level 20 erreichen",             target: 20,  cur: (a) => a.level },
+  { label: "Mythos 🐉",            icon: "ti-dragon",       task: "Level 30 — fast unmöglich",       target: 30,  cur: (a) => a.level },
 ];
 const FRAMES = [
-  { id: "none",       label: "Kein Rahmen",  req: () => true },
-  { id: "bronze",     label: "Bronze",       req: (s) => s.level >= 3 },
-  { id: "silber",     label: "Silber",       req: (s) => s.level >= 5 },
-  { id: "gold",       label: "Gold",         req: (s) => s.level >= 10 },
-  { id: "glow",       label: "Neon-Glow ✨",  req: (s) => s.streak >= 14 },
-  { id: "diamant",    label: "Diamant 💎",    req: (s) => s.level >= 15 },
-  { id: "feuer",      label: "Feuer 🔥",      req: (s) => s.streak >= 30 },
-  { id: "platin",     label: "Platin",       req: (s) => s.level >= 25 },
-  { id: "regenbogen", label: "Regenbogen 🌈", req: (s) => s.level >= 35 },
+  { id: "none",       label: "Kein Rahmen",   icon: "ti-circle",   task: "Standard",                    target: 0,  cur: () => 1 },
+  { id: "bronze",     label: "Bronze",        icon: "ti-medal",    task: "10 Challenges erledigen",     target: 10, cur: (a) => a.done },
+  { id: "silber",     label: "Silber",        icon: "ti-medal",    task: "50 Likes erhalten",           target: 50, cur: (a) => a.likesReceived },
+  { id: "gold",       label: "Gold",          icon: "ti-medal",    task: "Level 10 erreichen",          target: 10, cur: (a) => a.level },
+  { id: "glow",       label: "Neon-Glow ✨",   icon: "ti-sparkles", task: "14 Tage Serie halten",        target: 14, cur: (a) => a.streak },
+  { id: "diamant",    label: "Diamant 💎",     icon: "ti-diamond",  task: "Ein Beitrag mit 25+ Likes",   target: 25, cur: (a) => a.maxLikes },
+  { id: "feuer",      label: "Feuer 🔥",       icon: "ti-flame",    task: "30 Tage Serie halten",        target: 30, cur: (a) => a.streak },
+  { id: "platin",     label: "Platin",        icon: "ti-shield",   task: "50 Challenges erledigen",     target: 50, cur: (a) => a.done },
+  { id: "regenbogen", label: "Regenbogen 🌈",  icon: "ti-rainbow",  task: "Level 30 — die Königsklasse", target: 30, cur: (a) => a.level },
 ];
 
 // Avatar-Element (Header/Profil) setzen: eigenes Foto oder Buchstabe, plus Rahmen-Klasse.
@@ -442,7 +447,6 @@ function renderProfile(s) {
   const pt = $("profileTitle");
   pt.textContent = state.profile.title || "";
   pt.classList.toggle("hidden", !state.profile.title);
-  renderCosmetics(s);
   $("profileLevelLabel").textContent = "Level " + s.level;
   $("profileXpFill").style.width = Math.round(s.progress * 100) + "%";
   $("profileXpHint").textContent = s.nextNeeded > 0
@@ -453,12 +457,6 @@ function renderProfile(s) {
     { val: s.streak,        label: "Serie",         cls: "streak", icon: "ti-flame" },
     { val: s.likesReceived, label: "Likes erhalten",cls: "likes",  icon: "ti-heart" },
   ]);
-
-  $("profileBadges").innerHTML = s.badges.map((b) => `
-    <div class="badge ${b.unlocked ? "on" : ""}">
-      <i class="ti ${b.unlocked ? b.icon : "ti-lock"}"></i>
-      <div class="badge-label">${b.label}</div>
-    </div>`).join("");
 
   const grid = $("profilePosts"), none = $("profileNoPosts");
   if (!s.posts.length) { grid.innerHTML = ""; none.classList.remove("hidden"); }
@@ -487,49 +485,80 @@ function renderProfile(s) {
   }
 }
 
-// Titel- und Rahmen-Auswahl rendern (gesperrt = noch nicht freigeschaltet).
-function renderCosmetics(s) {
-  const all = state.profile.unlockAll; // Test-Freischaltung
-  const equippedTitle = state.profile.title || "Frischling";
-  $("titleChips").innerHTML = TITLES.map((t) => {
-    const unlocked = all || t.req(s);
-    const equipped = equippedTitle === t.label;
-    return `<button class="cos-chip${unlocked ? "" : " locked"}${equipped ? " equipped" : ""}"
-      data-kind="title" data-val="${Feed.escape(t.label)}" ${unlocked ? "" : "disabled"}>
-      ${unlocked ? "" : '<i class="ti ti-lock"></i> '}${Feed.escape(t.label)}</button>`;
-  }).join("");
+// ----- Sammlung-Overlay (Erfolge + Titel/Rahmen ausrüsten) -----
+function skinUnlocked(item, a) { return a.unlockAll || item.cur(a) >= item.target; }
 
-  const equippedFrame = state.profile.frame || "none";
-  $("frameChips").innerHTML = FRAMES.map((f) => {
-    const unlocked = all || f.req(s);
-    const equipped = equippedFrame === f.id;
-    return `<button class="cos-chip frame-chip${unlocked ? "" : " locked"}${equipped ? " equipped" : ""}"
-      data-kind="frame" data-val="${f.id}" ${unlocked ? "" : "disabled"}>
-      <span class="fchip-prev frame-${f.id}"></span>${unlocked ? "" : '<i class="ti ti-lock"></i> '}${Feed.escape(f.label)}</button>`;
-  }).join("");
+function skinRow(item, kind, a) {
+  const unlocked = skinUnlocked(item, a);
+  const equipped = kind === "title"
+    ? (state.profile.title || "Frischling") === item.label
+    : (state.profile.frame || "none") === item.id;
+  const val = kind === "title" ? item.label : item.id;
+  const have = item.cur(a);
+  const pct = item.target > 0 ? Math.min(100, Math.round(have / item.target * 100)) : 100;
+  const preview = kind === "frame"
+    ? `<span class="skin-prev frame-${item.id}"></span>`
+    : `<span class="skin-prev skin-ico"><i class="ti ${item.icon}"></i></span>`;
+  const btn = equipped
+    ? '<button class="skin-btn on" disabled><i class="ti ti-check"></i></button>'
+    : unlocked
+      ? `<button class="skin-btn" data-kind="${kind}" data-val="${Feed.escape(val)}">Ausrüsten</button>`
+      : '<button class="skin-btn locked" disabled><i class="ti ti-lock"></i></button>';
+  return `<div class="skin-row${unlocked ? "" : " locked"}">
+      ${preview}
+      <div class="skin-main">
+        <div class="skin-name">${Feed.escape(item.label)}</div>
+        <div class="skin-task">${unlocked ? "✓ " : ""}${Feed.escape(item.task)}${item.target > 0 && !unlocked ? ` · ${have}/${item.target}` : ""}</div>
+        ${item.target > 0 ? `<div class="skin-bar"><div style="width:${pct}%"></div></div>` : ""}
+      </div>
+      ${btn}
+    </div>`;
+}
 
-  document.querySelectorAll("#titleChips .cos-chip:not(.locked), #frameChips .cos-chip:not(.locked)").forEach((chip) => {
-    chip.addEventListener("click", async () => {
-      const kind = chip.dataset.kind, val = chip.dataset.val;
+function renderCollection(a) {
+  $("collectionTitles").innerHTML = TITLES.map((t) => skinRow(t, "title", a)).join("");
+  $("collectionFrames").innerHTML = FRAMES.map((f) => skinRow(f, "frame", a)).join("");
+  const total = TITLES.length + FRAMES.length;
+  const got = TITLES.filter((t) => skinUnlocked(t, a)).length + FRAMES.filter((f) => skinUnlocked(f, a)).length;
+  $("collectionCount").textContent = `${got}/${total} freigeschaltet`;
+
+  document.querySelectorAll("#collectionModal .skin-btn[data-kind]").forEach((b) => {
+    b.addEventListener("click", async () => {
+      const kind = b.dataset.kind, val = b.dataset.val;
       const patch = kind === "title"
         ? { title: val === "Frischling" ? null : val }
         : { frame: val === "none" ? null : val };
-      chip.disabled = true;
+      b.disabled = true;
       try {
         await Social.saveProfile(patch);
         if (kind === "title") state.profile.title = patch.title;
         else state.profile.frame = patch.frame;
-        // Avatare + Titel überall aktualisieren
         applyAvatarEl($("headerAvatar"), state.username, state.profile.avatar_url, state.profile.frame, "avatar");
         applyAvatarEl($("profileAvatar"), state.username, state.profile.avatar_url, state.profile.frame, "profile-avatar");
         const pt = $("profileTitle");
         pt.textContent = state.profile.title || "";
         pt.classList.toggle("hidden", !state.profile.title);
-        renderCosmetics(s);
-      } catch (e) { chip.disabled = false; alert("Speichern fehlgeschlagen: " + e.message); }
+        renderCollection(a);
+      } catch (e) { b.disabled = false; alert("Speichern fehlgeschlagen: " + e.message); }
     });
   });
 }
+
+async function openCollection() {
+  $("collectionModal").classList.remove("hidden");
+  $("collectionTitles").innerHTML = '<p class="spinner-text">Lädt…</p>';
+  $("collectionFrames").innerHTML = "";
+  $("collectionCount").textContent = "";
+  try {
+    const a = await Stats.collection();
+    if (!a) return;
+    a.unlockAll = state.profile.unlockAll;
+    renderCollection(a);
+  } catch (e) {
+    $("collectionTitles").innerHTML = `<p class="spinner-text">Fehler: ${Feed.escape(e.message)}</p>`;
+  }
+}
+function closeCollection() { $("collectionModal").classList.add("hidden"); }
 
 // Avatar-Picker: aus den eigenen Beiträgen wählen (oder zurück auf Buchstabe).
 function openAvatarPicker(s) {
@@ -744,6 +773,11 @@ $("reportClose").addEventListener("click", closeReport);
 $("reportModal").addEventListener("click", (e) => { if (e.target.id === "reportModal") closeReport(); });
 document.querySelectorAll("#reportModal [data-reason]").forEach((b) =>
   b.addEventListener("click", () => submitReport(b.dataset.reason)));
+
+// Sammlung-Overlay (Erfolge + Skins)
+$("openCollectionBtn").addEventListener("click", openCollection);
+$("collectionClose").addEventListener("click", closeCollection);
+$("collectionModal").addEventListener("click", (e) => { if (e.target.id === "collectionModal") closeCollection(); });
 
 // Info-Panel „So funktioniert's"
 $("infoBtn").addEventListener("click", () => $("infoModal").classList.remove("hidden"));
