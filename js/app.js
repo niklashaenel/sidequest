@@ -23,6 +23,7 @@ const state = {
   stats: null,        // letzte berechnete Statistik (für Avatar-Picker etc.)
   profile: { avatar_url: null, title: null, frame: null, unlockAll: false, isAdmin: false, specialTitle: null }, // eigene Kosmetik
   partCount: {},      // Teilnehmer je aktiver Challenge
+  specialTitles: [],  // mir zugewiesene Spezial-Titel (aus title_grants)
 };
 
 // Jeder Skin ist ein Erfolg: Aufgabe (task) + Ziel (target) + aktueller Wert (cur) aus den
@@ -536,11 +537,14 @@ function skinRow(item, kind, a) {
 }
 
 function renderCollection(a) {
-  // Spezial-Titel (per Supabase persönlich vergeben) – immer ausrüstbar, ganz oben.
-  const special = state.profile.specialTitle;
-  if (special) {
-    const item = { label: special, icon: "ti-crown", task: t("col.specialTask"), target: 0, cur: () => 1 };
-    $("collectionSpecial").innerHTML = skinRow(item, "title", a);
+  // Spezial-Titel (persönlich zugewiesen) – immer ausrüstbar, ganz oben.
+  // Quellen: Einzelfeld profiles.special_title + zugewiesene aus title_grants.
+  const specials = [];
+  if (state.profile.specialTitle) specials.push(state.profile.specialTitle);
+  (state.specialTitles || []).forEach((l) => { if (l && !specials.includes(l)) specials.push(l); });
+  if (specials.length) {
+    $("collectionSpecial").innerHTML = specials.map((label) =>
+      skinRow({ label, icon: "ti-crown", task: t("col.specialTask"), target: 0, cur: () => 1 }, "title", a)).join("");
     $("collectionSpecialSection").classList.remove("hidden");
   } else {
     $("collectionSpecial").innerHTML = "";
@@ -584,6 +588,7 @@ async function openCollection() {
     const a = await Stats.collection();
     if (!a) return;
     a.unlockAll = state.profile.unlockAll;
+    state.specialTitles = await Social.mySpecialTitles();
     renderCollection(a);
   } catch (e) {
     $("collectionTitles").innerHTML = `<p class="spinner-text">${Feed.escape(t("common.error", { msg: e.message }))}</p>`;

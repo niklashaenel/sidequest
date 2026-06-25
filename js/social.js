@@ -242,6 +242,19 @@ const Social = {
     if (error) throw error;
   },
 
+  // Mir zugewiesene Spezial-Titel (aus title_grants → special_titles). Fail-soft.
+  // Durch RLS sieht jeder NUR seine eigenen Zuweisungen – andere kennen den Titel gar nicht.
+  async mySpecialTitles() {
+    try {
+      const user = await Auth.getUser();
+      if (!user) return [];
+      const { data, error } = await sb.from("title_grants")
+        .select("special_titles(label)").eq("user_id", user.id);
+      if (error) throw error;
+      return (data || []).map((g) => g.special_titles && g.special_titles.label).filter(Boolean);
+    } catch (e) { console.warn("[SideQuest] mySpecialTitles:", e.message); return []; }
+  },
+
   // ---- Melden & Moderation ----
   // Beitrag melden. Doppel-Meldung (unique) wird stillschweigend ignoriert.
   async reportPost(submissionId, reason) {
