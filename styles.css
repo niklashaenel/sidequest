@@ -523,3 +523,24 @@ body { overscroll-behavior-y: contain; }
 .archive-title { flex: 1; min-width: 0; font-weight: 700; font-size: 14px; white-space: nowrap;
                  overflow: hidden; text-overflow: ellipsis; }
 .archive-item > .ti-chevron-right { color: var(--muted-2); flex-shrink: 0; }
+
+/* ===================================================================
+   v20: Archiv-Gruppen (aufklappbar, Tages/Stunden) + Frühe-Vögel-Badge
+   =================================================================== */
+.arc-group { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+.arc-group + .arc-group { margin-top: 8px; }
+.arc-group-head { display: flex; align-items: center; gap: 8px; width: 100%; background: none; border: none;
+                  color: var(--text); font: inherit; font-weight: 700; font-size: 14px; padding: 12px 13px; cursor: pointer; }
+.arc-caret { color: var(--muted); transition: transform .2s ease; flex-shrink: 0; }
+.arc-group.open .arc-caret { transform: rotate(90deg); }
+.arc-label { flex: 1; text-align: left; }
+.arc-count { color: var(--muted); font-size: 12px; background: var(--surface-2); border-radius: 999px; padding: 1px 8px; }
+.arc-group-body { display: none; padding: 0 8px 8px; flex-direction: column; gap: 6px; }
+.arc-group.open .arc-group-body { display: flex; }
+/* Archiv-Eintrag innerhalb einer Gruppe (überschreibt v19) */
+.arc-group-body .archive-item { background: var(--surface-2); border-radius: var(--r-sm); padding: 10px 12px; }
+.archive-when { color: var(--muted); font-size: 12px; flex-shrink: 0; }
+
+/* Frühe-Vögel-Badge im Feed (wie „erster Kommentar") */
+.fi-early { font-size: 11px; font-weight: 800; padding: 1px 7px; border-radius: 999px;
+            background: var(--hourly-bg); color: var(--hourly-tx); white-space: nowrap; }

@@ -210,17 +210,47 @@ function renderBest(list) {
   sec.classList.remove("hidden");
 }
 
+// Wann lief die Challenge? (heute/gestern + Uhrzeit, sonst Datum)
+function archiveWhen(iso) {
+  const d = new Date(iso), now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  const hm = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const dayDiff = Math.round(
+    (new Date(now.getFullYear(), now.getMonth(), now.getDate()) -
+     new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000);
+  if (dayDiff <= 0) return "heute " + hm;
+  if (dayDiff === 1) return "gestern " + hm;
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}. ${hm}`;
+}
+
+function archiveGroup(label, items) {
+  if (!items.length) return "";
+  const rows = items.map((ch) => {
+    const meta = Challenges.meta(ch.kind);
+    return `<button class="archive-item" data-q="${ch.id}" data-title="${Feed.escape(ch.title)}">
+        <i class="ti ${meta.icon}"></i>
+        <span class="archive-title">${Feed.escape(ch.title)}</span>
+        <span class="archive-when">${archiveWhen(ch.ends_at)}</span>
+      </button>`;
+  }).join("");
+  return `<div class="arc-group">
+      <button class="arc-group-head">
+        <i class="ti ti-chevron-right arc-caret"></i><span class="arc-label">${label}</span>
+        <span class="arc-count">${items.length}</span>
+      </button>
+      <div class="arc-group-body">${rows}</div>
+    </div>`;
+}
+
 function renderArchive(list) {
   const sec = $("archiveSection"), el = $("archiveList");
   if (!list || !list.length) { sec.classList.add("hidden"); return; }
-  el.innerHTML = list.map((ch) => {
-    const meta = Challenges.meta(ch.kind);
-    return `<button class="archive-item" data-q="${ch.id}" data-title="${Feed.escape(ch.title)}">
-      <i class="ti ${meta.icon}"></i>
-      <span class="archive-title">${Feed.escape(ch.title)}</span>
-      <i class="ti ti-chevron-right"></i>
-    </button>`;
-  }).join("");
+  const hourly = list.filter((c) => c.kind === "hourly");
+  const daily  = list.filter((c) => c.kind !== "hourly"); // daily + special
+  el.innerHTML = archiveGroup("⚡ Stunden-Challenges", hourly) + archiveGroup("🌙 Tages-Challenges", daily);
+
+  el.querySelectorAll(".arc-group-head").forEach((h) =>
+    h.addEventListener("click", () => h.parentElement.classList.toggle("open")));
   el.querySelectorAll(".archive-item").forEach((c) =>
     c.addEventListener("click", () => goToFeed({ id: Number(c.dataset.q), title: c.dataset.title })));
   sec.classList.remove("hidden");
@@ -728,8 +758,9 @@ sb.auth.onAuthStateChange((event, session) => {
 // Beim Laden: bestehende Session? -> direkt in die App, sonst Login.
 // (INITIAL_SESSION wird oben bewusst ignoriert, damit es hier nicht doppelt lädt.)
 (async () => {
-  const user = await Auth.getUser();
-  if (user) await enterApp();
+  // Lokale Session prüfen (kein Netzwerk-Check) -> bleibt eingeloggt, auch bei wackeligem Netz.
+  const session = await Auth.getSession();
+  if (session) await enterApp();
   else showScreen("authScreen");
 })();
 

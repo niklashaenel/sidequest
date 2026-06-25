@@ -40,6 +40,12 @@ const Auth = {
     return data.user || null;
   },
 
+  // Lokale Session (ohne Netzwerk-Check) – zum „angemeldet bleiben" beim App-Start.
+  async getSession() {
+    const { data } = await sb.auth.getSession();
+    return data.session || null;
+  },
+
   // Profil-Eintrag sicherstellen. Speichert Anzeigename in der Tabelle "profiles".
   // upsert = anlegen oder (falls schon da) aktualisieren – verhindert Doppel-Fehler.
   async ensureProfile(username) {

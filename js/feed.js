@@ -35,6 +35,11 @@ const Feed = {
     return (name || "?").trim().charAt(0).toUpperCase() || "?";
   },
 
+  // Abzeichen für die frühesten Beiträge (wie „erster Kommentar" auf TikTok).
+  earlyLabel(rank) {
+    return rank === 1 ? "🥇 Erster!" : rank === 2 ? "🥈 2." : "🥉 3.";
+  },
+
   // Avatar als HTML: eigenes Foto (avatar_url) oder Anfangsbuchstabe, mit optionalem Rahmen.
   avatarHTML(name, avatarUrl, frame, baseCls) {
     const f = frame && frame !== "none" ? " frame-" + frame : "";
@@ -94,6 +99,11 @@ const Feed = {
       return;
     }
 
+    // Frühe-Vögel: die ersten 1-3 Beiträge (chronologisch) der Challenge bekommen ein Abzeichen.
+    const allByTime = [...(subsRes.data || [])].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    const earlyRank = {};
+    allByTime.slice(0, 3).forEach((s, i) => { earlyRank[s.id] = i + 1; });
+
     // 2) Im Freunde-Modus nur Beiträge von Gefolgten (und mir selbst).
     const subs = (mode === "friends")
       ? (subsRes.data || []).filter((s) => follows.has(s.user_id) || s.user_id === myId)
@@ -130,6 +140,7 @@ const Feed = {
       const isFriend = friends.friends.has(item.user_id);
       const reqPending = friends.outgoing.has(item.user_id);
       const uid = Feed.escape(item.user_id);
+      const rank = earlyRank[item.id];
 
       const el = document.createElement("article");
       el.className = "feed-item";
@@ -137,7 +148,7 @@ const Feed = {
         <div class="fi-head">
           ${Feed.avatarHTML(username, prof.avatar_url, prof.frame, "fi-avatar")}
           <div class="fi-id">
-            <div class="fi-user">${Feed.escape(username)}${prof.title ? ` <span class="fi-title">${Feed.escape(prof.title)}</span>` : ""}</div>
+            <div class="fi-user">${Feed.escape(username)}${prof.title ? ` <span class="fi-title">${Feed.escape(prof.title)}</span>` : ""}${rank ? ` <span class="fi-early r${rank}">${Feed.earlyLabel(rank)}</span>` : ""}</div>
             <div class="fi-time">${Feed.formatTime(item.created_at)}</div>
           </div>
           ${isMine

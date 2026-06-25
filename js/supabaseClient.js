@@ -25,6 +25,9 @@ if (KEYS_FEHLEN) {
     "[SideQuest] Bitte SUPABASE_URL und SUPABASE_KEY in js/supabaseClient.js eintragen."
   );
 } else {
-  // Erstellt den globalen Client.
-  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  // Erstellt den globalen Client. Session wird lokal gespeichert + automatisch erneuert,
+  // damit man eingeloggt bleibt (auch nach App-Neustart / wackeligem Netz).
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
+  });
 }
