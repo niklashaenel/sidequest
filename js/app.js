@@ -27,19 +27,29 @@ const state = {
 
 // Freischaltbare Titel (gespeichert wird das Label) und Rahmen (gespeichert wird die id).
 const TITLES = [
-  { label: "Frischling",     req: () => true },
-  { label: "Stammgast",      req: (s) => s.done >= 5 },
-  { label: "Serientäter 🔥",  req: (s) => s.streak >= 7 },
-  { label: "Liebling ❤️",     req: (s) => s.likesReceived >= 25 },
-  { label: "Veteran 🎖️",      req: (s) => s.done >= 20 },
-  { label: "Legende 👑",      req: (s) => s.level >= 10 },
+  { label: "Frischling",      req: () => true },
+  { label: "Stammgast",       req: (s) => s.done >= 5 },
+  { label: "Serientäter 🔥",   req: (s) => s.streak >= 7 },
+  { label: "Liebling ❤️",      req: (s) => s.likesReceived >= 25 },
+  { label: "Veteran 🎖️",       req: (s) => s.done >= 20 },
+  { label: "Legende 👑",       req: (s) => s.level >= 10 },
+  { label: "Süchtig 💉",       req: (s) => s.done >= 50 },
+  { label: "Publikumsliebling 🌟", req: (s) => s.likesReceived >= 75 },
+  { label: "Unaufhaltsam ⚡",   req: (s) => s.streak >= 30 },
+  { label: "Ikone 💎",         req: (s) => s.likesReceived >= 150 },
+  { label: "Großmeister 🧠",    req: (s) => s.level >= 20 },
+  { label: "Mythos 🐉",        req: (s) => s.level >= 30 },
 ];
 const FRAMES = [
-  { id: "none",   label: "Kein Rahmen", req: () => true },
-  { id: "bronze", label: "Bronze",      req: (s) => s.level >= 3 },
-  { id: "silber", label: "Silber",      req: (s) => s.level >= 5 },
-  { id: "gold",   label: "Gold",        req: (s) => s.level >= 10 },
-  { id: "glow",   label: "Neon-Glow ✨", req: (s) => s.streak >= 14 },
+  { id: "none",       label: "Kein Rahmen",  req: () => true },
+  { id: "bronze",     label: "Bronze",       req: (s) => s.level >= 3 },
+  { id: "silber",     label: "Silber",       req: (s) => s.level >= 5 },
+  { id: "gold",       label: "Gold",         req: (s) => s.level >= 10 },
+  { id: "glow",       label: "Neon-Glow ✨",  req: (s) => s.streak >= 14 },
+  { id: "diamant",    label: "Diamant 💎",    req: (s) => s.level >= 15 },
+  { id: "feuer",      label: "Feuer 🔥",      req: (s) => s.streak >= 30 },
+  { id: "platin",     label: "Platin",       req: (s) => s.level >= 25 },
+  { id: "regenbogen", label: "Regenbogen 🌈", req: (s) => s.level >= 35 },
 ];
 
 // Avatar-Element (Header/Profil) setzen: eigenes Foto oder Buchstabe, plus Rahmen-Klasse.
@@ -473,13 +483,16 @@ function renderCosmetics(s) {
 function openAvatarPicker(s) {
   const grid = $("avatarPickerGrid");
   const posts = (s && s.posts) || [];
-  const cells = [`<button class="ap-cell ap-letter" data-url="">${Feed.escape(Feed.initial(state.username))}</button>`]
-    .concat(posts.map((p) =>
+  const cells = [
+    `<button class="ap-cell ap-upload" data-upload="1"><i class="ti ti-photo-up"></i><span>Galerie</span></button>`,
+    `<button class="ap-cell ap-letter" data-url="">${Feed.escape(Feed.initial(state.username))}</button>`,
+  ].concat(posts.map((p) =>
       `<button class="ap-cell" data-url="${Feed.escape(p.image_url)}"><img src="${Feed.escape(p.image_url)}" alt="" loading="lazy" /></button>`));
   grid.innerHTML = cells.join("");
-  $("avatarPickerHint").classList.toggle("hidden", posts.length > 0);
+  $("avatarPickerHint").classList.remove("hidden");
   grid.querySelectorAll(".ap-cell").forEach((c) => {
     c.addEventListener("click", async () => {
+      if (c.dataset.upload) { $("avatarFile").click(); return; } // beliebiges Bild aus der Galerie
       const url = c.dataset.url || null;
       grid.querySelectorAll(".ap-cell").forEach((x) => (x.disabled = true));
       try {
@@ -653,6 +666,26 @@ document.querySelectorAll("#feedToggle button").forEach((b) => {
 $("profileAvatar").addEventListener("click", () => openAvatarPicker(state.stats));
 $("avatarPickerClose").addEventListener("click", closeAvatarPicker);
 $("avatarPicker").addEventListener("click", (e) => { if (e.target.id === "avatarPicker") closeAvatarPicker(); });
+
+// Beliebiges Bild aus der Galerie als Profilbild hochladen
+$("avatarFile").addEventListener("change", async (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  const grid = $("avatarPickerGrid");
+  grid.querySelectorAll(".ap-cell").forEach((x) => (x.disabled = true));
+  try {
+    const url = await Upload.avatar(file);
+    await Social.saveProfile({ avatar_url: url });
+    state.profile.avatar_url = url;
+    applyAvatarEl($("headerAvatar"), state.username, url, state.profile.frame, "avatar");
+    applyAvatarEl($("profileAvatar"), state.username, url, state.profile.frame, "profile-avatar");
+    closeAvatarPicker();
+  } catch (err) {
+    grid.querySelectorAll(".ap-cell").forEach((x) => (x.disabled = false));
+    alert("Hochladen fehlgeschlagen: " + err.message);
+  }
+});
 
 // Info-Panel „So funktioniert's"
 $("infoBtn").addEventListener("click", () => $("infoModal").classList.remove("hidden"));

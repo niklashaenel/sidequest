@@ -28,6 +28,21 @@ const Upload = {
     return !!data;
   },
 
+  // Freies Avatar-Bild (aus der Galerie) hochladen – OHNE submission-Eintrag.
+  // Gibt die öffentliche URL zurück.
+  async avatar(file) {
+    const user = await Auth.getUser();
+    if (!user) throw new Error("Nicht eingeloggt.");
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const path = `avatars/${user.id}-${Date.now()}.${ext}`;
+    const { error: upErr } = await sb.storage
+      .from(Upload.BUCKET)
+      .upload(path, file, { upsert: true, contentType: file.type || "image/jpeg" });
+    if (upErr) throw upErr;
+    const { data: pub } = sb.storage.from(Upload.BUCKET).getPublicUrl(path);
+    return pub.publicUrl;
+  },
+
   // Foto hochladen + Eintrag schreiben.
   async submit(file, quest) {
     const user = await Auth.getUser();
