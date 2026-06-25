@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=26" />
+  <link rel="stylesheet" href="styles.css?v=27" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
@@ -133,17 +133,8 @@
       <!-- Push-Benachrichtigungen aktivieren (nur sichtbar, wenn möglich) -->
       <button id="profileNotifyBtn" class="btn btn-ghost hidden" style="margin-top:14px"><i class="ti ti-bell"></i> Benachrichtigungen aktivieren</button>
 
-      <!-- Freundschaftsanfragen / Freunde / Folge ich -->
-      <div id="friendRequestsSection" class="hidden">
-        <p class="section-label" style="margin-top:22px">🤝 Freundschaftsanfragen</p>
-        <div id="friendRequests" class="soc-list"></div>
-      </div>
-      <p class="section-label" style="margin-top:22px">Freunde (<span id="friendsCount">0</span>)</p>
-      <div id="friendsList" class="soc-list"></div>
-      <p class="section-label" style="margin-top:18px">Folge ich (<span id="followsCount">0</span>)</p>
-      <div id="followsList" class="soc-list"></div>
-
-      <button id="openCollectionBtn" class="btn" style="margin-top:18px"><i class="ti ti-trophy"></i> Sammlung &amp; Erfolge</button>
+      <button id="openFriendsBtn" class="btn btn-ghost" style="margin-top:14px"><i class="ti ti-users"></i> Freunde &amp; Anfragen <span id="friendsBadge" class="hbadge hidden"></span></button>
+      <button id="openCollectionBtn" class="btn" style="margin-top:10px"><i class="ti ti-trophy"></i> Sammlung &amp; Erfolge</button>
 
       <p class="section-label" style="margin-top:22px">Deine Beiträge</p>
       <div id="profilePosts" class="post-grid"></div>
@@ -194,6 +185,22 @@
 
   <!-- Toast (z. B. Serien-Belohnung) -->
   <div id="toast" class="toast hidden"></div>
+
+  <!-- Freunde & Anfragen -->
+  <div id="friendsModal" class="modal hidden">
+    <div class="modal-card">
+      <button class="onboard-close" id="friendsClose" aria-label="Schließen"><i class="ti ti-x"></i></button>
+      <h3 class="onboard-title">👥 Freunde</h3>
+      <div id="friendRequestsSection" class="hidden">
+        <p class="section-label" style="margin-top:14px">🤝 Freundschaftsanfragen</p>
+        <div id="friendRequests" class="soc-list"></div>
+      </div>
+      <p class="section-label" style="margin-top:16px">Freunde (<span id="friendsCount">0</span>)</p>
+      <div id="friendsList" class="soc-list"></div>
+      <p class="section-label" style="margin-top:18px">Folge ich (<span id="followsCount">0</span>)</p>
+      <div id="followsList" class="soc-list"></div>
+    </div>
+  </div>
 
   <!-- Sammlung & Erfolge (Titel + Rahmen freischalten/ausrüsten) -->
   <div id="collectionModal" class="modal hidden">
@@ -280,15 +287,15 @@
     <button class="link-btn" id="onboardLater">Später</button>
   </div>
 
-  <script src="js/supabaseClient.js?v=26"></script>
-  <script src="js/auth.js?v=26"></script>
-  <script src="js/challenges.js?v=26"></script>
-  <script src="js/social.js?v=26"></script>
-  <script src="js/upload.js?v=26"></script>
-  <script src="js/feed.js?v=26"></script>
-  <script src="js/push.js?v=26"></script>
-  <script src="js/onboarding.js?v=26"></script>
-  <script src="js/stats.js?v=26"></script>
-  <script src="js/app.js?v=26"></script>
+  <script src="js/supabaseClient.js?v=27"></script>
+  <script src="js/auth.js?v=27"></script>
+  <script src="js/challenges.js?v=27"></script>
+  <script src="js/social.js?v=27"></script>
+  <script src="js/upload.js?v=27"></script>
+  <script src="js/feed.js?v=27"></script>
+  <script src="js/push.js?v=27"></script>
+  <script src="js/onboarding.js?v=27"></script>
+  <script src="js/stats.js?v=27"></script>
+  <script src="js/app.js?v=27"></script>
 </body>
 </html>

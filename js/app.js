@@ -374,8 +374,27 @@ async function openProfile() {
   state.stats = s;
   renderProfile(s);
   refreshNotifyBtn();
-  renderSocial().catch((e) => console.warn("[SideQuest] social:", e.message));
+  refreshFriendsBadge();
 }
+
+// Anfrage-Zähler am „Freunde"-Button (rot), damit man Anfragen trotz Overlay nicht verpasst.
+async function refreshFriendsBadge() {
+  const badge = $("friendsBadge");
+  try {
+    const fd = await Social.friendData();
+    const n = fd.incoming.length;
+    badge.textContent = n;
+    badge.classList.toggle("hidden", n === 0);
+  } catch (e) { badge.classList.add("hidden"); }
+}
+
+async function openFriends() {
+  $("friendsModal").classList.remove("hidden");
+  $("friendsList").innerHTML = '<p class="spinner-text">Lädt…</p>';
+  await renderSocial().catch((e) => console.warn("[SideQuest] social:", e.message));
+  refreshFriendsBadge();
+}
+function closeFriends() { $("friendsModal").classList.add("hidden"); }
 
 // Profil: Anfragen / Freunde / Folge-ich-Listen rendern.
 async function renderSocial() {
@@ -773,6 +792,11 @@ $("reportClose").addEventListener("click", closeReport);
 $("reportModal").addEventListener("click", (e) => { if (e.target.id === "reportModal") closeReport(); });
 document.querySelectorAll("#reportModal [data-reason]").forEach((b) =>
   b.addEventListener("click", () => submitReport(b.dataset.reason)));
+
+// Freunde-Overlay
+$("openFriendsBtn").addEventListener("click", openFriends);
+$("friendsClose").addEventListener("click", closeFriends);
+$("friendsModal").addEventListener("click", (e) => { if (e.target.id === "friendsModal") closeFriends(); });
 
 // Sammlung-Overlay (Erfolge + Skins)
 $("openCollectionBtn").addEventListener("click", openCollection);
