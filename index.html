@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=20" />
+  <link rel="stylesheet" href="styles.css?v=21" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
@@ -24,7 +24,6 @@
   <header id="appHeader" class="hidden">
     <span class="logo">Side<span class="dot">Quest</span></span>
     <div class="header-right">
-      <button id="notifyBell" class="icon-btn hidden" aria-label="Benachrichtigungen aktivieren" title="Benachrichtigungen aktivieren"><i class="ti ti-bell"></i></button>
       <button id="headerAvatar" class="avatar" aria-label="Profil" title="Profil">?</button>
       <button id="logoutBtn" class="icon-btn" aria-label="Abmelden" title="Abmelden"><i class="ti ti-logout"></i></button>
     </div>
@@ -124,6 +123,9 @@
       </div>
       <div id="profileStats" class="stats-strip" style="margin-top:4px"></div>
 
+      <!-- Push-Benachrichtigungen aktivieren (nur sichtbar, wenn möglich) -->
+      <button id="profileNotifyBtn" class="btn btn-ghost hidden" style="margin-top:14px"><i class="ti ti-bell"></i> Benachrichtigungen aktivieren</button>
+
       <!-- Freundschaftsanfragen / Freunde / Folge ich -->
       <div id="friendRequestsSection" class="hidden">
         <p class="section-label" style="margin-top:22px">🤝 Freundschaftsanfragen</p>
@@ -212,15 +214,15 @@
     <button class="link-btn" id="onboardLater">Später</button>
   </div>
 
-  <script src="js/supabaseClient.js?v=20"></script>
-  <script src="js/auth.js?v=20"></script>
-  <script src="js/challenges.js?v=20"></script>
-  <script src="js/social.js?v=20"></script>
-  <script src="js/upload.js?v=20"></script>
-  <script src="js/feed.js?v=20"></script>
-  <script src="js/push.js?v=20"></script>
-  <script src="js/onboarding.js?v=20"></script>
-  <script src="js/stats.js?v=20"></script>
-  <script src="js/app.js?v=20"></script>
+  <script src="js/supabaseClient.js?v=21"></script>
+  <script src="js/auth.js?v=21"></script>
+  <script src="js/challenges.js?v=21"></script>
+  <script src="js/social.js?v=21"></script>
+  <script src="js/upload.js?v=21"></script>
+  <script src="js/feed.js?v=21"></script>
+  <script src="js/push.js?v=21"></script>
+  <script src="js/onboarding.js?v=21"></script>
+  <script src="js/stats.js?v=21"></script>
+  <script src="js/app.js?v=21"></script>
 </body>
 </html>

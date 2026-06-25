@@ -544,3 +544,12 @@ body { overscroll-behavior-y: contain; }
 /* Frühe-Vögel-Badge im Feed (wie „erster Kommentar") */
 .fi-early { font-size: 11px; font-weight: 800; padding: 1px 7px; border-radius: 999px;
             background: var(--hourly-bg); color: var(--hourly-tx); white-space: nowrap; }
+
+/* ===================================================================
+   v21: Challenge-Karten-Meta (Teilnehmer + XP)
+   =================================================================== */
+.cc-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 10px 0 4px; }
+.cc-part { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 12.5px; font-weight: 600; }
+.cc-part .ti { font-size: 15px; }
+.cc-xp { font-size: 11px; font-weight: 800; color: var(--brand-text); background: var(--brand-soft);
+         padding: 2px 9px; border-radius: 999px; flex-shrink: 0; }

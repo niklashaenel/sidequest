@@ -22,6 +22,7 @@ const state = {
   username: "",
   stats: null,        // letzte berechnete Statistik (für Avatar-Picker etc.)
   profile: { avatar_url: null, title: null, frame: null }, // eigene Kosmetik
+  partCount: {},      // Teilnehmer je aktiver Challenge
 };
 
 // Freischaltbare Titel (gespeichert wird das Label) und Rahmen (gespeichert wird die id).
@@ -101,20 +102,18 @@ async function enterApp() {
   showScreen("overviewScreen");
   await loadOverview();
   Onboarding.maybeShow();
-  refreshBell();
 }
 
-// Glocke in der Kopfzeile: nur zeigen, wenn Benachrichtigungen erlaubt werden können.
-const notifyBell = $("notifyBell");
-function refreshBell() {
-  // Glocke nur zeigen, wenn Benachrichtigungen noch aktiviert werden können.
-  notifyBell.classList.toggle("hidden", !(typeof Push !== "undefined" && Push.canPrompt()));
+// Benachrichtigungs-Knopf im Profil: nur sichtbar, wenn Push noch aktiviert werden kann.
+const profileNotifyBtn = $("profileNotifyBtn");
+function refreshNotifyBtn() {
+  profileNotifyBtn.classList.toggle("hidden", !(typeof Push !== "undefined" && Push.canPrompt()));
 }
-notifyBell.addEventListener("click", async () => {
-  notifyBell.disabled = true;
+profileNotifyBtn.addEventListener("click", async () => {
+  profileNotifyBtn.disabled = true;
   const ok = await Push.enable();
-  notifyBell.disabled = false;
-  refreshBell();
+  profileNotifyBtn.disabled = false;
+  refreshNotifyBtn();
   if (ok) alert("🔔 Benachrichtigungen aktiviert! Du verpasst keine Challenge mehr.");
 });
 
@@ -130,6 +129,8 @@ async function loadOverview() {
     listEl.innerHTML = `<p class="spinner-text">Fehler: ${Feed.escape(err.message)}</p>`;
     return;
   }
+  try { state.partCount = await Stats.participantCounts(state.challenges.map((c) => c.id)); }
+  catch (e) { state.partCount = {}; }
   await refreshGreeting();
   renderOverview();
   loadStatsAndTop(); // Stats + Top-3 nachladen (blockiert die Challenge-Liste nicht)
@@ -305,6 +306,7 @@ async function openProfile() {
   const s = await Stats.forMe();
   state.stats = s;
   renderProfile(s);
+  refreshNotifyBtn();
   renderSocial().catch((e) => console.warn("[SideQuest] social:", e.message));
 }
 
@@ -540,6 +542,12 @@ function renderOverview() {
         </div>
       </div>
       <p class="cc-title">${Feed.escape(ch.title)}</p>
+      <div class="cc-meta">
+        <span class="cc-part">${(state.partCount[ch.id] || 0) > 0
+          ? `<i class="ti ti-users"></i> ${state.partCount[ch.id]} dabei`
+          : '<i class="ti ti-sparkles"></i> Sei der/die Erste!'}</span>
+        <span class="cc-xp">+10 XP</span>
+      </div>
       <div class="cc-action ${done ? "done" : ""}">
         ${done ? '<i class="ti ti-check"></i> Erledigt – Feed ansehen' : "Challenge starten"}
       </div>`;

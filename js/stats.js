@@ -144,6 +144,15 @@ const Stats = {
     return { posts: rows.length, people: new Set(rows.map((r) => r.user_id)).size };
   },
 
+  // Wie viele haben je aktiver Challenge schon gepostet? (für „N dabei" auf der Karte)
+  async participantCounts(challengeIds) {
+    const map = {};
+    if (!challengeIds || !challengeIds.length) return map;
+    const { data } = await sb.from("submissions").select("quest_id").in("quest_id", challengeIds);
+    (data || []).forEach((r) => { map[r.quest_id] = (map[r.quest_id] || 0) + 1; });
+    return map;
+  },
+
   // Beste Bilder der Woche: Top-Beiträge der letzten 7 Tage nach Likes (Top 6).
   async bestPhotos() {
     const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();

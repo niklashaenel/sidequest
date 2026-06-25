@@ -13,7 +13,12 @@ const Auth = {
 
   // Registrieren: Konto anlegen, danach Profil mit Anzeigename speichern.
   async register(username, email, password) {
-    const { data, error } = await sb.auth.signUp({ email, password });
+    // Anzeigename in den User-Metadaten ablegen, damit er auch bei AKTIVER
+    // E-Mail-Verifizierung erhalten bleibt (dann gibt's beim Signup noch keine Session).
+    const { data, error } = await sb.auth.signUp({
+      email, password,
+      options: { data: { username: (username || "").trim() } },
+    });
     if (error) throw error;
 
     // Wenn "Confirm email" in Supabase AUS ist, ist man direkt eingeloggt (session vorhanden).
@@ -52,8 +57,9 @@ const Auth = {
     const user = await Auth.getUser();
     if (!user) return;
 
-    // Fallback-Name, falls beim Login (ohne Eingabefeld) noch kein Profil existiert.
-    const name = (username && username.trim()) || user.email.split("@")[0];
+    // Fallback-Name: explizit übergeben -> Metadaten aus der Registrierung -> E-Mail-Präfix.
+    const metaName = user.user_metadata && user.user_metadata.username;
+    const name = (username && username.trim()) || (metaName && metaName.trim()) || user.email.split("@")[0];
 
     const { error } = await sb
       .from("profiles")
