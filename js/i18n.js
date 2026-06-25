@@ -148,6 +148,8 @@ const I18N = {
       "col.title": "🏆 Sammlung",
       "col.titles": "Titel",
       "col.frames": "Rahmen",
+      "col.special": "👑 Spezial-Titel",
+      "col.specialTask": "Persönlich vergeben",
       "col.unlocked": "{got}/{total} freigeschaltet",
       "col.equip": "Ausrüsten",
 
@@ -339,6 +341,8 @@ const I18N = {
       "col.title": "🏆 Collection",
       "col.titles": "Titles",
       "col.frames": "Frames",
+      "col.special": "👑 Special title",
+      "col.specialTask": "Granted personally",
       "col.unlocked": "{got}/{total} unlocked",
       "col.equip": "Equip",
 

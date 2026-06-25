@@ -21,7 +21,7 @@ const state = {
   current: null,      // gerade gewählte Challenge
   username: "",
   stats: null,        // letzte berechnete Statistik (für Avatar-Picker etc.)
-  profile: { avatar_url: null, title: null, frame: null, unlockAll: false, isAdmin: false }, // eigene Kosmetik
+  profile: { avatar_url: null, title: null, frame: null, unlockAll: false, isAdmin: false, specialTitle: null }, // eigene Kosmetik
   partCount: {},      // Teilnehmer je aktiver Challenge
 };
 
@@ -536,6 +536,17 @@ function skinRow(item, kind, a) {
 }
 
 function renderCollection(a) {
+  // Spezial-Titel (per Supabase persönlich vergeben) – immer ausrüstbar, ganz oben.
+  const special = state.profile.specialTitle;
+  if (special) {
+    const item = { label: special, icon: "ti-crown", task: t("col.specialTask"), target: 0, cur: () => 1 };
+    $("collectionSpecial").innerHTML = skinRow(item, "title", a);
+    $("collectionSpecialSection").classList.remove("hidden");
+  } else {
+    $("collectionSpecial").innerHTML = "";
+    $("collectionSpecialSection").classList.add("hidden");
+  }
+
   $("collectionTitles").innerHTML = TITLES.map((t) => skinRow(t, "title", a)).join("");
   $("collectionFrames").innerHTML = FRAMES.map((f) => skinRow(f, "frame", a)).join("");
   const total = TITLES.length + FRAMES.length;
@@ -622,11 +633,11 @@ async function refreshGreeting() {
   const user = await Auth.getUser();
   if (!user) return;
   // Mit Kosmetik-Spalten laden; falls noch nicht angelegt -> Fallback auf username.
-  let res = await sb.from("profiles").select("username, avatar_url, title, frame, unlock_all, is_admin").eq("id", user.id).maybeSingle();
+  let res = await sb.from("profiles").select("username, avatar_url, title, frame, unlock_all, is_admin, special_title").eq("id", user.id).maybeSingle();
   if (res.error) res = await sb.from("profiles").select("username").eq("id", user.id).maybeSingle();
   const data = res.data || {};
   state.username = data.username || user.email.split("@")[0];
-  state.profile = { avatar_url: data.avatar_url || null, title: data.title || null, frame: data.frame || null, unlockAll: !!data.unlock_all, isAdmin: !!data.is_admin };
+  state.profile = { avatar_url: data.avatar_url || null, title: data.title || null, frame: data.frame || null, unlockAll: !!data.unlock_all, isAdmin: !!data.is_admin, specialTitle: data.special_title || null };
   $("greetingName").textContent = `Hi, ${state.username}!`;
   applyAvatarEl($("headerAvatar"), state.username, state.profile.avatar_url, state.profile.frame, "avatar");
 }
