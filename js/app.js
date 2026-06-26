@@ -93,6 +93,11 @@ $("primaryAuthBtn").addEventListener("click", async () => {
   setMessage($("authMessage"), t("auth.moment"));
   try {
     if (registerMode) {
+      // Doppelte Anzeigenamen verhindern (fail-soft, falls DB-Funktion noch fehlt).
+      if (await Auth.usernameTaken(username)) {
+        setMessage($("authMessage"), t("auth.nameTaken"), "error");
+        return;
+      }
       const res = await Auth.register(username, email, password);
       if (!res.session) {
         registerMode = false; applyAuthMode();
@@ -762,6 +767,8 @@ function showChallengeDetail(ch) {
   cd.dataset.ends = ch.ends_at;
   cd.querySelector("span").textContent = Challenges.formatRemaining(ch.ends_at);
   setMessage($("questMessage"), "");
+  // Founder/Admin darf den Feed ansehen, ohne selbst einen Beitrag hochzuladen.
+  $("founderFeedBtn").classList.toggle("hidden", !state.profile.isAdmin);
   showScreen("challengeScreen");
 }
 
@@ -769,6 +776,9 @@ function showChallengeDetail(ch) {
 //  Foto machen + hochladen
 // =====================================================================
 $("startQuestBtn").addEventListener("click", () => $("cameraInput").click());
+
+// Founder/Admin: Feed der Challenge ansehen, ohne selbst einen Beitrag zu posten.
+$("founderFeedBtn").addEventListener("click", () => { if (state.current) goToFeed(state.current); });
 
 $("cameraInput").addEventListener("change", (e) => {
   const file = e.target.files && e.target.files[0];

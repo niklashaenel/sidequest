@@ -40,6 +40,7 @@ const I18N = {
       "auth.moment": "Moment…",
       "auth.needCreds": "Bitte E-Mail und Passwort eingeben.",
       "auth.needName": "Bitte einen Anzeigenamen wählen.",
+      "auth.nameTaken": "Dieser Anzeigename ist schon vergeben. Bitte wähle einen anderen.",
       "auth.accountCreated": "Konto angelegt. Bitte E-Mail bestätigen, dann einloggen.",
 
       // Übersicht
@@ -70,6 +71,7 @@ const I18N = {
 
       // Challenge-Karte / Typen / Zeit
       "cc.start": "Challenge starten",
+      "cc.founderView": "Feed ansehen (ohne Beitrag)",
       "cc.doneView": "Erledigt – Feed ansehen",
       "cc.participants": "{n} dabei",
       "cc.beFirst": "Sei der/die Erste!",
@@ -257,6 +259,7 @@ const I18N = {
       "auth.moment": "One sec…",
       "auth.needCreds": "Please enter email and password.",
       "auth.needName": "Please choose a display name.",
+      "auth.nameTaken": "That display name is already taken. Please choose another.",
       "auth.accountCreated": "Account created. Please confirm your email, then log in.",
 
       "ov.greetingDefault": "Let's go!",
@@ -284,6 +287,7 @@ const I18N = {
       "stat.likesReceived": "Likes received",
 
       "cc.start": "Start challenge",
+      "cc.founderView": "View feed (without posting)",
       "cc.doneView": "Done – view feed",
       "cc.participants": "{n} joined",
       "cc.beFirst": "Be the first!",

@@ -39,6 +39,21 @@ const Auth = {
     await sb.auth.signOut();
   },
 
+  // Prüft VOR der Registrierung, ob ein Anzeigename schon vergeben ist.
+  // Nutzt eine SECURITY-DEFINER-Funktion (auch für nicht eingeloggte Besucher lesbar).
+  // Fail-soft: Fehlt die Funktion in der DB noch, wird NICHT blockiert (App bleibt heil).
+  async usernameTaken(name) {
+    const clean = (name || "").trim();
+    if (!clean) return false;
+    try {
+      const { data, error } = await sb.rpc("username_taken", { name: clean });
+      if (error) return false; // Funktion fehlt / RLS – nicht blockieren
+      return !!data;
+    } catch (_) {
+      return false;
+    }
+  },
+
   // Aktuell eingeloggten User holen (oder null).
   async getUser() {
     const { data } = await sb.auth.getUser();
