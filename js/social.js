@@ -375,6 +375,18 @@ const Social = {
     if (error) throw error;
   },
 
+  // Allgemeines App-Feedback / Verbesserungsvorschlag. Landet in app_feedback
+  // (nur der Admin liest es im Supabase-Dashboard).
+  async sendAppFeedback(text) {
+    const user = await Auth.getUser();
+    if (!user) throw new Error(t("err.notLoggedIn"));
+    const body = (text || "").trim();
+    if (body.length < 4) throw new Error(t("ov.suggest.short"));
+    const { error } = await sb.from("app_feedback")
+      .insert({ user_id: user.id, text: body.slice(0, 600) });
+    if (error) throw error;
+  },
+
   // Neuen Kommentar speichern.
   async addComment(submissionId, body) {
     const user = await Auth.getUser();

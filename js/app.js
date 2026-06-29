@@ -912,6 +912,32 @@ $("settingsInfoBtn").addEventListener("click", () => {
 $("infoClose").addEventListener("click", () => $("infoModal").classList.add("hidden"));
 $("infoModal").addEventListener("click", (e) => { if (e.target.id === "infoModal") $("infoModal").classList.add("hidden"); });
 
+// App-Verbesserung vorschlagen (allgemeines Feedback, aus den Einstellungen)
+$("settingsFeedbackBtn").addEventListener("click", () => {
+  $("settingsModal").classList.add("hidden");
+  setMessage($("feedbackMsg"), "");
+  $("feedbackModal").classList.remove("hidden");
+});
+$("feedbackClose").addEventListener("click", () => $("feedbackModal").classList.add("hidden"));
+$("feedbackModal").addEventListener("click", (e) => { if (e.target.id === "feedbackModal") $("feedbackModal").classList.add("hidden"); });
+$("feedbackForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const input = $("feedbackInput");
+  const msg = $("feedbackMsg");
+  const btn = e.target.querySelector("button");
+  setMessage(msg, "");
+  btn.disabled = true;
+  try {
+    await Social.sendAppFeedback(input.value);
+    input.value = "";
+    msg.textContent = t("fb.thanks");
+    msg.className = "suggest-msg ok";
+  } catch (err) {
+    msg.textContent = err.message || t("common.failed", { msg: "" });
+    msg.className = "suggest-msg error";
+  } finally { btn.disabled = false; }
+});
+
 // Challenge-Idee vorschlagen
 $("suggestForm").addEventListener("submit", async (e) => {
   e.preventDefault();
