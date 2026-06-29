@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=35" />
+  <link rel="stylesheet" href="styles.css?v=36" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
@@ -51,6 +51,11 @@
           <input id="passwordInput" type="password" autocomplete="current-password" data-i18n-ph="auth.password.ph" placeholder="mind. 6 Zeichen" />
         </label>
 
+        <label id="consentField" class="consent-row hidden">
+          <input id="consentCheck" type="checkbox" />
+          <span data-i18n-html="auth.consent">Ich bin mind. 16 Jahre alt und akzeptiere die <button type="button" class="link-btn" data-legal="privacy">Datenschutzerklärung</button>.</span>
+        </label>
+
         <button id="primaryAuthBtn" class="btn" data-i18n="auth.login">Login</button>
         <p class="toggle-line">
           <span id="toggleText" data-i18n="auth.noAccount">Noch kein Konto?</span>
@@ -62,6 +67,11 @@
           <button data-lang="de">DE</button>
           <button data-lang="en">EN</button>
         </div>
+        <p class="legal-footer">
+          <button type="button" class="link-btn" data-legal="imprint" data-i18n="legal.imprint">Impressum</button>
+          <span>·</span>
+          <button type="button" class="link-btn" data-legal="privacy" data-i18n="legal.privacy">Datenschutz</button>
+        </p>
       </div>
     </section>
 
@@ -253,6 +263,20 @@
       <button id="settingsInfoBtn" class="btn btn-ghost" style="margin-top:18px"><i class="ti ti-help-circle"></i> <span data-i18n="title.info">So funktioniert's</span></button>
       <button id="settingsFeedbackBtn" class="btn btn-ghost" style="margin-top:10px"><i class="ti ti-message-plus"></i> <span data-i18n="fb.open">App verbessern</span></button>
       <button id="settingsAdminBtn" class="btn btn-ghost hidden" style="margin-top:10px"><i class="ti ti-crown"></i> <span data-i18n="ta.open">Spezial-Titel verwalten</span></button>
+      <button id="settingsLegalBtn" class="btn btn-ghost" style="margin-top:10px"><i class="ti ti-file-text"></i> <span data-i18n="legal.open">Impressum &amp; Datenschutz</span></button>
+      <button id="settingsDeleteBtn" class="btn btn-danger" style="margin-top:18px"><i class="ti ti-trash"></i> <span data-i18n="del.open">Konto löschen</span></button>
+    </div>
+  </div>
+
+  <!-- Rechtliches: Impressum & Datenschutzerklärung -->
+  <div id="legalModal" class="modal hidden">
+    <div class="modal-card">
+      <button class="onboard-close" id="legalClose" data-i18n-attr="common.close"><i class="ti ti-x"></i></button>
+      <div class="seg-toggle" id="legalToggle" style="margin-top:6px">
+        <button data-legal-tab="imprint" class="active" data-i18n="legal.imprint">Impressum</button>
+        <button data-legal-tab="privacy" data-i18n="legal.privacy">Datenschutz</button>
+      </div>
+      <div id="legalContent" class="legal-content"></div>
     </div>
   </div>
 
@@ -345,16 +369,17 @@
     <button class="link-btn" id="onboardLater" data-i18n="onboard.later">Später</button>
   </div>
 
-  <script src="js/i18n.js?v=35"></script>
-  <script src="js/supabaseClient.js?v=35"></script>
-  <script src="js/auth.js?v=35"></script>
-  <script src="js/challenges.js?v=35"></script>
-  <script src="js/social.js?v=35"></script>
-  <script src="js/upload.js?v=35"></script>
-  <script src="js/feed.js?v=35"></script>
-  <script src="js/push.js?v=35"></script>
-  <script src="js/onboarding.js?v=35"></script>
-  <script src="js/stats.js?v=35"></script>
-  <script src="js/app.js?v=35"></script>
+  <script src="js/i18n.js?v=36"></script>
+  <script src="js/legal.js?v=36"></script>
+  <script src="js/supabaseClient.js?v=36"></script>
+  <script src="js/auth.js?v=36"></script>
+  <script src="js/challenges.js?v=36"></script>
+  <script src="js/social.js?v=36"></script>
+  <script src="js/upload.js?v=36"></script>
+  <script src="js/feed.js?v=36"></script>
+  <script src="js/push.js?v=36"></script>
+  <script src="js/onboarding.js?v=36"></script>
+  <script src="js/stats.js?v=36"></script>
+  <script src="js/app.js?v=36"></script>
 </body>
 </html>

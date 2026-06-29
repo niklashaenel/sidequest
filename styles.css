@@ -658,3 +658,19 @@ body { overscroll-behavior-y: contain; }
 .lang-toggle button { background: none; border: none; color: var(--muted); font: inherit; font-size: 12px;
                font-weight: 800; padding: 5px 13px; border-radius: 999px; cursor: pointer; }
 .lang-toggle button.active { background: var(--brand); color: var(--brand-ink); }
+
+/* ---- Recht/Datenschutz: Einwilligung, Footer, Modal, Lösch-Knopf ---- */
+.consent-row { display: flex; align-items: flex-start; gap: 9px; margin: 4px 0 10px;
+               font-size: 13px; color: var(--muted); line-height: 1.4; text-align: left; }
+.consent-row input[type=checkbox] { margin-top: 2px; width: 17px; height: 17px; flex-shrink: 0; accent-color: var(--brand); }
+.consent-row .link-btn { padding: 0; font-size: 13px; }
+.legal-footer { display: flex; align-items: center; justify-content: center; gap: 8px;
+                margin-top: 14px; font-size: 12px; color: var(--muted); }
+.legal-footer .link-btn { padding: 4px; font-size: 12px; color: var(--muted); }
+.legal-content { margin-top: 14px; max-height: 60vh; overflow-y: auto; text-align: left;
+                 font-size: 13px; line-height: 1.5; color: var(--text); -webkit-overflow-scrolling: touch; }
+.legal-content h4 { margin: 0 0 10px; font-size: 16px; color: var(--brand-text); }
+.legal-content p { margin: 0 0 10px; }
+.legal-content b { color: var(--text); }
+.btn-danger { background: var(--surface-2); color: var(--danger);
+              border: 1px solid var(--danger); }

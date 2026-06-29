@@ -73,6 +73,7 @@ let registerMode = false;
 // =====================================================================
 function applyAuthMode() {
   $("usernameField").classList.toggle("hidden", !registerMode);
+  $("consentField").classList.toggle("hidden", !registerMode); // Pflicht-Häkchen nur beim Registrieren
   $("primaryAuthBtn").textContent = registerMode ? t("auth.register") : t("auth.login");
   $("toggleText").textContent     = registerMode ? t("auth.haveAccount") : t("auth.noAccount");
   $("toggleModeBtn").textContent  = registerMode ? t("auth.login") : t("auth.register");
@@ -88,6 +89,7 @@ $("primaryAuthBtn").addEventListener("click", async () => {
 
   if (!email || !password) return setMessage($("authMessage"), t("auth.needCreds"), "error");
   if (registerMode && !username) return setMessage($("authMessage"), t("auth.needName"), "error");
+  if (registerMode && !$("consentCheck").checked) return setMessage($("authMessage"), t("auth.needConsent"), "error");
 
   btn.disabled = true;
   setMessage($("authMessage"), t("auth.moment"));
@@ -890,6 +892,48 @@ $("settingsBtn").addEventListener("click", () => {
 });
 $("settingsClose").addEventListener("click", () => $("settingsModal").classList.add("hidden"));
 $("settingsModal").addEventListener("click", (e) => { if (e.target.id === "settingsModal") $("settingsModal").classList.add("hidden"); });
+
+// ---- Rechtliches: Impressum & Datenschutz ----
+function openLegal(tab) {
+  $("settingsModal").classList.add("hidden");
+  showLegalTab(tab || "imprint");
+  $("legalModal").classList.remove("hidden");
+}
+function showLegalTab(tab) {
+  document.querySelectorAll("#legalToggle [data-legal-tab]").forEach((b) =>
+    b.classList.toggle("active", b.dataset.legalTab === tab));
+  $("legalContent").innerHTML = tab === "privacy" ? LEGAL.privacy(I18N.lang) : LEGAL.imprint(I18N.lang);
+  $("legalContent").scrollTop = 0;
+}
+// Jeder Knopf mit data-legal öffnet das Modal (Auth-Footer, Einwilligungs-Link, Einstellungen).
+// Delegation, weil der Einwilligungs-Link bei Sprachwechsel (data-i18n-html) neu erzeugt wird.
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-legal]");
+  if (!el) return;
+  e.preventDefault();
+  openLegal(el.dataset.legal);
+});
+$("settingsLegalBtn").addEventListener("click", () => openLegal("imprint"));
+$("legalClose").addEventListener("click", () => $("legalModal").classList.add("hidden"));
+$("legalModal").addEventListener("click", (e) => { if (e.target.id === "legalModal") $("legalModal").classList.add("hidden"); });
+document.querySelectorAll("#legalToggle [data-legal-tab]").forEach((b) =>
+  b.addEventListener("click", () => showLegalTab(b.dataset.legalTab)));
+
+// ---- Konto löschen (Recht auf Löschung, Art. 17 DSGVO) ----
+$("settingsDeleteBtn").addEventListener("click", async () => {
+  if (!confirm(t("del.confirm"))) return;
+  const btn = $("settingsDeleteBtn");
+  btn.disabled = true;
+  try {
+    await Social.deleteAccount();
+    alert(t("del.done"));
+    await Auth.logout();
+    location.reload();
+  } catch (err) {
+    alert(t("common.error", { msg: err.message }));
+    btn.disabled = false;
+  }
+});
 
 // Admin: Spezial-Titel verwalten
 $("settingsAdminBtn").addEventListener("click", () => { $("settingsModal").classList.add("hidden"); openTitleAdmin(); });

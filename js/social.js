@@ -375,6 +375,16 @@ const Social = {
     if (error) throw error;
   },
 
+  // Konto + alle zugehörigen Daten löschen (Recht auf Löschung, Art. 17 DSGVO).
+  // Ruft eine SECURITY-DEFINER-Funktion auf, die den auth.users-Eintrag löscht;
+  // per ON DELETE CASCADE verschwinden Profil, Beiträge, Likes, Kommentare usw.
+  async deleteAccount() {
+    const user = await Auth.getUser();
+    if (!user) throw new Error(t("err.notLoggedIn"));
+    const { error } = await sb.rpc("delete_my_account");
+    if (error) throw error;
+  },
+
   // Allgemeines App-Feedback / Verbesserungsvorschlag. Landet in app_feedback
   // (nur der Admin liest es im Supabase-Dashboard).
   async sendAppFeedback(text) {
