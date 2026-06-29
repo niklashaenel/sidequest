@@ -19,13 +19,22 @@ const Feed = {
 
   // Beiträge einer Challenge laden – mit hidden-Spalte, sonst Fallback (Spalte noch nicht da).
   async fetchSubs(questId) {
-    let res = await sb.from("submissions")
-      .select("id, user_id, image_url, created_at, hidden")
+    const q = (cols) => sb.from("submissions").select(cols)
       .eq("quest_id", questId).order("created_at", { ascending: false });
-    if (res.error) res = await sb.from("submissions")
-      .select("id, user_id, image_url, created_at")
-      .eq("quest_id", questId).order("created_at", { ascending: false });
+    let res = await q("id, user_id, quest_id, image_url, image_url_2, created_at, hidden");
+    if (res.error) res = await q("id, user_id, quest_id, image_url, created_at, hidden"); // image_url_2 noch nicht da
+    if (res.error) res = await q("id, user_id, image_url, created_at"); // ganz alter Stand
     return res;
+  },
+
+  // Bild(er) eines Beitrags: ein Bild oder zwei nebeneinander (Doppelfoto).
+  imagesHTML(item, username) {
+    const alt = `Beitrag von ${Feed.escape(username)}`;
+    const img = (src) => `<img class="fi-img" src="${Feed.escape(src)}" alt="${alt}" loading="lazy" />`;
+    if (item.image_url_2) {
+      return `<div class="fi-imgs dual">${img(item.image_url)}${img(item.image_url_2)}</div>`;
+    }
+    return `<div class="fi-imgs">${img(item.image_url)}</div>`;
   },
 
   formatTime(iso) {
@@ -171,7 +180,11 @@ const Feed = {
                    : `<button class="fi-friend${reqPending ? " pending" : ""}" data-uid="${uid}" ${reqPending ? "disabled" : ""} title="${Feed.escape(t("friend.add.title"))}"><i class="ti ti-user-plus"></i></button>`}
                </div>`}
         </div>
-        <img class="fi-img" src="${Feed.escape(item.image_url)}" alt="Beitrag von ${Feed.escape(username)}" loading="lazy" />
+        ${Feed.imagesHTML(item, username)}
+        ${isMine && !item.image_url_2
+          ? `<button class="fi-add2"><i class="ti ti-photo-plus"></i> ${Feed.escape(t("up.addSecond"))}</button>
+             <input type="file" accept="image/*" class="hidden fi-add2-input" />`
+          : ""}
         <div class="fi-actions">
           <button class="fi-act fi-like ${liked ? "liked" : ""}" aria-label="Gefällt mir">
             <i class="ti ti-heart"></i><span class="like-count">${likeCount}</span>
@@ -311,6 +324,34 @@ const Feed = {
         } catch (e) {
           del.disabled = false;
           alert(t("post.delFailed", { msg: e.message }));
+        }
+      });
+    }
+
+    // Zweites Foto nachreichen (nur bei eigenem Einzel-Beitrag vorhanden, zeitversetzt).
+    const add2 = el.querySelector(".fi-add2");
+    const add2Input = el.querySelector(".fi-add2-input");
+    if (add2 && add2Input) {
+      add2.addEventListener("click", () => add2Input.click());
+      add2Input.addEventListener("change", async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        add2.disabled = true;
+        const questId = Feed.current && Feed.current.quest ? Feed.current.quest.id : item.quest_id;
+        try {
+          const url = await Upload.addSecond(item.id, questId, file);
+          // Zweites Bild sofort in die Anzeige übernehmen + Knopf entfernen.
+          const imgs = el.querySelector(".fi-imgs");
+          if (imgs) {
+            imgs.classList.add("dual");
+            const im = document.createElement("img");
+            im.className = "fi-img"; im.loading = "lazy"; im.src = url;
+            imgs.appendChild(im);
+          }
+          add2.remove(); add2Input.remove();
+        } catch (err) {
+          add2.disabled = false;
+          alert(t("common.error", { msg: err.message }));
         }
       });
     }

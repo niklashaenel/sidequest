@@ -66,6 +66,7 @@ function applyAvatarEl(el, name, avatarUrl, frame, baseCls) {
   else { el.style.backgroundImage = ""; el.textContent = Feed.initial(name); }
 }
 let pickedFile = null;
+let pickedFile2 = null; // optionales zweites Foto (Doppelfoto)
 let registerMode = false;
 
 // =====================================================================
@@ -782,22 +783,43 @@ $("startQuestBtn").addEventListener("click", () => $("cameraInput").click());
 // Founder/Admin: Feed der Challenge ansehen, ohne selbst einen Beitrag zu posten.
 $("founderFeedBtn").addEventListener("click", () => { if (state.current) goToFeed(state.current); });
 
+// Zweites-Foto-UI zurücksetzen (Vorschau weg, Knopf wieder anbieten).
+function resetSecondPhoto() {
+  pickedFile2 = null;
+  $("cameraInput2").value = "";
+  $("previewSlot2").classList.add("hidden");
+  $("addSecondBtn").classList.remove("hidden");
+}
+
 $("cameraInput").addEventListener("change", (e) => {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
   pickedFile = file;
+  resetSecondPhoto(); // neues erstes Foto -> zweites verwerfen
   $("previewImage").src = URL.createObjectURL(file);
   $("uploadQuestLabel").textContent = state.current ? Challenges.titleOf(state.current) : "";
   setMessage($("uploadMessage"), "");
   showScreen("uploadScreen");
 });
 
+// Optionales zweites Foto auswählen.
+$("addSecondBtn").addEventListener("click", () => $("cameraInput2").click());
+$("cameraInput2").addEventListener("change", (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  pickedFile2 = file;
+  $("previewImage2").src = URL.createObjectURL(file);
+  $("previewSlot2").classList.remove("hidden");
+  $("addSecondBtn").classList.add("hidden");
+});
+$("removeSecondBtn").addEventListener("click", resetSecondPhoto);
+
 $("retakeBtn").addEventListener("click", () => {
-  pickedFile = null; $("cameraInput").value = "";
+  pickedFile = null; $("cameraInput").value = ""; resetSecondPhoto();
   showScreen("challengeScreen");
 });
 $("uploadBack").addEventListener("click", () => {
-  pickedFile = null; $("cameraInput").value = "";
+  pickedFile = null; $("cameraInput").value = ""; resetSecondPhoto();
   showScreen("challengeScreen");
 });
 
@@ -805,11 +827,11 @@ $("confirmUploadBtn").addEventListener("click", async () => {
   if (!pickedFile || !state.current) return;
   const btn = $("confirmUploadBtn");
   btn.disabled = true;
-  setMessage($("uploadMessage"), "Lade hoch…");
+  setMessage($("uploadMessage"), t("up.uploading"));
   try {
-    await Upload.submit(pickedFile, state.current);
+    await Upload.submit(pickedFile, pickedFile2, state.current);
     state.doneIds.add(state.current.id);
-    pickedFile = null; $("cameraInput").value = "";
+    pickedFile = null; $("cameraInput").value = ""; resetSecondPhoto();
     goToFeed(state.current);
   } catch (err) {
     setMessage($("uploadMessage"), uebersetzeFehler(err), "error");

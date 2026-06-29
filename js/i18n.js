@@ -109,6 +109,9 @@ const I18N = {
       "up.uploadUnlock": "Hochladen & freischalten",
       "up.retake": "Neues Foto machen",
       "up.uploading": "Lade hoch…",
+      "up.addSecond": "Zweites Foto hinzufügen",
+      "up.removeSecond": "Zweites Foto entfernen",
+      "up.uploading": "Lade hoch…",
 
       // Feed
       "feed.all": "Alle",
@@ -337,6 +340,9 @@ const I18N = {
 
       "up.uploadUnlock": "Upload & unlock",
       "up.retake": "Retake photo",
+      "up.uploading": "Uploading…",
+      "up.addSecond": "Add second photo",
+      "up.removeSecond": "Remove second photo",
       "up.uploading": "Uploading…",
 
       "feed.all": "All",
