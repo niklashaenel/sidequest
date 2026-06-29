@@ -24,6 +24,7 @@ const state = {
   profile: { avatar_url: null, title: null, frame: null, unlockAll: false, isAdmin: false, specialTitle: null }, // eigene Kosmetik
   partCount: {},      // Teilnehmer je aktiver Challenge
   specialTitles: [],  // mir zugewiesene Spezial-Titel (aus title_grants)
+  config: { archiveHourly: 6, archiveDaily: 7 }, // Founder-Einstellung: Archiv-Anzeige
 };
 
 // Jeder Skin ist ein Erfolg: Aufgabe (task) + Ziel (target) + aktueller Wert (cur) aus den
@@ -270,8 +271,10 @@ function archiveGroup(label, items) {
 function renderArchive(list) {
   const sec = $("archiveSection"), el = $("archiveList");
   if (!list || !list.length) { sec.classList.add("hidden"); return; }
-  const hourly = list.filter((c) => c.kind === "hourly");
-  const daily  = list.filter((c) => c.kind !== "hourly"); // daily + special
+  // Founder-Grenzen: nur die letzten N Stunden- bzw. Tages-Challenges zeigen (recent() ist neueste-zuerst).
+  const hourly = list.filter((c) => c.kind === "hourly").slice(0, state.config.archiveHourly);
+  const daily  = list.filter((c) => c.kind !== "hourly").slice(0, state.config.archiveDaily); // daily + special
+  if (!hourly.length && !daily.length) { sec.classList.add("hidden"); return; }
   el.innerHTML = archiveGroup(t("ov.archiveHourly"), hourly) + archiveGroup(t("ov.archiveDaily"), daily);
 
   el.querySelectorAll(".arc-group-head").forEach((h) =>
@@ -359,7 +362,9 @@ async function loadStatsAndTop() {
     if (s) celebrateStreak(s);
     Stats.weeklyBoard().then(renderWeekly).catch((e) => console.warn("[SideQuest] weekly:", e.message));
     Stats.bestPhotos().then(renderBest).catch((e) => console.warn("[SideQuest] best:", e.message));
-    Challenges.recent().then(renderArchive).catch((e) => console.warn("[SideQuest] archive:", e.message));
+    // Founder-Anzeige-Grenzen laden, dann Archiv damit rendern.
+    Social.getConfig().then((cfg) => { state.config = cfg; return Challenges.recent(); })
+      .then(renderArchive).catch((e) => console.warn("[SideQuest] archive:", e.message));
     loadMod(); // Admin: gemeldete Beiträge
     const top = await Stats.topToday(state.challenges.map((c) => c.id));
     renderTopToday(top);
@@ -607,6 +612,11 @@ function closeCollection() { $("collectionModal").classList.add("hidden"); }
 async function openTitleAdmin() {
   $("titleAdminModal").classList.remove("hidden");
   $("titleAdminList").innerHTML = `<p class="spinner-text">${t("common.loading")}</p>`;
+  // Aktuelle Anzeige-Grenzen in die Felder schreiben.
+  const cfg = await Social.getConfig();
+  state.config = cfg;
+  $("cfgHourly").value = cfg.archiveHourly;
+  $("cfgDaily").value = cfg.archiveDaily;
   await renderTitleAdmin();
 }
 function closeTitleAdmin() { $("titleAdminModal").classList.add("hidden"); }
@@ -963,6 +973,32 @@ $("settingsDeleteBtn").addEventListener("click", async () => {
     alert(t("common.error", { msg: err.message }));
     btn.disabled = false;
   }
+});
+
+// Admin: Anzeige-Grenzen speichern
+$("cfgSaveBtn").addEventListener("click", async () => {
+  const h = parseInt($("cfgHourly").value, 10) || 0;
+  const d = parseInt($("cfgDaily").value, 10) || 0;
+  const btn = $("cfgSaveBtn"); btn.disabled = true;
+  try {
+    await Social.adminSetConfig(h, d);
+    state.config = { archiveHourly: h, archiveDaily: d };
+    toast(t("adm.saved"));
+    Challenges.recent().then(renderArchive).catch(() => {}); // Archiv sofort neu rendern
+  } catch (e) { alert(t("common.error", { msg: e.message })); }
+  finally { btn.disabled = false; }
+});
+
+// Admin: ALLE Beiträge & Fotos löschen (Reset)
+$("adminWipeBtn").addEventListener("click", async () => {
+  if (!confirm(t("adm.wipeConfirm"))) return;
+  const btn = $("adminWipeBtn"); btn.disabled = true;
+  try {
+    await Social.adminDeleteAllSubmissions();
+    toast(t("adm.wiped"));
+    Challenges.recent().then(renderArchive).catch(() => {});
+  } catch (e) { alert(t("common.error", { msg: e.message })); }
+  finally { btn.disabled = false; }
 });
 
 // Admin: Spezial-Titel verwalten

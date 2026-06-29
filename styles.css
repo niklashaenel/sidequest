@@ -696,3 +696,9 @@ body { overscroll-behavior-y: contain; }
            background: var(--surface-2); color: var(--brand-text);
            font-size: 13px; font-weight: 700; }
 .fi-add2:disabled { opacity: .5; cursor: default; }
+
+/* ---- Founder/Admin: Archiv-Anzeige-Konfiguration ---- */
+.admin-cfg { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; }
+.admin-cfg label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+.admin-cfg input { width: 80px; background: var(--surface-2); border: 1px solid var(--border);
+                   border-radius: var(--r-sm, 8px); color: var(--text); padding: 8px 10px; font: inherit; }

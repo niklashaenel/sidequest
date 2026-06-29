@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=38" />
+  <link rel="stylesheet" href="styles.css?v=39" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
@@ -292,6 +292,18 @@
         <button type="submit" class="btn btn-sm" data-i18n="ta.create">Erstellen</button>
       </form>
       <div id="titleAdminList" class="ta-list"></div>
+
+      <p class="section-label" style="margin-top:22px" data-i18n="adm.archiveTitle">📜 Archiv-Anzeige</p>
+      <div class="admin-cfg">
+        <label><span data-i18n="adm.cfgHourly">Stunden-Challenges</span>
+          <input id="cfgHourly" type="number" min="0" max="60" /></label>
+        <label><span data-i18n="adm.cfgDaily">Tages-Challenges</span>
+          <input id="cfgDaily" type="number" min="0" max="60" /></label>
+        <button id="cfgSaveBtn" class="soc-btn" data-i18n="adm.save">Speichern</button>
+      </div>
+
+      <p class="section-label" style="margin-top:22px" data-i18n="adm.resetTitle">⚠️ Zurücksetzen</p>
+      <button id="adminWipeBtn" class="btn btn-danger"><i class="ti ti-trash"></i> <span data-i18n="adm.wipe">Alle Beiträge &amp; Fotos löschen</span></button>
     </div>
   </div>
 
@@ -371,17 +383,17 @@
     <button class="link-btn" id="onboardLater" data-i18n="onboard.later">Später</button>
   </div>
 
-  <script src="js/i18n.js?v=38"></script>
-  <script src="js/legal.js?v=38"></script>
-  <script src="js/supabaseClient.js?v=38"></script>
-  <script src="js/auth.js?v=38"></script>
-  <script src="js/challenges.js?v=38"></script>
-  <script src="js/social.js?v=38"></script>
-  <script src="js/upload.js?v=38"></script>
-  <script src="js/feed.js?v=38"></script>
-  <script src="js/push.js?v=38"></script>
-  <script src="js/onboarding.js?v=38"></script>
-  <script src="js/stats.js?v=38"></script>
-  <script src="js/app.js?v=38"></script>
+  <script src="js/i18n.js?v=39"></script>
+  <script src="js/legal.js?v=39"></script>
+  <script src="js/supabaseClient.js?v=39"></script>
+  <script src="js/auth.js?v=39"></script>
+  <script src="js/challenges.js?v=39"></script>
+  <script src="js/social.js?v=39"></script>
+  <script src="js/upload.js?v=39"></script>
+  <script src="js/feed.js?v=39"></script>
+  <script src="js/push.js?v=39"></script>
+  <script src="js/onboarding.js?v=39"></script>
+  <script src="js/stats.js?v=39"></script>
+  <script src="js/app.js?v=39"></script>
 </body>
 </html>

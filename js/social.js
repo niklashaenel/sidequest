@@ -308,6 +308,37 @@ const Social = {
     if (error) throw error;
   },
 
+  // ---- App-Konfiguration (Founder stellt ein, wie viel Archiv angezeigt wird) ----
+  // Liefert {archiveHourly, archiveDaily} mit Standardwerten. Fail-soft.
+  async getConfig() {
+    const cfg = { archiveHourly: 6, archiveDaily: 7 };
+    try {
+      const { data, error } = await sb.from("app_config").select("key, value");
+      if (error) throw error;
+      (data || []).forEach((r) => {
+        if (r.key === "archive_hourly_limit") cfg.archiveHourly = r.value;
+        if (r.key === "archive_daily_limit") cfg.archiveDaily = r.value;
+      });
+    } catch (e) { /* Tabelle evtl. noch nicht da -> Standardwerte */ }
+    return cfg;
+  },
+
+  // Founder: Anzeige-Grenzen speichern.
+  async adminSetConfig(archiveHourly, archiveDaily) {
+    const rows = [
+      { key: "archive_hourly_limit", value: Math.max(0, archiveHourly | 0) },
+      { key: "archive_daily_limit", value: Math.max(0, archiveDaily | 0) },
+    ];
+    const { error } = await sb.from("app_config").upsert(rows, { onConflict: "key" });
+    if (error) throw error;
+  },
+
+  // Founder: ALLE Beiträge + Fotos löschen (Reset, z. B. nach der Testphase).
+  async adminDeleteAllSubmissions() {
+    const { error } = await sb.rpc("admin_delete_all_submissions");
+    if (error) throw error;
+  },
+
   // ---- Melden & Moderation ----
   // Beitrag melden. Doppel-Meldung (unique) wird stillschweigend ignoriert.
   async reportPost(submissionId, reason) {
