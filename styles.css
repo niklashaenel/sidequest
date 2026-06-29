@@ -675,19 +675,22 @@ body { overscroll-behavior-y: contain; }
 .btn-danger { background: var(--surface-2); color: var(--danger);
               border: 1px solid var(--danger); }
 
-/* ---- Doppelfoto: Upload-Vorschau (1 oder 2) ---- */
-.preview-row { display: flex; gap: 8px; }
-.preview-row .preview { flex: 1; min-width: 0; }
-.preview-slot2 { position: relative; flex: 1; min-width: 0; display: flex; }
+/* ---- Multi-Foto: Upload-Vorschau-Grid (1..n) ---- */
+.preview-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.preview-grid.multi { grid-template-columns: 1fr 1fr; }
+.pg-cell { position: relative; }
+.pg-cell img { width: 100%; border-radius: var(--r-md); aspect-ratio: 3/4;
+               object-fit: cover; display: block; background: var(--surface-2); }
 .preview-remove { position: absolute; top: 6px; right: 6px; width: 28px; height: 28px;
                   border: none; border-radius: 999px; cursor: pointer;
                   background: rgba(0,0,0,.6); color: #fff; display: flex;
                   align-items: center; justify-content: center; font-size: 15px; }
-/* ---- Doppelfoto: Feed-Darstellung (nebeneinander) ---- */
+/* ---- Multi-Foto: Feed-Collage (mehrere Bilder) ---- */
 .fi-imgs { display: block; }
-.fi-imgs.dual { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
-.fi-imgs.dual .fi-img { aspect-ratio: 3/4; }
-/* ---- „2. Foto nachreichen"-Knopf im Feed ---- */
+.fi-imgs.multi { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+.fi-imgs.multi .fi-img { aspect-ratio: 1/1; }
+.fi-imgs.multi.n3 .fi-img:first-child { grid-column: span 2; aspect-ratio: 2/1; }
+/* ---- „Foto nachreichen"-Knopf im Feed ---- */
 .fi-add2 { display: flex; align-items: center; justify-content: center; gap: 6px;
            width: 100%; margin: 0; padding: 9px; border: none; cursor: pointer;
            background: var(--surface-2); color: var(--brand-text);

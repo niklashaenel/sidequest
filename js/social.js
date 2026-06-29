@@ -122,16 +122,18 @@ const Social = {
     }));
   },
 
-  // Eigenen Beitrag löschen: Foto aus dem Storage + DB-Zeile (Likes/Kommentare per cascade weg).
+  // Eigenen Beitrag löschen: Foto(s) aus dem Storage + DB-Zeile (Likes/Kommentare per cascade weg).
+  // imageUrl kann eine URL ODER ein Array von URLs sein (Multi-Foto).
   async deleteSubmission(id, imageUrl) {
-    // Storage-Pfad aus der öffentlichen URL ziehen und Datei entfernen (Fehler hier egal).
+    // Storage-Pfade aus den öffentlichen URLs ziehen und Dateien entfernen (Fehler hier egal).
     try {
       const marker = "/submissions/";
-      const i = (imageUrl || "").indexOf(marker);
-      if (i >= 0) {
-        const path = decodeURIComponent(imageUrl.slice(i + marker.length).split("?")[0]);
-        await sb.storage.from("submissions").remove([path]);
-      }
+      const urls = (Array.isArray(imageUrl) ? imageUrl : [imageUrl]).filter(Boolean);
+      const paths = urls.map((u) => {
+        const i = u.indexOf(marker);
+        return i >= 0 ? decodeURIComponent(u.slice(i + marker.length).split("?")[0]) : null;
+      }).filter(Boolean);
+      if (paths.length) await sb.storage.from("submissions").remove(paths);
     } catch (e) { /* DB-Zeile ist das Wichtige */ }
 
     // .select() zurückgeben lassen: bei 0 gelöschten Zeilen (fehlende Berechtigung/Policy)

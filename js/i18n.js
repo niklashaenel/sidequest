@@ -109,6 +109,7 @@ const I18N = {
       "up.uploadUnlock": "Hochladen & freischalten",
       "up.retake": "Neues Foto machen",
       "up.uploading": "Lade hoch…",
+      "up.addPhoto": "Weiteres Foto hinzufügen",
       "up.addSecond": "Zweites Foto hinzufügen",
       "up.removeSecond": "Zweites Foto entfernen",
       "up.uploading": "Lade hoch…",
@@ -243,6 +244,7 @@ const I18N = {
       "err.network": "Keine Verbindung zu Supabase. URL/Key prüfen.",
       "err.rls": "Keine Berechtigung (RLS). Policies prüfen.",
       "err.notLoggedIn": "Nicht eingeloggt.",
+      "err.noPhoto": "Bitte mindestens ein Foto auswählen.",
 
       // Serien-Toast
       "toast.streak": "🔥 <b>{label}</b><br>+{xp} Bonus-XP kassiert!",
@@ -341,6 +343,7 @@ const I18N = {
       "up.uploadUnlock": "Upload & unlock",
       "up.retake": "Retake photo",
       "up.uploading": "Uploading…",
+      "up.addPhoto": "Add another photo",
       "up.addSecond": "Add second photo",
       "up.removeSecond": "Remove second photo",
       "up.uploading": "Uploading…",
@@ -466,6 +469,7 @@ const I18N = {
       "err.network": "No connection to Supabase. Check URL/key.",
       "err.rls": "No permission (RLS). Check policies.",
       "err.notLoggedIn": "Not logged in.",
+      "err.noPhoto": "Please select at least one photo.",
 
       "toast.streak": "🔥 <b>{label}</b><br>+{xp} bonus XP earned!",
     },

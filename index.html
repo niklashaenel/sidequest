@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=37" />
+  <link rel="stylesheet" href="styles.css?v=38" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
@@ -167,7 +167,7 @@
         </div>
         <h2 id="questTitle" class="quest-title" data-i18n="detail.loading">Lade Challenge…</h2>
         <span id="detailCountdown" class="countdown-pill"><i class="ti ti-clock"></i> <span></span></span>
-        <input id="cameraInput" type="file" accept="image/*" class="hidden" />
+        <input id="cameraInput" type="file" accept="image/*" multiple class="hidden" />
         <button id="startQuestBtn" class="btn"><i class="ti ti-camera"></i> <span data-i18n="cc.start">Challenge starten</span></button>
         <button id="founderFeedBtn" class="btn btn-ghost hidden" style="margin-top:10px"><i class="ti ti-eye"></i> <span data-i18n="cc.founderView">Feed ansehen (ohne Beitrag)</span></button>
         <p id="questMessage" class="message"></p>
@@ -179,17 +179,11 @@
       <button class="back-btn" id="uploadBack"><i class="ti ti-arrow-left"></i> <span data-i18n="nav.back">Zurück</span></button>
       <div class="card">
         <p id="uploadQuestLabel" class="section-label" style="margin:0"></p>
-        <div id="previewRow" class="preview-row">
-          <img id="previewImage" class="preview" alt="" />
-          <div id="previewSlot2" class="preview-slot2 hidden">
-            <img id="previewImage2" class="preview" alt="" />
-            <button id="removeSecondBtn" type="button" class="preview-remove" data-i18n-attr="up.removeSecond"><i class="ti ti-x"></i></button>
-          </div>
-        </div>
-        <input id="cameraInput2" type="file" accept="image/*" class="hidden" />
-        <button id="addSecondBtn" class="btn btn-ghost"><i class="ti ti-photo-plus"></i> <span data-i18n="up.addSecond">Zweites Foto hinzufügen</span></button>
+        <div id="previewGrid" class="preview-grid"></div>
+        <input id="cameraInput2" type="file" accept="image/*" multiple class="hidden" />
+        <button id="addPhotoBtn" class="btn btn-ghost"><i class="ti ti-photo-plus"></i> <span data-i18n="up.addPhoto">Weiteres Foto hinzufügen</span></button>
         <button id="confirmUploadBtn" class="btn"><i class="ti ti-upload"></i> <span data-i18n="up.uploadUnlock">Hochladen &amp; freischalten</span></button>
-        <button id="retakeBtn" class="link-btn" data-i18n="up.retake">Neues Foto machen</button>
+        <button id="retakeBtn" class="link-btn" data-i18n="up.retake">Neu auswählen</button>
         <p id="uploadMessage" class="message"></p>
       </div>
     </section>
@@ -377,17 +371,17 @@
     <button class="link-btn" id="onboardLater" data-i18n="onboard.later">Später</button>
   </div>
 
-  <script src="js/i18n.js?v=37"></script>
-  <script src="js/legal.js?v=37"></script>
-  <script src="js/supabaseClient.js?v=37"></script>
-  <script src="js/auth.js?v=37"></script>
-  <script src="js/challenges.js?v=37"></script>
-  <script src="js/social.js?v=37"></script>
-  <script src="js/upload.js?v=37"></script>
-  <script src="js/feed.js?v=37"></script>
-  <script src="js/push.js?v=37"></script>
-  <script src="js/onboarding.js?v=37"></script>
-  <script src="js/stats.js?v=37"></script>
-  <script src="js/app.js?v=37"></script>
+  <script src="js/i18n.js?v=38"></script>
+  <script src="js/legal.js?v=38"></script>
+  <script src="js/supabaseClient.js?v=38"></script>
+  <script src="js/auth.js?v=38"></script>
+  <script src="js/challenges.js?v=38"></script>
+  <script src="js/social.js?v=38"></script>
+  <script src="js/upload.js?v=38"></script>
+  <script src="js/feed.js?v=38"></script>
+  <script src="js/push.js?v=38"></script>
+  <script src="js/onboarding.js?v=38"></script>
+  <script src="js/stats.js?v=38"></script>
+  <script src="js/app.js?v=38"></script>
 </body>
 </html>

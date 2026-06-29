@@ -53,44 +53,58 @@ const Upload = {
     return pub.publicUrl;
   },
 
-  // Foto(s) hochladen + Eintrag schreiben. file2 ist optional (Doppelfoto).
-  async submit(file, file2, quest) {
+  // Mehrere Fotos hochladen + Eintrag schreiben. files = Array (1..n).
+  // Bei >1 werden sie automatisch als Collage zusammengefügt (Spalte "images").
+  async submit(files, quest) {
     const user = await Auth.getUser();
     if (!user) throw new Error(t("err.notLoggedIn"));
+    const list = Array.isArray(files) ? files : [files];
+    if (!list.length) throw new Error(t("err.noPhoto"));
 
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-    const imageUrl = await Upload._put(file, `${user.id}/${quest.id}.${ext}`);
-
-    // Optionales zweites Foto (z. B. Vorher/Nachher) – eigener Pfad mit "-2".
-    let imageUrl2 = null;
-    if (file2) {
-      const ext2 = (file2.name.split(".").pop() || "jpg").toLowerCase();
-      imageUrl2 = await Upload._put(file2, `${user.id}/${quest.id}-2.${ext2}`);
+    const urls = [];
+    for (let i = 0; i < list.length; i++) {
+      const ext = (list[i].name.split(".").pop() || "jpg").toLowerCase();
+      const suffix = i === 0 ? "" : "-" + (i + 1); // erstes Foto behält den alten Pfad
+      urls.push(await Upload._put(list[i], `${user.id}/${quest.id}${suffix}.${ext}`));
     }
 
-    // Eintrag schreiben/aktualisieren (upsert pro User+Quest).
-    const row = { user_id: user.id, quest_id: quest.id, image_url: imageUrl };
-    if (file2) row.image_url_2 = imageUrl2;
-    const { error: dbErr } = await sb
-      .from("submissions")
-      .upsert(row, { onConflict: "user_id,quest_id" });
-    if (dbErr) throw dbErr;
+    // image_url = erstes Foto (für Galerie/Avatar/Bestenliste), images = alle, image_url_2 = 2. (Kompat).
+    const row = {
+      user_id: user.id, quest_id: quest.id,
+      image_url: urls[0],
+      images: urls.length > 1 ? urls : null,
+      image_url_2: urls[1] || null,
+    };
+    await Upload._upsert(row);
   },
 
-  // Zweites Foto NACHTRÄGLICH zu einem bestehenden Beitrag hinzufügen (zeitversetzt).
-  // Gibt die öffentliche URL zurück, damit der Feed sofort aktualisiert werden kann.
-  async addSecond(submissionId, questId, file) {
+  // Upsert mit Fail-soft: fehlen die Spalten images/image_url_2 noch (SQL nicht eingespielt),
+  // wird ohne sie gespeichert (dann eben nur das erste Foto) – App bleibt heil.
+  async _upsert(row) {
+    let { error } = await sb.from("submissions").upsert(row, { onConflict: "user_id,quest_id" });
+    if (error && /image_url_2|images|column/i.test(error.message || "")) {
+      const base = { user_id: row.user_id, quest_id: row.quest_id, image_url: row.image_url };
+      ({ error } = await sb.from("submissions").upsert(base, { onConflict: "user_id,quest_id" }));
+    }
+    if (error) throw error;
+  },
+
+  // Foto NACHTRÄGLICH an einen bestehenden Beitrag anhängen (zeitversetzt).
+  // existing = bisherige URL-Liste; gibt die neue vollständige Liste zurück.
+  async appendPhoto(submissionId, questId, existing, file) {
     const user = await Auth.getUser();
     if (!user) throw new Error(t("err.notLoggedIn"));
+    const list = (existing || []).filter(Boolean);
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-    const url = await Upload._put(file, `${user.id}/${questId}-2.${ext}`);
+    const url = await Upload._put(file, `${user.id}/${questId}-${list.length + 1}.${ext}`);
+    const all = [...list, url];
     const { data, error } = await sb
       .from("submissions")
-      .update({ image_url_2: url })
+      .update({ images: all, image_url_2: all[1] || null })
       .eq("id", submissionId).eq("user_id", user.id)
       .select("id");
     if (error) throw error;
     if (!data || !data.length) throw new Error(t("err.notLoggedIn"));
-    return url;
+    return all;
   },
 };

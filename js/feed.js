@@ -21,20 +21,29 @@ const Feed = {
   async fetchSubs(questId) {
     const q = (cols) => sb.from("submissions").select(cols)
       .eq("quest_id", questId).order("created_at", { ascending: false });
-    let res = await q("id, user_id, quest_id, image_url, image_url_2, created_at, hidden");
-    if (res.error) res = await q("id, user_id, quest_id, image_url, created_at, hidden"); // image_url_2 noch nicht da
+    let res = await q("id, user_id, quest_id, image_url, images, image_url_2, created_at, hidden");
+    if (res.error) res = await q("id, user_id, quest_id, image_url, image_url_2, created_at, hidden"); // images-Spalte noch nicht da
+    if (res.error) res = await q("id, user_id, quest_id, image_url, created_at, hidden");
     if (res.error) res = await q("id, user_id, image_url, created_at"); // ganz alter Stand
     return res;
   },
 
-  // Bild(er) eines Beitrags: ein Bild oder zwei nebeneinander (Doppelfoto).
+  // Alle Foto-URLs eines Beitrags ermitteln (images-Array > image_url_2 > Einzelbild).
+  photoList(item) {
+    if (Array.isArray(item.images) && item.images.length) return item.images.filter(Boolean);
+    if (item.image_url_2) return [item.image_url, item.image_url_2];
+    return item.image_url ? [item.image_url] : [];
+  },
+
+  // Bild(er) eines Beitrags: eins, oder mehrere als Collage-Grid.
   imagesHTML(item, username) {
     const alt = `Beitrag von ${Feed.escape(username)}`;
+    const urls = Feed.photoList(item);
     const img = (src) => `<img class="fi-img" src="${Feed.escape(src)}" alt="${alt}" loading="lazy" />`;
-    if (item.image_url_2) {
-      return `<div class="fi-imgs dual">${img(item.image_url)}${img(item.image_url_2)}</div>`;
+    if (urls.length > 1) {
+      return `<div class="fi-imgs multi n${Math.min(urls.length, 4)}">${urls.map(img).join("")}</div>`;
     }
-    return `<div class="fi-imgs">${img(item.image_url)}</div>`;
+    return `<div class="fi-imgs">${img(urls[0] || item.image_url)}</div>`;
   },
 
   formatTime(iso) {
@@ -181,9 +190,9 @@ const Feed = {
                </div>`}
         </div>
         ${Feed.imagesHTML(item, username)}
-        ${isMine && !item.image_url_2
-          ? `<button class="fi-add2"><i class="ti ti-photo-plus"></i> ${Feed.escape(t("up.addSecond"))}</button>
-             <input type="file" accept="image/*" class="hidden fi-add2-input" />`
+        ${isMine && Feed.photoList(item).length < 4
+          ? `<button class="fi-add2"><i class="ti ti-photo-plus"></i> ${Feed.escape(t("up.addPhoto"))}</button>
+             <input type="file" accept="image/*" multiple class="hidden fi-add2-input" />`
           : ""}
         <div class="fi-actions">
           <button class="fi-act fi-like ${liked ? "liked" : ""}" aria-label="Gefällt mir">
@@ -316,7 +325,7 @@ const Feed = {
         if (!confirm(t("post.delConfirm"))) return;
         del.disabled = true;
         try {
-          await Social.deleteSubmission(item.id, item.image_url);
+          await Social.deleteSubmission(item.id, Feed.photoList(item));
           el.style.transition = "opacity .2s ease";
           el.style.opacity = "0";
           setTimeout(() => el.remove(), 200);
@@ -328,26 +337,26 @@ const Feed = {
       });
     }
 
-    // Zweites Foto nachreichen (nur bei eigenem Einzel-Beitrag vorhanden, zeitversetzt).
+    // Weitere Fotos nachreichen (nur bei eigenem Beitrag, zeitversetzt, bis zu 4).
     const add2 = el.querySelector(".fi-add2");
     const add2Input = el.querySelector(".fi-add2-input");
     if (add2 && add2Input) {
       add2.addEventListener("click", () => add2Input.click());
       add2Input.addEventListener("change", async (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (!file) return;
+        const files = e.target.files ? [...e.target.files] : [];
+        if (!files.length) return;
         add2.disabled = true;
         const questId = Feed.current && Feed.current.quest ? Feed.current.quest.id : item.quest_id;
         try {
-          const url = await Upload.addSecond(item.id, questId, file);
-          // Zweites Bild sofort in die Anzeige übernehmen + Knopf entfernen.
-          const imgs = el.querySelector(".fi-imgs");
-          if (imgs) {
-            imgs.classList.add("dual");
-            const im = document.createElement("img");
-            im.className = "fi-img"; im.loading = "lazy"; im.src = url;
-            imgs.appendChild(im);
+          let current = Feed.photoList(item);
+          for (const f of files) {
+            if (current.length >= 4) break;
+            current = await Upload.appendPhoto(item.id, questId, current, f);
           }
+          item.images = current; // Item aktualisieren
+          // Bilder-Block neu aufbauen (Collage).
+          const imgs = el.querySelector(".fi-imgs");
+          if (imgs) imgs.outerHTML = Feed.imagesHTML(item, item.user_id);
           add2.remove(); add2Input.remove();
         } catch (err) {
           add2.disabled = false;

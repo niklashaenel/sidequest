@@ -65,8 +65,7 @@ function applyAvatarEl(el, name, avatarUrl, frame, baseCls) {
   if (avatarUrl) { el.style.backgroundImage = `url('${avatarUrl}')`; el.textContent = ""; }
   else { el.style.backgroundImage = ""; el.textContent = Feed.initial(name); }
 }
-let pickedFile = null;
-let pickedFile2 = null; // optionales zweites Foto (Doppelfoto)
+let pickedFiles = []; // ausgewählte Fotos (1..n) – mehrere werden als Collage zusammengefügt
 let registerMode = false;
 
 // =====================================================================
@@ -783,55 +782,64 @@ $("startQuestBtn").addEventListener("click", () => $("cameraInput").click());
 // Founder/Admin: Feed der Challenge ansehen, ohne selbst einen Beitrag zu posten.
 $("founderFeedBtn").addEventListener("click", () => { if (state.current) goToFeed(state.current); });
 
-// Zweites-Foto-UI zurücksetzen (Vorschau weg, Knopf wieder anbieten).
-function resetSecondPhoto() {
-  pickedFile2 = null;
-  $("cameraInput2").value = "";
-  $("previewSlot2").classList.add("hidden");
-  $("addSecondBtn").classList.remove("hidden");
+// Vorschau-Grid aus den gewählten Fotos aufbauen (jede Zelle mit Entfernen-×).
+function renderPreviewGrid() {
+  const grid = $("previewGrid");
+  grid.innerHTML = "";
+  pickedFiles.forEach((file, i) => {
+    const cell = document.createElement("div");
+    cell.className = "pg-cell";
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    const rm = document.createElement("button");
+    rm.type = "button"; rm.className = "preview-remove";
+    rm.innerHTML = '<i class="ti ti-x"></i>';
+    rm.addEventListener("click", () => { pickedFiles.splice(i, 1); renderPreviewGrid(); });
+    cell.appendChild(img); cell.appendChild(rm);
+    grid.appendChild(cell);
+  });
+  grid.classList.toggle("multi", pickedFiles.length > 1);
 }
 
 $("cameraInput").addEventListener("change", (e) => {
-  const file = e.target.files && e.target.files[0];
-  if (!file) return;
-  pickedFile = file;
-  resetSecondPhoto(); // neues erstes Foto -> zweites verwerfen
-  $("previewImage").src = URL.createObjectURL(file);
+  const files = e.target.files ? [...e.target.files] : [];
+  if (!files.length) return;
+  pickedFiles = files;            // frische Auswahl (Kamera erlaubt auch Mehrfachauswahl)
+  $("cameraInput").value = "";
+  renderPreviewGrid();
   $("uploadQuestLabel").textContent = state.current ? Challenges.titleOf(state.current) : "";
   setMessage($("uploadMessage"), "");
   showScreen("uploadScreen");
 });
 
-// Optionales zweites Foto auswählen.
-$("addSecondBtn").addEventListener("click", () => $("cameraInput2").click());
+// Weitere Fotos hinzufügen (anhängen).
+$("addPhotoBtn").addEventListener("click", () => $("cameraInput2").click());
 $("cameraInput2").addEventListener("change", (e) => {
-  const file = e.target.files && e.target.files[0];
-  if (!file) return;
-  pickedFile2 = file;
-  $("previewImage2").src = URL.createObjectURL(file);
-  $("previewSlot2").classList.remove("hidden");
-  $("addSecondBtn").classList.add("hidden");
+  const files = e.target.files ? [...e.target.files] : [];
+  if (!files.length) return;
+  pickedFiles = pickedFiles.concat(files);
+  $("cameraInput2").value = "";
+  renderPreviewGrid();
 });
-$("removeSecondBtn").addEventListener("click", resetSecondPhoto);
 
 $("retakeBtn").addEventListener("click", () => {
-  pickedFile = null; $("cameraInput").value = ""; resetSecondPhoto();
+  pickedFiles = []; $("cameraInput").value = "";
   showScreen("challengeScreen");
 });
 $("uploadBack").addEventListener("click", () => {
-  pickedFile = null; $("cameraInput").value = ""; resetSecondPhoto();
+  pickedFiles = []; $("cameraInput").value = "";
   showScreen("challengeScreen");
 });
 
 $("confirmUploadBtn").addEventListener("click", async () => {
-  if (!pickedFile || !state.current) return;
+  if (!pickedFiles.length || !state.current) return;
   const btn = $("confirmUploadBtn");
   btn.disabled = true;
   setMessage($("uploadMessage"), t("up.uploading"));
   try {
-    await Upload.submit(pickedFile, pickedFile2, state.current);
+    await Upload.submit(pickedFiles, state.current);
     state.doneIds.add(state.current.id);
-    pickedFile = null; $("cameraInput").value = ""; resetSecondPhoto();
+    pickedFiles = [];
     goToFeed(state.current);
   } catch (err) {
     setMessage($("uploadMessage"), uebersetzeFehler(err), "error");
@@ -1126,7 +1134,7 @@ sb.auth.onAuthStateChange((event, session) => {
   if (event === "SIGNED_IN" && session && session.user) {
     enterApp();
   } else if (event === "SIGNED_OUT") {
-    state.current = null; pickedFile = null;
+    state.current = null; pickedFiles = [];
     showScreen("authScreen");
   }
 });
