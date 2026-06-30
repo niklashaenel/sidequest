@@ -122,6 +122,8 @@ const Feed = {
     Feed.current = { quest, onDeleted };
     // Challenge noch aktiv? (abgelaufene Challenges: kein Nachreichen mehr)
     const questActive = !!(quest && quest.ends_at && new Date(quest.ends_at).getTime() > Date.now());
+    // Founder/Admin darf jeden Beitrag löschen.
+    const amAdmin = (typeof state !== "undefined" && state.profile && state.profile.isAdmin);
     const mode = Feed.mode || "all";
     const me = await Auth.getUser();
     const myId = me ? me.id : null;
@@ -152,9 +154,9 @@ const Feed = {
     const earlyRank = {};
     allByTime.slice(0, 3).forEach((s, i) => { earlyRank[s.id] = i + 1; });
 
-    // 2) Im Freunde-Modus nur Beiträge von Gefolgten (und mir selbst).
+    // 2) Im Freunde-Modus: Beiträge von Freunden + Gefolgten (und mir selbst).
     const subs = (mode === "friends")
-      ? rows.filter((s) => follows.has(s.user_id) || s.user_id === myId)
+      ? rows.filter((s) => s.user_id === myId || follows.has(s.user_id) || friends.friends.has(s.user_id))
       : rows;
 
     list.innerHTML = "";
@@ -207,6 +209,7 @@ const Feed = {
                  ${isFriend
                    ? `<span class="fi-friend done" title="${Feed.escape(t("friend.added.title"))}"><i class="ti ti-user-check"></i></span>`
                    : `<button class="fi-friend${reqPending ? " pending" : ""}" data-uid="${uid}" ${reqPending ? "disabled" : ""} title="${Feed.escape(t("friend.add.title"))}"><i class="ti ti-user-plus"></i></button>`}
+                 ${amAdmin ? '<button class="fi-del" title="Admin"><i class="ti ti-trash"></i></button>' : ""}
                </div>`}
         </div>
         ${Feed.imagesHTML(item, username, isMine)}

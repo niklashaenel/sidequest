@@ -125,7 +125,7 @@ const I18N = {
 
       // Feed
       "feed.all": "Alle",
-      "feed.following": "Folge ich",
+      "feed.following": "Freunde",
       "feed.emptyAll": "Noch keine weiteren Beiträge. Du bist früh dran!",
       "feed.emptyFriends": "Noch keine Beiträge von Freunden. Folge Leuten im „Alle\"-Tab!",
       "feed.loading": "Lade Beiträge…",
@@ -377,7 +377,7 @@ const I18N = {
       "up.uploading": "Uploading…",
 
       "feed.all": "All",
-      "feed.following": "Following",
+      "feed.following": "Friends",
       "feed.emptyAll": "No other posts yet. You're early!",
       "feed.emptyFriends": "No posts from people you follow yet. Follow people in the \"All\" tab!",
       "feed.loading": "Loading posts…",

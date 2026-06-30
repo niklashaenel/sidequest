@@ -335,8 +335,22 @@ const Social = {
 
   // Founder: ALLE Beiträge + Fotos löschen (Reset, z. B. nach der Testphase).
   async adminDeleteAllSubmissions() {
+    // 1) DB-Einträge löschen (SQL-Löschung auf storage.objects ist in Supabase gesperrt).
     const { error } = await sb.rpc("admin_delete_all_submissions");
     if (error) throw error;
+    // 2) Storage best-effort über die Storage-API leeren.
+    try {
+      const { data: top } = await sb.storage.from(Upload.BUCKET).list("", { limit: 1000 });
+      for (const e of (top || [])) {
+        if (e.id === null) { // Ordner -> Inhalt löschen
+          const { data: files } = await sb.storage.from(Upload.BUCKET).list(e.name, { limit: 1000 });
+          const paths = (files || []).map((f) => `${e.name}/${f.name}`);
+          if (paths.length) await sb.storage.from(Upload.BUCKET).remove(paths);
+        } else {
+          await sb.storage.from(Upload.BUCKET).remove([e.name]);
+        }
+      }
+    } catch (err) { console.warn("[SideQuest] storage clear:", err.message); }
   },
 
   // ---- Melden & Moderation ----
@@ -414,6 +428,14 @@ const Social = {
   async deleteAccount() {
     const user = await Auth.getUser();
     if (!user) throw new Error(t("err.notLoggedIn"));
+    // Eigene Foto-Dateien best-effort entfernen (Storage-API, vor dem Konto-Löschen).
+    try {
+      const { data: files } = await sb.storage.from(Upload.BUCKET).list(user.id, { limit: 1000 });
+      const paths = (files || []).map((f) => `${user.id}/${f.name}`);
+      const { data: av } = await sb.storage.from(Upload.BUCKET).list("avatars", { limit: 1000 });
+      (av || []).forEach((f) => { if (f.name.startsWith(user.id)) paths.push(`avatars/${f.name}`); });
+      if (paths.length) await sb.storage.from(Upload.BUCKET).remove(paths);
+    } catch (e) { /* Konto-Löschung ist das Wichtige */ }
     const { error } = await sb.rpc("delete_my_account");
     if (error) throw error;
   },
