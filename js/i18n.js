@@ -153,6 +153,9 @@ const I18N = {
       // Profil
       "prof.editAvatar": "Profilbild ändern",
       "prof.notify": "Benachrichtigungen aktivieren",
+      "prof.changeName": "Anzeigename ändern",
+      "prof.changeNamePrompt": "Neuer Anzeigename:",
+      "prof.nameChanged": "Anzeigename geändert ✓",
       "prof.friends": "Freunde & Anfragen",
       "prof.collection": "Sammlung & Erfolge",
       "prof.yourPosts": "Deine Beiträge",
@@ -406,6 +409,9 @@ const I18N = {
 
       "prof.editAvatar": "Change profile picture",
       "prof.notify": "Enable notifications",
+      "prof.changeName": "Change display name",
+      "prof.changeNamePrompt": "New display name:",
+      "prof.nameChanged": "Display name changed ✓",
       "prof.friends": "Friends & requests",
       "prof.collection": "Collection & achievements",
       "prof.yourPosts": "Your posts",

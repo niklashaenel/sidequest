@@ -975,6 +975,26 @@ document.querySelectorAll("#reportModal [data-reason]").forEach((b) =>
   b.addEventListener("click", () => submitReport(b.dataset.reason)));
 
 // Freunde-Overlay
+// Anzeigename ändern (mit Eindeutigkeits-Prüfung)
+$("changeNameBtn").addEventListener("click", async () => {
+  const current = state.username || "";
+  const input = prompt(t("prof.changeNamePrompt"), current);
+  if (input === null) return;                 // abgebrochen
+  const name = input.trim();
+  if (!name || name === current) return;       // leer oder unverändert
+  if (name.length < 2) { alert(t("auth.needName")); return; }
+  try {
+    if (await Auth.usernameTaken(name)) { alert(t("auth.nameTaken")); return; }
+    await Social.saveProfile({ username: name });
+    state.username = name;
+    await refreshGreeting();                    // Header + Begrüßung aktualisieren
+    $("profileName").textContent = name;        // Profil-Überschrift aktualisieren
+    toast(t("prof.nameChanged"));
+  } catch (e) {
+    alert(t("auth.nameTaken"));                 // u.a. 23505 (Race) -> Name doch vergeben
+  }
+});
+
 $("openFriendsBtn").addEventListener("click", openFriends);
 $("friendsClose").addEventListener("click", closeFriends);
 $("friendsModal").addEventListener("click", (e) => { if (e.target.id === "friendsModal") closeFriends(); });
