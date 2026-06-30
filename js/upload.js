@@ -91,6 +91,32 @@ const Upload = {
     if (error) throw error;
   },
 
+  // Einzelnes Foto aus einem Multi-Beitrag entfernen (lässt den Beitrag bestehen).
+  // Gibt die verbleibende URL-Liste zurück.
+  async removePhoto(submissionId, urlToRemove) {
+    const user = await Auth.getUser();
+    if (!user) throw new Error(t("err.notLoggedIn"));
+    const { data: row, error: e1 } = await sb
+      .from("submissions").select("image_url, images").eq("id", submissionId).single();
+    if (e1) throw e1;
+    let urls = (Array.isArray(row.images) && row.images.length) ? row.images.slice() : [row.image_url];
+    urls = urls.filter((u) => u && u !== urlToRemove);
+    if (!urls.length) throw new Error(t("err.lastPhoto")); // letztes Foto -> ganzen Beitrag löschen
+    // Storage-Datei der entfernten URL löschen (Fehler hier egal).
+    try {
+      const marker = "/submissions/";
+      const i = (urlToRemove || "").indexOf(marker);
+      if (i >= 0) await sb.storage.from(Upload.BUCKET)
+        .remove([decodeURIComponent(urlToRemove.slice(i + marker.length).split("?")[0])]);
+    } catch (e) { /* DB-Update ist das Wichtige */ }
+    const update = { image_url: urls[0], images: urls.length > 1 ? urls : null, image_url_2: urls[1] || null };
+    const { data, error: e2 } = await sb.from("submissions")
+      .update(update).eq("id", submissionId).eq("user_id", user.id).select("id");
+    if (e2) throw e2;
+    if (!data || !data.length) throw new Error(t("err.notLoggedIn"));
+    return urls;
+  },
+
   // Foto NACHTRÄGLICH an einen bestehenden Beitrag anhängen (zeitversetzt).
   // existing = bisherige URL-Liste; gibt die neue vollständige Liste zurück.
   async appendPhoto(submissionId, questId, existing, file) {

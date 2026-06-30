@@ -37,12 +37,16 @@ const Feed = {
   },
 
   // Bild(er) eines Beitrags: eins, oder mehrere als Collage-Grid.
-  imagesHTML(item, username) {
+  // mine = eigener Beitrag (dann kann man in der Lightbox einzelne Fotos löschen).
+  imagesHTML(item, username, mine) {
     const alt = `Beitrag von ${Feed.escape(username)}`;
     const urls = Feed.photoList(item);
-    const img = (src) => `<img class="fi-img" src="${Feed.escape(src)}" alt="${alt}" loading="lazy" />`;
-    if (urls.length > 1) {
-      return `<div class="fi-imgs multi n${Math.min(urls.length, 4)}">${urls.map(img).join("")}</div>`;
+    const total = urls.length;
+    const img = (src) => `<img class="fi-img" src="${Feed.escape(src)}" `
+      + `data-url="${Feed.escape(src)}" data-sub="${item.id}" data-mine="${mine ? 1 : 0}" data-count="${total}" `
+      + `alt="${alt}" loading="lazy" />`;
+    if (total > 1) {
+      return `<div class="fi-imgs multi n${Math.min(total, 4)}">${urls.map(img).join("")}</div>`;
     }
     return `<div class="fi-imgs">${img(urls[0] || item.image_url)}</div>`;
   },
@@ -107,6 +111,8 @@ const Feed = {
 
   async render(quest, onDeleted) {
     Feed.current = { quest, onDeleted };
+    // Challenge noch aktiv? (abgelaufene Challenges: kein Nachreichen mehr)
+    const questActive = !!(quest && quest.ends_at && new Date(quest.ends_at).getTime() > Date.now());
     const mode = Feed.mode || "all";
     const me = await Auth.getUser();
     const myId = me ? me.id : null;
@@ -194,8 +200,8 @@ const Feed = {
                    : `<button class="fi-friend${reqPending ? " pending" : ""}" data-uid="${uid}" ${reqPending ? "disabled" : ""} title="${Feed.escape(t("friend.add.title"))}"><i class="ti ti-user-plus"></i></button>`}
                </div>`}
         </div>
-        ${Feed.imagesHTML(item, username)}
-        ${isMine && Feed.photoList(item).length < 4
+        ${Feed.imagesHTML(item, username, isMine)}
+        ${isMine && questActive && Feed.photoList(item).length < 4
           ? `<button class="fi-add2"><i class="ti ti-photo-plus"></i> ${Feed.escape(t("up.addPhoto"))}</button>
              <input type="file" accept="image/*" multiple class="hidden fi-add2-input" />`
           : ""}
@@ -361,7 +367,7 @@ const Feed = {
           item.images = current; // Item aktualisieren
           // Bilder-Block neu aufbauen (Collage).
           const imgs = el.querySelector(".fi-imgs");
-          if (imgs) imgs.outerHTML = Feed.imagesHTML(item, item.user_id);
+          if (imgs) imgs.outerHTML = Feed.imagesHTML(item, item.user_id, true);
           add2.remove(); add2Input.remove();
         } catch (err) {
           add2.disabled = false;

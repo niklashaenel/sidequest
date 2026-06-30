@@ -118,6 +118,8 @@ const I18N = {
       "share.text": "Mach mit bei SideQuest – die tägliche Foto-Challenge! 📸",
       "share.copied": "Link kopiert – schick ihn deinen Freunden! 🔗",
       "share.copyManual": "Kopier diesen Link und teil ihn:",
+      "lb.delete": "Dieses Foto löschen",
+      "lb.delConfirm": "Dieses einzelne Foto aus dem Beitrag entfernen?",
       "up.uploading": "Lade hoch…",
 
       // Feed
@@ -260,6 +262,7 @@ const I18N = {
       "err.rls": "Keine Berechtigung (RLS). Policies prüfen.",
       "err.notLoggedIn": "Nicht eingeloggt.",
       "err.noPhoto": "Bitte mindestens ein Foto auswählen.",
+      "err.lastPhoto": "Das ist das letzte Foto – lösch stattdessen den ganzen Beitrag.",
 
       // Serien-Toast
       "toast.streak": "🔥 <b>{label}</b><br>+{xp} Bonus-XP kassiert!",
@@ -367,6 +370,8 @@ const I18N = {
       "share.text": "Join me on SideQuest – the daily photo challenge! 📸",
       "share.copied": "Link copied – send it to your friends! 🔗",
       "share.copyManual": "Copy this link and share it:",
+      "lb.delete": "Delete this photo",
+      "lb.delConfirm": "Remove this single photo from the post?",
       "up.uploading": "Uploading…",
 
       "feed.all": "All",
@@ -500,6 +505,7 @@ const I18N = {
       "err.rls": "No permission (RLS). Check policies.",
       "err.notLoggedIn": "Not logged in.",
       "err.noPhoto": "Please select at least one photo.",
+      "err.lastPhoto": "That's the last photo – delete the whole post instead.",
 
       "toast.streak": "🔥 <b>{label}</b><br>+{xp} bonus XP earned!",
     },

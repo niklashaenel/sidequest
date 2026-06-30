@@ -85,6 +85,35 @@ document.addEventListener("click", (e) => {
   if (e.target.closest("[data-share]")) { e.preventDefault(); shareApp(); }
 });
 
+// ---- Lightbox: Feed-Bild groß ansehen (+ eigenes Einzelfoto löschen) ----
+function openLightbox(imgEl) {
+  $("lbImg").src = imgEl.dataset.url || imgEl.src;
+  const mine = imgEl.dataset.mine === "1";
+  const count = parseInt(imgEl.dataset.count || "1", 10);
+  const del = $("lbDelete");
+  if (mine && count > 1) {       // einzelnes Foto eines Multi-Beitrags löschbar
+    del.classList.remove("hidden");
+    del.onclick = async () => {
+      if (!confirm(t("lb.delConfirm"))) return;
+      del.disabled = true;
+      try {
+        await Upload.removePhoto(Number(imgEl.dataset.sub), imgEl.dataset.url);
+        closeLightbox();
+        if (Feed.current) Feed.render(Feed.current.quest, Feed.current.onDeleted);
+      } catch (e) { alert(t("common.error", { msg: e.message })); }
+      finally { del.disabled = false; }
+    };
+  } else { del.classList.add("hidden"); del.onclick = null; }
+  $("lightbox").classList.remove("hidden");
+}
+function closeLightbox() { $("lightbox").classList.add("hidden"); $("lbImg").src = ""; }
+$("lbClose").addEventListener("click", closeLightbox);
+$("lightbox").addEventListener("click", (e) => { if (e.target.id === "lightbox") closeLightbox(); });
+document.addEventListener("click", (e) => {
+  const img = e.target.closest(".fi-img");
+  if (img) openLightbox(img);
+});
+
 // =====================================================================
 //  Auth-Screen
 // =====================================================================
