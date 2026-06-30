@@ -37,12 +37,15 @@ const Feed = {
     return item.image_url ? [item.image_url] : [];
   },
 
-  // Bildunterschrift mit hervorgehobenen @-Erwähnungen (HTML-sicher).
+  // Text HTML-sicher escapen UND @-Erwähnungen hervorheben (für Caption + Kommentare).
+  mentionize(text) {
+    return Feed.escape(text).replace(/@([A-Za-z0-9_äöüÄÖÜß.]{2,30})/g, '<span class="fi-mention">@$1</span>');
+  },
+
+  // Bildunterschrift mit hervorgehobenen @-Erwähnungen.
   captionHTML(item) {
     if (!item.caption) return "";
-    let safe = Feed.escape(item.caption);
-    safe = safe.replace(/@([A-Za-z0-9_äöüÄÖÜß.]{2,30})/g, '<span class="fi-mention">@$1</span>');
-    return `<p class="fi-caption">${safe}</p>`;
+    return `<p class="fi-caption">${Feed.mentionize(item.caption)}</p>`;
   },
 
   // Bild(er) eines Beitrags: eins, oder mehrere als Collage-Grid.
@@ -154,15 +157,16 @@ const Feed = {
     const earlyRank = {};
     allByTime.slice(0, 3).forEach((s, i) => { earlyRank[s.id] = i + 1; });
 
-    // 2) Im Freunde-Modus: Beiträge von Freunden + Gefolgten (und mir selbst).
-    const subs = (mode === "friends")
-      ? rows.filter((s) => s.user_id === myId || follows.has(s.user_id) || friends.friends.has(s.user_id))
-      : rows;
+    // 2) Feed-Modus filtern: "friends" = echte Freunde, "following" = Gefolgte, sonst alle (je + ich).
+    const subs =
+      mode === "friends"   ? rows.filter((s) => s.user_id === myId || friends.friends.has(s.user_id)) :
+      mode === "following" ? rows.filter((s) => s.user_id === myId || follows.has(s.user_id)) :
+      rows;
 
     list.innerHTML = "";
     if (!subs.length) {
-      const icon = mode === "friends" ? "ti-users" : "ti-photo";
-      const txt  = mode === "friends" ? t("feed.emptyFriends") : t("feed.emptyAll");
+      const icon = mode === "all" ? "ti-photo" : "ti-users";
+      const txt  = mode === "all" ? t("feed.emptyAll") : t("feed.emptyFriends");
       empty.innerHTML = `<i class="ti ${icon}"></i>${Feed.escape(txt)}`
         + `<button class="btn btn-sm" data-share style="margin-top:16px"><i class="ti ti-user-plus"></i> ${Feed.escape(t("share.invite"))}</button>`;
       empty.classList.remove("hidden");
@@ -399,7 +403,7 @@ const Feed = {
 
     const renderList = () => {
       const items = comments.map((c) =>
-        `<p class="comment"><b>${Feed.escape(c.username)}</b>${Feed.escape(c.body)}<span class="c-time">${Feed.formatTime(c.created_at)}</span></p>`
+        `<p class="comment"><b>${Feed.escape(c.username)}</b>${Feed.mentionize(c.body)}<span class="c-time">${Feed.formatTime(c.created_at)}</span></p>`
       ).join("");
       box.innerHTML =
         (comments.length ? items : `<p class="comment-empty">${Feed.escape(t("comments.empty"))}</p>`) +
