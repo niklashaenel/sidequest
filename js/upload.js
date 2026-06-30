@@ -55,7 +55,8 @@ const Upload = {
 
   // Mehrere Fotos hochladen + Eintrag schreiben. files = Array (1..n).
   // Bei >1 werden sie automatisch als Collage zusammengefügt (Spalte "images").
-  async submit(files, quest) {
+  // visibility = "public" | "friends" (privater Modus).
+  async submit(files, quest, visibility) {
     const user = await Auth.getUser();
     if (!user) throw new Error(t("err.notLoggedIn"));
     const list = Array.isArray(files) ? files : [files];
@@ -74,6 +75,7 @@ const Upload = {
       image_url: urls[0],
       images: urls.length > 1 ? urls : null,
       image_url_2: urls[1] || null,
+      visibility: visibility === "friends" ? "friends" : "public",
     };
     await Upload._upsert(row);
   },

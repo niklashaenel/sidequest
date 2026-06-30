@@ -67,7 +67,23 @@ function applyAvatarEl(el, name, avatarUrl, frame, baseCls) {
   else { el.style.backgroundImage = ""; el.textContent = Feed.initial(name); }
 }
 let pickedFiles = []; // ausgewählte Fotos (1..n) – mehrere werden als Collage zusammengefügt
+let pickedVisibility = "public"; // "public" | "friends" – Sichtbarkeit des Beitrags
 let registerMode = false;
+
+// App teilen / Freunde einladen (Web-Share, sonst Link kopieren).
+async function shareApp() {
+  const url = "https://niklashaenel.github.io/sidequest/";
+  const text = t("share.text");
+  try {
+    if (navigator.share) { await navigator.share({ title: "SideQuest", text, url }); return; }
+  } catch (e) { return; } // Nutzer hat abgebrochen
+  try { await navigator.clipboard.writeText(url); toast(t("share.copied")); }
+  catch (e) { prompt(t("share.copyManual"), url); }
+}
+// Jeder Knopf mit data-share löst das Teilen aus (auch dynamisch gerenderte, z. B. in Leer-Zuständen).
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-share]")) { e.preventDefault(); shareApp(); }
+});
 
 // =====================================================================
 //  Auth-Screen
@@ -811,11 +827,21 @@ function renderPreviewGrid() {
   grid.classList.toggle("multi", pickedFiles.length > 1);
 }
 
+// Sichtbarkeits-Schalter (Öffentlich / Nur Freunde)
+function setVisibility(vis) {
+  pickedVisibility = vis === "friends" ? "friends" : "public";
+  document.querySelectorAll("#visToggle [data-vis]").forEach((b) =>
+    b.classList.toggle("active", b.dataset.vis === pickedVisibility));
+}
+document.querySelectorAll("#visToggle [data-vis]").forEach((b) =>
+  b.addEventListener("click", () => setVisibility(b.dataset.vis)));
+
 $("cameraInput").addEventListener("change", (e) => {
   const files = e.target.files ? [...e.target.files] : [];
   if (!files.length) return;
   pickedFiles = files;            // frische Auswahl (Kamera erlaubt auch Mehrfachauswahl)
   $("cameraInput").value = "";
+  setVisibility("public");        // Standard: öffentlich
   renderPreviewGrid();
   $("uploadQuestLabel").textContent = state.current ? Challenges.titleOf(state.current) : "";
   setMessage($("uploadMessage"), "");
@@ -847,7 +873,7 @@ $("confirmUploadBtn").addEventListener("click", async () => {
   btn.disabled = true;
   setMessage($("uploadMessage"), t("up.uploading"));
   try {
-    await Upload.submit(pickedFiles, state.current);
+    await Upload.submit(pickedFiles, state.current, pickedVisibility);
     state.doneIds.add(state.current.id);
     pickedFiles = [];
     goToFeed(state.current);

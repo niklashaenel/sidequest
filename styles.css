@@ -702,3 +702,6 @@ body { overscroll-behavior-y: contain; }
 .admin-cfg label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
 .admin-cfg input { width: 80px; background: var(--surface-2); border: 1px solid var(--border);
                    border-radius: var(--r-sm, 8px); color: var(--text); padding: 8px 10px; font: inherit; }
+
+/* ---- Einladen-CTA im Leer-Zustand inline/zentriert ---- */
+.empty-state .btn { display: inline-flex; width: auto; margin-top: 14px; }

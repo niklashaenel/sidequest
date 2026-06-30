@@ -112,6 +112,12 @@ const I18N = {
       "up.addPhoto": "Weiteres Foto hinzufügen",
       "up.addSecond": "Zweites Foto hinzufügen",
       "up.removeSecond": "Zweites Foto entfernen",
+      "vis.public": "Öffentlich",
+      "vis.friends": "Nur Freunde",
+      "share.invite": "Freunde einladen",
+      "share.text": "Mach mit bei SideQuest – die tägliche Foto-Challenge! 📸",
+      "share.copied": "Link kopiert – schick ihn deinen Freunden! 🔗",
+      "share.copyManual": "Kopier diesen Link und teil ihn:",
       "up.uploading": "Lade hoch…",
 
       // Feed
@@ -355,6 +361,12 @@ const I18N = {
       "up.addPhoto": "Add another photo",
       "up.addSecond": "Add second photo",
       "up.removeSecond": "Remove second photo",
+      "vis.public": "Public",
+      "vis.friends": "Friends only",
+      "share.invite": "Invite friends",
+      "share.text": "Join me on SideQuest – the daily photo challenge! 📸",
+      "share.copied": "Link copied – send it to your friends! 🔗",
+      "share.copyManual": "Copy this link and share it:",
       "up.uploading": "Uploading…",
 
       "feed.all": "All",

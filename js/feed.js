@@ -21,7 +21,8 @@ const Feed = {
   async fetchSubs(questId) {
     const q = (cols) => sb.from("submissions").select(cols)
       .eq("quest_id", questId).order("created_at", { ascending: false });
-    let res = await q("id, user_id, quest_id, image_url, images, image_url_2, created_at, hidden");
+    let res = await q("id, user_id, quest_id, image_url, images, image_url_2, visibility, created_at, hidden");
+    if (res.error) res = await q("id, user_id, quest_id, image_url, images, image_url_2, created_at, hidden"); // visibility-Spalte noch nicht da
     if (res.error) res = await q("id, user_id, quest_id, image_url, image_url_2, created_at, hidden"); // images-Spalte noch nicht da
     if (res.error) res = await q("id, user_id, quest_id, image_url, created_at, hidden");
     if (res.error) res = await q("id, user_id, image_url, created_at"); // ganz alter Stand
@@ -126,7 +127,10 @@ const Feed = {
     }
 
     // Gemeldete/auto-deaktivierte Beiträge raus (hidden).
-    const rows = (subsRes.data || []).filter((s) => !s.hidden);
+    // Private Beiträge ("friends") nur zeigen, wenn ich der Autor bin oder ihm folge / befreundet bin.
+    const canSeePrivate = (uid) => uid === myId || follows.has(uid) || friends.friends.has(uid);
+    const rows = (subsRes.data || []).filter((s) =>
+      !s.hidden && (s.visibility !== "friends" || canSeePrivate(s.user_id)));
 
     // Frühe-Vögel: die ersten 1-3 Beiträge (chronologisch) der Challenge bekommen ein Abzeichen.
     const allByTime = [...rows].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
@@ -140,9 +144,10 @@ const Feed = {
 
     list.innerHTML = "";
     if (!subs.length) {
-      empty.innerHTML = (mode === "friends")
-        ? `<i class="ti ti-users"></i>${Feed.escape(t("feed.emptyFriends"))}`
-        : `<i class="ti ti-photo"></i>${Feed.escape(t("feed.emptyAll"))}`;
+      const icon = mode === "friends" ? "ti-users" : "ti-photo";
+      const txt  = mode === "friends" ? t("feed.emptyFriends") : t("feed.emptyAll");
+      empty.innerHTML = `<i class="ti ${icon}"></i>${Feed.escape(txt)}`
+        + `<button class="btn btn-sm" data-share style="margin-top:16px"><i class="ti ti-user-plus"></i> ${Feed.escape(t("share.invite"))}</button>`;
       empty.classList.remove("hidden");
       return;
     }
