@@ -29,6 +29,17 @@ const Push = {
     });
   },
 
+  // Verknüpft das Gerät mit dem eingeloggten User (external_id = user.id).
+  // Dadurch kann der Server gezielt DIESEN Nutzer pushen (z. B. bei Reaktionen).
+  identify(userId) {
+    if (!userId) return;
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    window.OneSignalDeferred.push(async (OneSignal) => {
+      try { await OneSignal.login(userId); }
+      catch (e) { console.warn("[SideQuest] OneSignal.login:", e && e.message); }
+    });
+  },
+
   // Diagnose: liefert den aktuellen Push-Zustand als lesbaren Text.
   async status() {
     const swReg = ("serviceWorker" in navigator)

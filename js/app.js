@@ -140,6 +140,8 @@ $("logoutBtn").addEventListener("click", async () => { await Auth.logout(); });
 // =====================================================================
 async function enterApp() {
   showScreen("overviewScreen");
+  // Gerät dem User zuordnen (für gezielte Pushes, z. B. bei Reaktionen).
+  try { const u = await Auth.getUser(); if (u && typeof Push !== "undefined") Push.identify(u.id); } catch (e) {}
   await loadOverview();
   Onboarding.maybeShow();
 }
