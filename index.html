@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css?v=42" />
+  <link rel="stylesheet" href="styles.css?v=43" />
   <!-- Tabler-Icons (für die schicken Symbole) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
 
@@ -183,6 +183,8 @@
         <div id="previewGrid" class="preview-grid"></div>
         <input id="cameraInput2" type="file" accept="image/*" multiple class="hidden" />
         <button id="addPhotoBtn" class="btn btn-ghost"><i class="ti ti-photo-plus"></i> <span data-i18n="up.addPhoto">Weiteres Foto hinzufügen</span></button>
+        <textarea id="captionInput" class="caption-input" maxlength="300" rows="2"
+          data-i18n-ph="up.captionPh" placeholder="Beschreibung… (@Name zum Erwähnen)"></textarea>
         <div id="visToggle" class="seg-toggle">
           <button type="button" data-vis="public" class="active"><i class="ti ti-world"></i> <span data-i18n="vis.public">Öffentlich</span></button>
           <button type="button" data-vis="friends"><i class="ti ti-users"></i> <span data-i18n="vis.friends">Nur Freunde</span></button>
@@ -395,17 +397,17 @@
     <button class="link-btn" id="onboardLater" data-i18n="onboard.later">Später</button>
   </div>
 
-  <script src="js/i18n.js?v=42"></script>
-  <script src="js/legal.js?v=42"></script>
-  <script src="js/supabaseClient.js?v=42"></script>
-  <script src="js/auth.js?v=42"></script>
-  <script src="js/challenges.js?v=42"></script>
-  <script src="js/social.js?v=42"></script>
-  <script src="js/upload.js?v=42"></script>
-  <script src="js/feed.js?v=42"></script>
-  <script src="js/push.js?v=42"></script>
-  <script src="js/onboarding.js?v=42"></script>
-  <script src="js/stats.js?v=42"></script>
-  <script src="js/app.js?v=42"></script>
+  <script src="js/i18n.js?v=43"></script>
+  <script src="js/legal.js?v=43"></script>
+  <script src="js/supabaseClient.js?v=43"></script>
+  <script src="js/auth.js?v=43"></script>
+  <script src="js/challenges.js?v=43"></script>
+  <script src="js/social.js?v=43"></script>
+  <script src="js/upload.js?v=43"></script>
+  <script src="js/feed.js?v=43"></script>
+  <script src="js/push.js?v=43"></script>
+  <script src="js/onboarding.js?v=43"></script>
+  <script src="js/stats.js?v=43"></script>
+  <script src="js/app.js?v=43"></script>
 </body>
 </html>

@@ -872,6 +872,7 @@ $("cameraInput").addEventListener("change", (e) => {
   if (!files.length) return;
   pickedFiles = files;            // frische Auswahl (Kamera erlaubt auch Mehrfachauswahl)
   $("cameraInput").value = "";
+  $("captionInput").value = "";   // Bildunterschrift frisch
   setVisibility("public");        // Standard: öffentlich
   renderPreviewGrid();
   $("uploadQuestLabel").textContent = state.current ? Challenges.titleOf(state.current) : "";
@@ -904,9 +905,9 @@ $("confirmUploadBtn").addEventListener("click", async () => {
   btn.disabled = true;
   setMessage($("uploadMessage"), t("up.uploading"));
   try {
-    await Upload.submit(pickedFiles, state.current, pickedVisibility);
+    await Upload.submit(pickedFiles, state.current, pickedVisibility, $("captionInput").value);
     state.doneIds.add(state.current.id);
-    pickedFiles = [];
+    pickedFiles = []; $("captionInput").value = "";
     goToFeed(state.current);
   } catch (err) {
     setMessage($("uploadMessage"), uebersetzeFehler(err), "error");

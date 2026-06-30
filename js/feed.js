@@ -21,7 +21,8 @@ const Feed = {
   async fetchSubs(questId) {
     const q = (cols) => sb.from("submissions").select(cols)
       .eq("quest_id", questId).order("created_at", { ascending: false });
-    let res = await q("id, user_id, quest_id, image_url, images, image_url_2, visibility, created_at, hidden");
+    let res = await q("id, user_id, quest_id, image_url, images, image_url_2, visibility, caption, created_at, hidden");
+    if (res.error) res = await q("id, user_id, quest_id, image_url, images, image_url_2, visibility, created_at, hidden"); // caption-Spalte noch nicht da
     if (res.error) res = await q("id, user_id, quest_id, image_url, images, image_url_2, created_at, hidden"); // visibility-Spalte noch nicht da
     if (res.error) res = await q("id, user_id, quest_id, image_url, image_url_2, created_at, hidden"); // images-Spalte noch nicht da
     if (res.error) res = await q("id, user_id, quest_id, image_url, created_at, hidden");
@@ -34,6 +35,14 @@ const Feed = {
     if (Array.isArray(item.images) && item.images.length) return item.images.filter(Boolean);
     if (item.image_url_2) return [item.image_url, item.image_url_2];
     return item.image_url ? [item.image_url] : [];
+  },
+
+  // Bildunterschrift mit hervorgehobenen @-Erwähnungen (HTML-sicher).
+  captionHTML(item) {
+    if (!item.caption) return "";
+    let safe = Feed.escape(item.caption);
+    safe = safe.replace(/@([A-Za-z0-9_äöüÄÖÜß.]{2,30})/g, '<span class="fi-mention">@$1</span>');
+    return `<p class="fi-caption">${safe}</p>`;
   },
 
   // Bild(er) eines Beitrags: eins, oder mehrere als Collage-Grid.
@@ -215,6 +224,7 @@ const Feed = {
           ${isMine ? "" : `<button class="fi-act fi-report" title="${Feed.escape(t("rep.title"))}"><i class="ti ti-flag"></i></button>`}
         </div>
         ${Feed.reactionBar(reactions.countById[item.id] || {}, reactions.mineById[item.id])}
+        ${Feed.captionHTML(item)}
         <div class="fi-comments hidden"></div>`;
 
       Feed.wireItem(el, item, liked, onDeleted);

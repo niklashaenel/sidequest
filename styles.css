@@ -719,3 +719,12 @@ body { overscroll-behavior-y: contain; }
             border-radius: 999px; background: rgba(255,255,255,0.14); color: #fff; font-size: 22px;
             display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .lb-delete { width: auto; }
+
+/* ---- Bildunterschrift (Caption) + @-Erwähnungen ---- */
+.caption-input { width: 100%; background: var(--surface-2); border: 1px solid var(--border);
+                 border-radius: var(--r-md); color: var(--text); padding: 11px 13px;
+                 font: inherit; font-size: 15px; resize: vertical; }
+.caption-input:focus { outline: none; border-color: var(--brand); }
+.fi-caption { padding: 2px 14px 12px; font-size: 14px; line-height: 1.4; white-space: pre-wrap;
+              word-break: break-word; }
+.fi-mention { color: var(--brand-text); font-weight: 700; }
