@@ -760,6 +760,7 @@ async function refreshGreeting() {
   const data = res.data || {};
   state.username = data.username || user.email.split("@")[0];
   state.profile = { avatar_url: data.avatar_url || null, title: data.title || null, frame: data.frame || null, unlockAll: !!data.unlock_all, isAdmin: !!data.is_admin, specialTitle: data.special_title || null };
+  Feed.isAdmin = state.profile.isAdmin; // Feed kennt jetzt den Admin-Status (für Löschen fremder Beiträge)
   $("greetingName").textContent = `Hi, ${state.username}!`;
   applyAvatarEl($("headerAvatar"), state.username, state.profile.avatar_url, state.profile.frame, "avatar");
 }

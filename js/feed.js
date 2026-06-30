@@ -4,8 +4,9 @@
 
 const Feed = {
 
-  mode: "all",      // "all" | "friends"
+  mode: "all",      // "all" | "friends" | "following"
   current: null,    // { quest, onDeleted } – für Neu-Rendern beim Umschalten
+  isAdmin: false,   // wird von app.js (refreshGreeting) gesetzt – Founder darf alles löschen
 
   // Profile robust laden: erst mit Kosmetik-Spalten, sonst Fallback (Spalten noch nicht angelegt).
   async fetchProfiles(ids) {
@@ -126,7 +127,7 @@ const Feed = {
     // Challenge noch aktiv? (abgelaufene Challenges: kein Nachreichen mehr)
     const questActive = !!(quest && quest.ends_at && new Date(quest.ends_at).getTime() > Date.now());
     // Founder/Admin darf jeden Beitrag löschen.
-    const amAdmin = (typeof state !== "undefined" && state.profile && state.profile.isAdmin);
+    const amAdmin = !!Feed.isAdmin;
     const mode = Feed.mode || "all";
     const me = await Auth.getUser();
     const myId = me ? me.id : null;
